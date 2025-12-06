@@ -1,0 +1,5 @@
+Module List :              https://docs.google.com/document/d/1v5WQMP2LDb9fslEESnQiv8qqXbG8OMGJT2VnpAh73ec/edit?tab=t.0
+Module list with timeline: https://docs.google.com/document/d/1JCCctMRNpBkJWgkvGTEjDwJELeTeVdS5P3tRsItfumU/edit?tab=t.0#heading=h.st2v5ht3oyqo
+Figma Design :             https://www.figma.com/design/RhARXfWU0ASB6sjhdop1Lj/Freelancing?node-id=72-611&t=2Ij4xwvPDhuRg9sN-1
+DB design :                https://dbdiagram.io/d/69318e36d6676488ba99255b
+API Documentation :        https://documenter.getpostman.com/view/50095879/2sB3dPTB2a
