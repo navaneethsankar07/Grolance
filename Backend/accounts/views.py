@@ -55,7 +55,7 @@ class VerifyOtpView(APIView):
             is_active=True,
         )
 
-        cache.delete(f"register_temp:{email}")  # cleanup
+        cache.delete(f"register_temp:{email}")  
 
         return Response(
             {"message": "Email verified successfully!", "user_id": user.id},

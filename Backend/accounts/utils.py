@@ -11,11 +11,6 @@ class OTPService:
 
     @staticmethod
     def send(email, purpose="default", ttl=300):
-        """
-        ttl = OTP lifetime (seconds)
-        cooldown = 60 seconds per email
-        """
-
         cooldown_key = f"otp_cooldown:{email}"
         otp_key = f"otp:{purpose}:{email}"
 
@@ -31,7 +26,7 @@ class OTPService:
         subject = "Your Grolance OTP"
         message = (
             f"Your OTP is: {otp}\n"
-            "This OTP will expire in 5 minutes.\n"
+            "This OTP will expire in 1 minute.\n"
         )
 
         try:
