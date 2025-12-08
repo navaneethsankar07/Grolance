@@ -31,7 +31,7 @@ class ResendEmailOtpSerializer(serializers.Serializer):
     email = serializers.EmailField()
 
     def validate_email(self, value):
-        temp = cache.get(f"register_temp:{value}")  # FIXED
+        temp = cache.get(f"register_temp:{value}")  
         if not temp:
             raise serializers.ValidationError("Registration expired. Please register again.")
         return value
