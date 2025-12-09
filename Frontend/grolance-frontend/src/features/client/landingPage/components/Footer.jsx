@@ -1,0 +1,122 @@
+import React from "react";
+
+export default function Footer() {
+  return (
+    <footer className="border-t border-[#E5E7EB]   pb-5">
+      <div className="max-w-[1800px] mx-auto">
+        {/* <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+          <div>
+            <div className="mb-4">
+              <h2 className="text-[37px] font-museo font-extrabold leading-7">
+                <span className="text-[#1A1A1A]">Gro</span>
+                <span className="text-[#3B82F6]">lance</span>
+              </h2>
+            </div>
+            <p className="font-murecho font-medium text-[13px] leading-7 text-black pl-8 -mt-4">
+              Your Craft, Your Crown.
+            </p>
+          </div>
+
+          <div>
+            <h3 className="font-grotesk font-bold text-base leading-6 text-[#1A1A1A] mb-4">
+              Company
+            </h3>
+            <ul className="space-y-2">
+              <li>
+                <div className="font-grotesk font-bold text-sm leading-5 text-[#6C757D] hover:text-[#3B82F6]">
+                  About Us
+                </div>
+              </li>
+              <li>
+                <div className="font-grotesk font-bold text-sm leading-5 text-[#6C757D] hover:text-[#3B82F6]">
+                  Contact
+                </div>
+              </li>
+            </ul>
+          </div>
+
+          <div>
+            <h3 className="font-grotesk font-bold text-base leading-6 text-[#1A1A1A] mb-4">
+              Support
+            </h3>
+            <ul className="space-y-2">
+              <li>
+                <div className="font-grotesk font-bold text-sm leading-5 text-[#6C757D] hover:text-[#3B82F6]">
+                  FAQs
+                </div>
+              </li>
+              <li>
+                <div className="font-grotesk font-bold text-sm leading-5 text-[#6C757D] hover:text-[#3B82F6]">
+                  Dispute Resolution
+                </div>
+              </li>
+              <li>
+                <div className="font-grotesk font-bold text-sm leading-5 text-[#6C757D] hover:text-[#3B82F6]">
+                  Refund Policy
+                </div>
+              </li>
+            </ul>
+          </div>
+
+          <div>
+            <h3 className="font-grotesk font-bold text-base leading-6 text-[#1A1A1A] mb-4">
+              Legal
+            </h3>
+            <ul className="space-y-2">
+              <li>
+                <div className="font-grotesk font-bold text-sm leading-5 text-[#6C757D] hover:text-[#3B82F6]">
+                  Terms of Service
+                </div>
+              </li>
+              <li>
+                <div className="font-grotesk font-bold text-sm leading-5 text-[#6C757D] hover:text-[#3B82F6]">
+                  Privacy Policy
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div> */}
+
+        <div className="pt-8 border-t border-[#8F8F8F] flex flex-col md:flex-row justify-between items-center gap-4">
+          <p className="font-grotesk font-bold text-sm leading-5 text-[#6C757D]">
+            © 2024 Freelancer. All rights reserved.
+          </p>
+
+          <div className="flex items-center gap-4">
+            <div className="text-[#6C757D] hover:text-[#3B82F6] cursor-pointer">
+              {/* Twitter Icon */}
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 20 20"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M18.7167 5.00004C18.075 5.29171 17.3833 5.48337 16.6667 5.57504C17.4 5.13337 17.9667 4.43337 18.2333 3.59171C17.5417 4.00837 16.775 4.30004 15.9667 4.46671C15.3083 3.75004 14.3833 3.33337 13.3333 3.33337C11.375 3.33337 9.77499 4.93337 9.77499 6.90837C9.77499 7.19171 9.80832 7.46671 9.86666 7.72504C6.89999 7.57504 4.25832 6.15004 2.49999 3.99171C2.19166 4.51671 2.01666 5.13337 2.01666 5.78337C2.01666 7.02504 2.64166 8.12504 3.60833 8.75004C3.01666 8.75004 2.46666 8.58337 1.98333 8.33337C1.98333 8.33337 1.98333 8.33337 1.98333 8.35837C1.98333 10.0917 3.21666 11.5417 4.84999 11.8667C4.54999 11.95 4.23333 11.9917 3.90832 11.9917C3.68333 11.9917 3.45833 11.9667 3.24166 11.925C3.69166 13.3584 5.01666 14.375 6.57499 14.4084C5.35832 15.375 3.81666 15.9417 2.13333 15.9417C1.84999 15.9417 1.56666 15.925 1.28333 15.8917C2.86666 16.9084 4.74999 17.5 6.76666 17.5C13.3333 17.5 16.9417 12.05 16.9417 7.32504C16.9417 7.16671 16.9417 7.01671 16.9333 6.85837C17.6333 6.35837 18.2333 5.72504 18.7167 5.00004Z"
+                  fill="currentColor"
+                />
+              </svg>
+            </div>
+
+            <div className="text-[#6C757D] hover:text-[#3B82F6] cursor-pointer">
+              {/* LinkedIn Icon */}
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 20 20"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M15.8333 2.5H4.16667C3.24167 2.5 2.5 3.24167 2.5 4.16667V15.8333C2.5 16.75 3.25 17.5 4.16667 17.5H15.8333C16.75 17.5 17.5 16.75 17.5 15.8333V4.16667C17.5 3.24167 16.75 2.5 15.8333 2.5ZM7.08333 15H4.58333V8.33333H7.08333V15ZM5.83333 7.08333C5.50181 7.08333 5.18387 6.95164 4.94945 6.71722C4.71503 6.4828 4.58333 6.16485 4.58333 5.83333C4.58333 5.50181 4.71503 5.18387 4.94945 4.94945C5.18387 4.71503 5.50181 4.58333 5.83333 4.58333C6.16485 4.58333 6.4828 4.71503 6.71722 4.94945C6.95164 5.18387 7.08333 5.50181 7.08333 5.83333C7.08333 6.16485 6.95164 6.4828 6.71722 6.71722C6.4828 6.95164 6.16485 7.08333 5.83333 7.08333ZM15.4167 15H12.9167V11.25C12.9167 10.4583 12.7083 10 12.0833 10C11.4583 10 11.0417 10.4583 11.0417 11.25V15H8.54167V8.33333H11.0417V9.58333C11.4583 8.79167 12.2917 8.33333 13.3333 8.33333C14.7917 8.33333 15.4167 9.29167 15.4167 10.8333V15Z"
+                  fill="currentColor"
+                />
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
+}
