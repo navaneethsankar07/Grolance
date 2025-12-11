@@ -3,3 +3,109 @@ Module list with timeline: https://docs.google.com/document/d/1JCCctMRNpBkJWgkvG
 Figma Design :             https://www.figma.com/design/RhARXfWU0ASB6sjhdop1Lj/Freelancing?node-id=72-611&t=2Ij4xwvPDhuRg9sN-1
 DB design :                https://dbdiagram.io/d/69318e36d6676488ba99255b
 API Documentation :        https://documenter.getpostman.com/view/50095879/2sB3dPTB2a
+
+
+
+
+
+import { Send, Star } from "lucide-react";
+
+interface FreelancerCardProps {
+  name: string;
+  title: string;
+  description: string;
+  skills: string[];
+  rating: number;
+  reviews: number;
+  price: number;
+  image: string;
+}
+
+export default function FreelancerCard({
+  name,
+  title,
+  description,
+  skills,
+  rating,
+  reviews,
+  price,
+  image,
+}: FreelancerCardProps) {
+  return (
+    <div className="flex w-full flex-col gap-6 rounded-lg bg-white p-6 shadow-lg md:flex-row md:gap-8">
+      <div className="flex flex-col items-center gap-4 md:items-start">
+        <img
+          src={image}
+          alt={`Portrait of ${name}`}
+          className="h-24 w-24 rounded-full object-cover"
+        />
+      </div>
+
+      <div className="flex flex-1 flex-col gap-4">
+        <div>
+          <h3 className="text-2xl font-bold text-gray-900">{name}</h3>
+          <p className="text-base text-gray-600">{title}</p>
+        </div>
+
+        <p className="max-w-[576px] text-base leading-[26px] text-gray-600">
+          {description}
+        </p>
+
+        <div className="flex flex-wrap gap-2">
+          {skills.map((skill) => (
+            <span
+              key={skill}
+              className="rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700"
+            >
+              {skill}
+            </span>
+          ))}
+        </div>
+
+        <div className="flex items-center gap-6">
+          <div className="flex items-center gap-2">
+            <Star className="h-5 w-5 fill-yellow-500 text-yellow-500" />
+            <span className="text-base font-bold text-gray-900">{rating}</span>
+            <span className="text-base text-gray-500">({reviews} reviews)</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex w-full flex-col gap-4 md:w-56">
+        <div>
+          <div className="flex items-end gap-1">
+            <span className="text-3xl font-bold text-gray-900">₹{price}</span>
+            <span className="text-base text-gray-500">/ project</span>
+          </div>
+          <p className="text-sm text-gray-400">Starting price</p>
+        </div>
+
+        <button className="flex items-center justify-center gap-2 rounded-lg bg-[#3B82F6] px-6 py-3 text-base font-semibold text-white transition-colors hover:bg-[#2563EB]">
+          <span>Invite to Job</span>
+          <Send className="h-5 w-5" />
+        </button>
+
+        <button className="rounded-lg border border-gray-300 px-6 py-3 text-base font-semibold text-gray-700 transition-colors hover:bg-gray-50">
+          View Profile
+        </button>
+      </div>
+    </div>
+  );
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
