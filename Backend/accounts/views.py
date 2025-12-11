@@ -28,12 +28,13 @@ class SendOtpView(APIView):
 
         if "error" in result:
             return Response({"error": result["error"]}, status=400)
-
+        print(request.data)
         return Response({"message": "OTP sent to your email. Please verify."}, status=200)
 
 
 class VerifyOtpView(APIView):
     def post(self, request):
+        print(request.data)
         serializer = EmailVerifySerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 

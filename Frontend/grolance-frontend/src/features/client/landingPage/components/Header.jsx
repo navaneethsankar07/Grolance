@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import SignupModal from '../../account/components/SignupModal';
+import SignupModal from '../../account/SignupModal';
+import { useModal } from '../../../../hooks/modal/useModalStore';
+import VerifyOtp from '../../account/OtpModal';
 const Header = () => {
-  const [openSignup, setOpenSignup] = useState(false);
+  const { openModal } = useModal();
+
   return (
     
     <nav className="fixed top-8 left-0 right-0 z-50 px-4 md:px-8">
@@ -28,18 +31,18 @@ const Header = () => {
           </div>
 
           <div className="flex items-center gap-2">
-            <button 
+            <button onClick={()=>openModal('signin')}
               variant="ghost"
               className="h-10 px-5 rounded-2xl bg-[#1A1A1A]/20 text-[#1A1A1A] font-grotesk font-bold text-sm hover:bg-[#1A1A1A]/30 flex items-center justify-center"
             >  
               Log In
             </button>
-            <button onClick={() => setOpenSignup(true)}
+            <button onClick={() => openModal("signup")}
               className="h-10 px-4 rounded-2xl bg-[#3B82F6] text-white font-grotesk font-bold text-sm shadow-[0_10px_15px_-3px_rgba(26,26,26,0.3),0_4px_6px_-4px_rgba(26,26,26,0.3)] hover:bg-[#3B82F6]/90 flex items-center justify-center"
             >
               Sign Up
             </button>
-            <SignupModal isOpen={openSignup} onClose={()=>setOpenSignup(false)}/>
+            <SignupModal />
           </div>
         </div>
       </div>

@@ -1,28 +1,59 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import InputBox from "./InputBox";
 import {zodResolver} from '@hookform/resolvers/zod'
 import { signupSchema } from "../validation/authSchemas";
+import { sendOtp } from "../../../../api/auth/authApi";
+import { useModal } from "../../../../hooks/modal/useModalStore";
 export default function SignupForm({ onSubmit }) {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  const {openModal, setSignupData, signupData} = useModal()
+  const [backendError, setBackendError] = useState("");
 
   const {
     register,
     handleSubmit,
     watch,
-    formState: { errors },
+    formState: { errors },reset,
   } = useForm({
     resolver: zodResolver(signupSchema),
   });
 
-  function handleSignup(data) {
-  console.log("VALID DATA:", data);
+  const handleSignup = async (formData)=> {
+    try {
+    setSignupData(formData);
+    const res = await sendOtp(formData);
+
+    console.log("User registered:", res);
+
+    openModal("otp",{email:formData.email})
+  } catch (err) {
+  if (err.response?.data) {
+    const backendData = err.response.data;
+    const firstField = Object.keys(backendData)[0];
+    const firstMessage = backendData[firstField][0];
+    setBackendError(firstMessage);
+    console.log("Error Message:", firstMessage);
+  }else {
+    setBackendError("Something went wrong. Please try again.");
+  }
 }
+};
+
+  useEffect(() => {
+    if (signupData) {
+      reset(signupData);
+    }
+  }, [signupData, reset]);
+
 
   const password = watch("password");
   return (
     <form onSubmit={handleSubmit(handleSignup)} className="flex flex-col flex-1">
+      {backendError && (
+  <p className="text-red-500 text-sm my-2 text-center">{backendError}</p>
+)}
 
       <InputBox
         label="Email Address"
@@ -76,12 +107,18 @@ export default function SignupForm({ onSubmit }) {
         passwordToggle
       />
 
-      <button
+      <button onClick={() => handleSignup}
         type="submit"
         className="w-full h-[47px] rounded-[40px] bg-[#3B82F6] hover:bg-[#3B82F6]/90 font-poppins font-medium text-xl text-white mt-4"
       >
         Create an account
       </button>
+      <div className="text-center text-sm text-gray-600 mt-5">
+              Already have an account?{" "}
+              <a href="#" className="text-blue-500 font-semibold hover:underline">
+                Login
+              </a>
+            </div>
     </form>
   );
 }
