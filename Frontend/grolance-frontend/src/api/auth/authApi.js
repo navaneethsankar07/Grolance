@@ -13,3 +13,14 @@ export const verifyOtp = async ({ email, otp_code }) => {
   const res = await axiosInstance.post("/auth/verify-otp/", { email, otp_code });
   return res.data;
 };
+
+export const loginUser = async ({ email, password }) => {
+  const res = await axiosInstance.post("/auth/login/", { email, password });
+  return res.data;
+};
+
+export const getCurrentUser = async () => {
+  const res = await axiosInstance.get("/auth/me/");
+  return res.data;
+};
+

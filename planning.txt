@@ -7,91 +7,271 @@ API Documentation :        https://documenter.getpostman.com/view/50095879/2sB3d
 
 
 
+import { useState } from "react";
+import { Lightbulb, CheckCircle2 } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
-import { Send, Star } from "lucide-react";
+export default function Index() {
+  const [projectTitle, setProjectTitle] = useState("");
+  const [projectDescription, setProjectDescription] = useState("");
+  const [requirements, setRequirements] = useState("");
+  const [deliverables, setDeliverables] = useState("");
+  const [category, setCategory] = useState("");
+  const [skillInput, setSkillInput] = useState("");
+  const [skills, setSkills] = useState<string[]>([]);
+  const [budget, setBudget] = useState("");
+  const [deliveryDays, setDeliveryDays] = useState("");
 
-interface FreelancerCardProps {
-  name: string;
-  title: string;
-  description: string;
-  skills: string[];
-  rating: number;
-  reviews: number;
-  price: number;
-  image: string;
-}
+  const handleAddSkill = () => {
+    if (skillInput.trim()) {
+      setSkills([...skills, skillInput.trim()]);
+      setSkillInput("");
+    }
+  };
 
-export default function FreelancerCard({
-  name,
-  title,
-  description,
-  skills,
-  rating,
-  reviews,
-  price,
-  image,
-}: FreelancerCardProps) {
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log({
+      projectTitle,
+      projectDescription,
+      requirements,
+      deliverables,
+      category,
+      skills,
+      budget,
+      deliveryDays,
+    });
+  };
+
   return (
-    <div className="flex w-full flex-col gap-6 rounded-lg bg-white p-6 shadow-lg md:flex-row md:gap-8">
-      <div className="flex flex-col items-center gap-4 md:items-start">
-        <img
-          src={image}
-          alt={`Portrait of ${name}`}
-          className="h-24 w-24 rounded-full object-cover"
-        />
-      </div>
-
-      <div className="flex flex-1 flex-col gap-4">
-        <div>
-          <h3 className="text-2xl font-bold text-gray-900">{name}</h3>
-          <p className="text-base text-gray-600">{title}</p>
+    <div className="min-h-screen bg-white py-12 px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl">
+        <div className="mb-8 text-center lg:text-left lg:max-w-3xl">
+          <h1 className="text-[31px] font-bold text-gray-900 leading-[40px] mb-2">
+            Post a New Project
+          </h1>
+          <p className="text-base text-gray-600 leading-6">
+            Describe your project details to receive competitive proposals from our community of skilled freelancers.
+          </p>
         </div>
 
-        <p className="max-w-[576px] text-base leading-[26px] text-gray-600">
-          {description}
-        </p>
-
-        <div className="flex flex-wrap gap-2">
-          {skills.map((skill) => (
-            <span
-              key={skill}
-              className="rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700"
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          <div className="lg:col-span-7">
+            <form
+              onSubmit={handleSubmit}
+              className="bg-white rounded-xl shadow-[0_4px_6px_-4px_rgba(0,0,0,0.1),0_10px_15px_-3px_rgba(0,0,0,0.1)] p-8"
             >
-              {skill}
-            </span>
-          ))}
-        </div>
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-2">
+                    Project Title <span className="text-red-500">*</span>
+                  </label>
+                  <Input
+                    value={projectTitle}
+                    onChange={(e) => setProjectTitle(e.target.value)}
+                    placeholder="e.g., Build a responsive e-commerce website"
+                    className="h-[50px] text-base border-gray-300 rounded-lg"
+                  />
+                </div>
 
-        <div className="flex items-center gap-6">
-          <div className="flex items-center gap-2">
-            <Star className="h-5 w-5 fill-yellow-500 text-yellow-500" />
-            <span className="text-base font-bold text-gray-900">{rating}</span>
-            <span className="text-base text-gray-500">({reviews} reviews)</span>
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-2">
+                    Project Description <span className="text-red-500">*</span>
+                  </label>
+                  <Textarea
+                    value={projectDescription}
+                    onChange={(e) => setProjectDescription(e.target.value)}
+                    placeholder="Describe what you need... Include details about your project goals, requirements, and any specific preferences."
+                    className="min-h-[170px] text-base border-gray-300 rounded-lg resize-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-2">
+                    Requirements From Freelancer <span className="text-red-500">*</span>
+                  </label>
+                  <Textarea
+                    value={requirements}
+                    onChange={(e) => setRequirements(e.target.value)}
+                    placeholder="Explain what you expect from the freelancer (tools, experience, deliverables, guidelines, references)."
+                    className="min-h-[170px] text-base border-gray-300 rounded-lg resize-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-2">
+                    Expected Deliverables <span className="text-red-500">*</span>
+                  </label>
+                  <Textarea
+                    value={deliverables}
+                    onChange={(e) => setDeliverables(e.target.value)}
+                    placeholder="List what the freelancer should deliver (design files, code, reports, videos, documentation, etc.)"
+                    className="min-h-[170px] text-base border-gray-300 rounded-lg resize-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-2">
+                    Category <span className="text-red-500">*</span>
+                  </label>
+                  <Select value={category} onValueChange={setCategory}>
+                    <SelectTrigger className="h-[47px] text-base border-gray-300 rounded-lg">
+                      <SelectValue placeholder="Select a category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="web-development">Web Development</SelectItem>
+                      <SelectItem value="mobile-development">Mobile Development</SelectItem>
+                      <SelectItem value="design">Design</SelectItem>
+                      <SelectItem value="marketing">Marketing</SelectItem>
+                      <SelectItem value="writing">Writing</SelectItem>
+                      <SelectItem value="data-science">Data Science</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-2">
+                    Required Skills <span className="text-red-500">*</span>
+                  </label>
+                  <div className="flex gap-2">
+                    <Input
+                      value={skillInput}
+                      onChange={(e) => setSkillInput(e.target.value)}
+                      onKeyPress={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          handleAddSkill();
+                        }
+                      }}
+                      placeholder="Type a skill and press Enter"
+                      className="h-[50px] text-base border-gray-300 rounded-lg flex-1"
+                    />
+                    <Button
+                      type="button"
+                      onClick={handleAddSkill}
+                      variant="outline"
+                      className="h-[50px] w-[78px] text-sm font-medium text-gray-700 border-gray-300 rounded-lg hover:bg-gray-50"
+                    >
+                      Add
+                    </Button>
+                  </div>
+                  {skills.length > 0 && (
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {skills.map((skill, index) => (
+                        <span
+                          key={index}
+                          className="inline-flex items-center gap-1 px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm"
+                        >
+                          {skill}
+                          <button
+                            type="button"
+                            onClick={() => setSkills(skills.filter((_, i) => i !== index))}
+                            className="hover:text-blue-900"
+                          >
+                            ×
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-2">
+                      Budget (Fixed Price) <span className="text-red-500">*</span>
+                    </label>
+                    <Input
+                      type="number"
+                      value={budget}
+                      onChange={(e) => setBudget(e.target.value)}
+                      placeholder="e.g., 5000"
+                      className="h-[50px] text-base border-gray-300 rounded-lg"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-2">
+                      Delivery Days <span className="text-red-500">*</span>
+                    </label>
+                    <Input
+                      type="number"
+                      value={deliveryDays}
+                      onChange={(e) => setDeliveryDays(e.target.value)}
+                      placeholder="e.g., 14"
+                      className="h-[50px] text-base border-gray-300 rounded-lg"
+                    />
+                  </div>
+                </div>
+
+                <div className="pt-6">
+                  <Button
+                    type="submit"
+                    className="w-full h-[52px] bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg shadow-sm"
+                  >
+                    Post Project
+                  </Button>
+                </div>
+              </div>
+            </form>
+          </div>
+
+          <div className="lg:col-span-5">
+            <div className="bg-white border border-blue-100 rounded-lg p-6 sticky top-8">
+              <div className="flex items-center gap-3 mb-4">
+                <Lightbulb className="w-6 h-6 text-blue-500" />
+                <h3 className="text-lg font-semibold text-gray-900">Tips for success</h3>
+              </div>
+
+              <div className="space-y-4">
+                <div className="flex items-start gap-3">
+                  <CheckCircle2 className="w-6 h-6 text-green-500 flex-shrink-0 mt-0.5" />
+                  <p className="text-base text-gray-600 leading-6">
+                    <span className="font-medium text-gray-700">Be specific:</span> Detailed descriptions attract better proposals.
+                  </p>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <CheckCircle2 className="w-6 h-6 text-green-500 flex-shrink-0 mt-0.5" />
+                  <p className="text-base text-gray-600 leading-6">
+                    <span className="font-medium text-gray-700">Set a realistic budget:</span> Research market rates for quality work.
+                  </p>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <CheckCircle2 className="w-6 h-6 text-green-500 flex-shrink-0 mt-0.5" />
+                  <p className="text-base text-gray-600 leading-6">
+                    <span className="font-medium text-gray-700">Define deliverables:</span> Clearly state what you expect to receive.
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-
-      <div className="flex w-full flex-col gap-4 md:w-56">
-        <div>
-          <div className="flex items-end gap-1">
-            <span className="text-3xl font-bold text-gray-900">₹{price}</span>
-            <span className="text-base text-gray-500">/ project</span>
-          </div>
-          <p className="text-sm text-gray-400">Starting price</p>
-        </div>
-
-        <button className="flex items-center justify-center gap-2 rounded-lg bg-[#3B82F6] px-6 py-3 text-base font-semibold text-white transition-colors hover:bg-[#2563EB]">
-          <span>Invite to Job</span>
-          <Send className="h-5 w-5" />
-        </button>
-
-        <button className="rounded-lg border border-gray-300 px-6 py-3 text-base font-semibold text-gray-700 transition-colors hover:bg-gray-50">
-          View Profile
-        </button>
       </div>
     </div>
   );
 }
+
+
+
+
+
+
+
+
+
+
+
 
 
 

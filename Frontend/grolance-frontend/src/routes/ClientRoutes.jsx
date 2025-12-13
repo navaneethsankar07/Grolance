@@ -1,17 +1,21 @@
-import React from 'react'
-import { Route, Routes } from 'react-router-dom'
-import Landingpage from '../features/client/landingPage/Landingpage'
-import ClientHomepage from '../features/client/homepage/ClientHomepage'
+import { Route, Routes } from "react-router-dom";
+import Landingpage from "../features/client/landingPage/Landingpage";
+import ClientHomepage from "../features/client/homepage/ClientHomepage";
+import ClientLayout from "../layouts/ClientLayout";
+import { useSelector } from "react-redux";
 
-function ClientRoutes() {
-    console.log('hello');
-    
+export default function ClientRoutes() {
+  const { user,loading } = useSelector(state => state.auth);
+  if (loading) {
+    return null; 
+  }
   return (
     <Routes>
-        <Route path='/' element={<Landingpage/>}/>
-        <Route path='/home' element={<ClientHomepage/>}/>
+      
+        <Route element={<ClientLayout />}>
+          <Route path="/" element={<ClientHomepage />} />
+        </Route>
+          
     </Routes>
-  )
+  );
 }
-
-export default ClientRoutes

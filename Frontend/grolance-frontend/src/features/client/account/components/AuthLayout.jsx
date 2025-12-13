@@ -1,10 +1,13 @@
 import { ExternalLink } from "lucide-react";
-
+import { Link } from "react-router-dom";
+import { useModal } from "../../../../hooks/modal/useModalStore";
 export default function AuthLayout({
   title,
   children,
   onClose,
 }) {
+
+  const {openModal} = useModal()
   return (
     <div className="w-full max-w-[1120px] md:h-[780px] flex flex-col md:flex-row bg-white rounded-[28px] overflow-hidden shadow-2xl relative">
 
@@ -31,10 +34,10 @@ export default function AuthLayout({
         </h1>
         {title=='Welcome Back'?<span className="text-lg text-gray-600 mb-8 md:mb-10 ml-17 flex gap-1">
               Don't have an account?{" "}
-              <a  className=" text-blue-500 font-semibold hover:underline flex gap-2 ">
+              <button onClick={()=>openModal('signup')} className=" text-blue-500 font-semibold hover:underline flex gap-2 ">
                 <span >Sign up</span>
                 <ExternalLink size={20} className="text-blue-500 mt-[0.1rem]" />
-              </a>
+              </button>
             </span>:null}
         
 
