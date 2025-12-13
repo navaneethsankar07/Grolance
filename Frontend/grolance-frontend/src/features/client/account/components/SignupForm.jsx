@@ -34,7 +34,7 @@ export default function SignupForm({ onSubmit }) {
     const firstField = Object.keys(backendData)[0];
     const firstMessage = backendData[firstField][0];
     setBackendError(firstMessage);
-    console.log("Error Message:", firstMessage);
+    console.log("Error Message:", backendData);
   }else {
     setBackendError("Something went wrong. Please try again.");
   }
@@ -115,9 +115,9 @@ export default function SignupForm({ onSubmit }) {
       </button>
       <div className="text-center text-sm text-gray-600 mt-5">
               Already have an account?{" "}
-              <a href="#" className="text-blue-500 font-semibold hover:underline">
+              <button onClick={()=>openModal('signin')} className="text-blue-500 font-semibold hover:underline">
                 Login
-              </a>
+              </button>
             </div>
     </form>
   );

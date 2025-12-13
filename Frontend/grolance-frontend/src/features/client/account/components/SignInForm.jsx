@@ -1,13 +1,24 @@
 import { useForm } from "react-hook-form";
 import InputBox from "../../account/components/InputBox";
+import { useDispatch } from "react-redux";
+import { loginThunk } from "../auth/authThunks";
+import { useModal } from "../../../../hooks/modal/useModalStore";
+import { useNavigate } from "react-router-dom";
 
 export default function SignInForm() {
+  const dispatch = useDispatch()
   const { register, handleSubmit, formState: { errors } } = useForm();
-
-  const onSubmit = (data) => {
-    console.log("Signin data:", data);
-  };
-
+  const {closeModal} = useModal()
+  const navigate = useNavigate()
+const onSubmit = async ({ email, password }) => {
+  try {
+    await dispatch(loginThunk({ email, password })).unwrap();
+    navigate("/");
+    closeModal()
+  } catch (err) {
+    console.log("Login error:", err);
+  }
+};
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
 

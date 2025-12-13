@@ -4,9 +4,12 @@ import { useModal } from '../../../hooks/modal/useModalStore';
 import { verifyOtp } from '../../../api/auth/authApi';
 import { useForm } from "react-hook-form";
 import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { setCredentials } from './auth/authslice';
 
 export default function VerifyOtp({email}) {
-    const { closeModal, openModal } = useModal();
+  const dispatch = useDispatch()
+  const { closeModal, openModal } = useModal();
     const {
     register,
     handleSubmit,
@@ -21,11 +24,16 @@ export default function VerifyOtp({email}) {
   const handleVerify = async ({otp}) => {
   try {
     const res = await verifyOtp({email, otp_code:otp});
-    navigate('/home')
-    closeModal("otp")
-    console.log("OTP Verified:", res);
+    console.log("OTP VERIFIED:", res);
+    dispatch(setCredentials({
+  user: res.user,
+  accessToken: res.access,
+  refreshToken: res.refresh
+}));
+openModal(null); 
+navigate("/");
   } catch (err) {
-    console.error("OTP Error:", err.response?.data);
+    console.log("Verify OTP Error:", err.response?.data || err.message);
   }
 };
 
