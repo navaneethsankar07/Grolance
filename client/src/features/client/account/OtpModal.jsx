@@ -12,7 +12,7 @@ export default function VerifyOtp({ email }) {
   const dispatch = useDispatch();
   const { closeModal, openModal } = useModal();
   const navigate = useNavigate();
-
+  const [error,setError] = useState('')
   const [timer, setTimer] = useState(60);
   const [canResend, setCanResend] = useState(false);
 
@@ -42,14 +42,18 @@ export default function VerifyOtp({ email }) {
         setCredentials({
           user: res.user,
           accessToken: res.access,
-          refreshToken: res.refresh,
         })
       );
 
       closeModal();
       navigate("/");
     } catch (err) {
-      console.log("Verify OTP Error:", err.response?.data || err.message);
+       const message =
+    err.response?.data?.error ||
+    err.response?.data?.message ||
+    "Invalid or expired OTP";
+
+  setError(message);
     }
   };
 
@@ -90,6 +94,9 @@ export default function VerifyOtp({ email }) {
           We've sent a 6-digit code to{" "}
           <span className="font-semibold text-gray-800">{email}</span>
         </p>
+        {error && (
+  <p className="text-red-500 text-sm my-2 text-center">{ error}</p>
+)}
 
         <input
           type="text"
@@ -109,7 +116,7 @@ export default function VerifyOtp({ email }) {
 
         <button
           type="submit"
-          className="w-full h-12 rounded-lg font-semibold text-white text-lg bg-blue-500 hover:bg-blue-600 transition"
+          className="w-full max-w-xs h-12 rounded-lg font-semibold text-white text-lg bg-[#3B82F6] hover:bg-[#3B82F6]/50 transition mt-4"
         >
           Verify OTP
         </button>
@@ -121,7 +128,7 @@ export default function VerifyOtp({ email }) {
             type="button"
             onClick={handleResend}
             disabled={!canResend}
-            className={`ml-2 font-semibold transition-colors ${
+            className={`ml-2 font-semibold transition-colors  ${
               canResend
                 ? "text-blue-600 hover:text-blue-700"
                 : "text-gray-400 cursor-not-allowed"
