@@ -4,10 +4,12 @@ from rest_framework.permissions import IsAuthenticated,AllowAny
 from rest_framework import status
 from django.core.cache import cache
 from django.contrib.auth import authenticate
-from .serializer import RegisterSerializer, EmailVerifySerializer, ResendEmailOtpSerializer, UserSerializer
-from .utils import otp_service
+from .serializer import RegisterSerializer, EmailVerifySerializer, ResendEmailOtpSerializer, UserSerializer, ForgotPasswordSerializer, ResetTokenValidateSerializer, ResetPasswordSerializer
+from .utils import otp_service, reset_password_service
 from .models import User
 from rest_framework_simplejwt.tokens import RefreshToken,TokenError
+from django.conf import settings
+
 class SendOtpView(APIView):
     def post(self, request):
         permission_classes = [AllowAny]
@@ -178,3 +180,76 @@ class LogoutView(APIView):
         response.delete_cookie("refresh_token")
 
         return response
+    
+
+class ForgotPasswordView(APIView):
+    permission_classes = [AllowAny]
+    def post(self, request):
+        serializer = ForgotPasswordSerializer(data = request.data)
+        serializer.is_valid(raise_exception=True)
+        email = serializer.validated_data["email"]
+
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            return Response(
+                {"message": "If an account exists, a reset link has been sent."},
+                status=200
+            )
+        
+        token_data = reset_password_service.generatetoken(user)
+        uid = token_data["uid"]
+        token = token_data["token"]
+
+
+        reset_password_service.send_reset_link(
+            email=user.email,
+            uid=token_data["uid"],
+            token=token_data["token"],
+        )
+
+        return Response(
+            {"message": "If this email exists, a reset link has been sent."},
+            status=200
+        )
+        
+        
+class ValidateResetTokenView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        uid = request.query_params.get("uid")
+        token = request.query_params.get("token")
+
+        serializer = ResetTokenValidateSerializer(
+            data={"uid": uid, "token": token}
+        )
+
+        if serializer.is_valid():
+            return Response(
+                {"message": "Reset link is valid"},
+                status=status.HTTP_200_OK
+            )
+
+        return Response(
+            {"error": "Reset link is invalid or expired"},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+class ResetPasswordView(APIView):
+    permission_classes = [AllowAny]  
+
+    def post(self, request):
+        serializer = ResetPasswordSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        user = serializer.validated_data["user"]
+        new_password = serializer.validated_data["new_password"]
+
+        user.set_password(new_password)
+        user.save()
+
+        return Response(
+            {"message": "Password reset successful"},
+            status=status.HTTP_200_OK
+        )

@@ -29,7 +29,7 @@ export default function AuthLayout({
       </div>
 
       <div className="w-full md:w-[474px]  bg-white p-8 md:p-12 flex flex-col">
-        <h1 className={`font-poppins font-bold text-[28px] md:text-[40px] ${title==='Welcome Back'?'mt-20':'mt-0'} text-center `}>
+        <h1 className={`font-Museo font-bold text-[28px] md:text-[40px] ${title==='Welcome Back'?'mt-20':'mt-0'} text-center `}>
           {title}
         </h1>
         {title=='Welcome Back'?<span className="text-lg text-gray-600 mb-8 md:mb-10 ml-17 flex gap-1">

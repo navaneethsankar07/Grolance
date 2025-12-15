@@ -5,9 +5,9 @@ import {zodResolver} from '@hookform/resolvers/zod'
 import { signupSchema } from "../validation/authSchemas";
 import { sendOtp } from "../../../../api/auth/authApi";
 import { useModal } from "../../../../hooks/modal/useModalStore";
-export default function SignupForm({ onSubmit }) {
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirm, setShowConfirm] = useState(false);
+export default function SignupForm({ }) {
+  
+  const [loading, setLoading] = useState(false);
   const {openModal, setSignupData, signupData} = useModal()
   const [backendError, setBackendError] = useState("");
 
@@ -21,6 +21,8 @@ export default function SignupForm({ onSubmit }) {
   });
 
   const handleSignup = async (formData)=> {
+     if (loading) return;
+     setLoading(true);
     try {
     setSignupData(formData);
     const res = await sendOtp(formData);
@@ -29,16 +31,31 @@ export default function SignupForm({ onSubmit }) {
 
     openModal("otp",{email:formData.email})
   } catch (err) {
-  if (err.response?.data) {
-    const backendData = err.response.data;
-    const firstField = Object.keys(backendData)[0];
-    const firstMessage = backendData[firstField][0];
-    setBackendError(firstMessage);
-    console.log("Error Message:", backendData);
-  }else {
+  const data = err.response?.data;
+
+  if (!data) {
+    setBackendError("Something went wrong. Please try again.");
+    return;
+  }
+
+  if (typeof data.error === "string") {
+    setBackendError(data.error);
+    return;
+  }
+
+  const firstKey = Object.keys(data)[0];
+  const value = data[firstKey];
+
+  if (Array.isArray(value)) {
+    setBackendError(value[0]);
+  } else if (typeof value === "string") {
+    setBackendError(value);
+  } else {
     setBackendError("Something went wrong. Please try again.");
   }
-}
+}finally {
+    setLoading(false);
+  }
 };
 
   useEffect(() => {
@@ -111,7 +128,7 @@ export default function SignupForm({ onSubmit }) {
         type="submit"
         className="w-full h-[47px] rounded-[40px] bg-[#3B82F6] hover:bg-[#3B82F6]/90 font-poppins font-medium text-xl text-white mt-4"
       >
-        Create an account
+        {loading? "Sending OTP...":"Create an account"}
       </button>
       <div className="text-center text-sm text-gray-600 mt-5">
               Already have an account?{" "}

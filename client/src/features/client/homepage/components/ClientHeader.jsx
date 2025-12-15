@@ -1,21 +1,24 @@
 import { Link } from "react-router-dom";
 import { Plus, Bell, Mail } from "lucide-react";
+import { useSelector } from "react-redux";
 
 export default function ClientHeader() {
+  const fullName = useSelector((state)=>state.auth.user.full_name)
+  const profilePic = useSelector(state=>state.auth.user.profile_photo)
   return (
     <header className="sticky top-0 z-50 w-full border-b border-gray-200/80 bg-white/95 backdrop-blur-sm">
       <div className="container ml-20 flex h-[73px] items-center gap-80 min-w-456 ">
-        <button  className="flex items-center gap-4">
+        <Link to={'/'}  className="flex items-center gap-4">
           <h1 className="text-[37px] font-bold leading-7" style={{ fontFamily: 'MuseoModerno, sans-serif' }}>
             <span className="text-[#1A1A1A]">Gro</span>
             <span className="text-[#3B82F6]">lance</span>
           </h1>
-        </button>
+        </Link>
 
         <nav className="flex items-center gap-9">
-          <button to="/" className="text-lg font-bold text-[#3B82F6]">
+          <Link to="/" className="text-lg font-bold text-[#3B82F6]">
             Dashboard
-          </button>
+          </Link>
           <button  className="text-xs font-medium text-[#111318]">
             Find Talent
           </button>
@@ -51,14 +54,25 @@ export default function ClientHeader() {
 
           <div className="flex items-center gap-3">
             <div className="text-right">
-              <div className="text-base font-semibold text-[#1A1A1A]">Alex Morgan</div>
+              <div className="text-base font-semibold text-[#1A1A1A]">{fullName}</div>
               <div className="text-sm text-[#3B82F6]">Client Account</div>
             </div>
-            <img
-              src="https://api.builder.io/api/v1/image/assets/TEMP/474d9d1aa27ddaa218daa24136b5a92cfb3e0e51?width=88"
-              alt="Alex Morgan"
-              className="h-11 w-11 rounded-full object-cover"
-            />
+            <div className="h-11 w-11 rounded-full overflow-hidden">
+  {profilePic ? (
+    <img
+      src={profilePic}
+      alt={fullName}
+      className="h-full w-full object-cover"
+    />
+  ) : (
+    <div className="bg-[#3B82f6] h-full w-full rounded-full flex items-center justify-center">
+      <span className="text-black font-museo font-bold text-2xl">
+        {fullName?.charAt(0).toUpperCase()}
+      </span>
+    </div>
+  )}
+</div>
+
           </div>
         </div>
       </div>

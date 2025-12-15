@@ -1,5 +1,5 @@
 #!/bin/sh
-'''exec' "/home/navaneeth-sankar/Brocamp/Grolance[First Project]/server/.venv/bin/python3" "$0" "$@"
+'''exec' "/home/navaneeth-sankar/Brocamp/Grolance[First Project]/server/.venv/bin/python" "$0" "$@"
 ' '''
 # -*- coding: utf-8 -*-
 import re
