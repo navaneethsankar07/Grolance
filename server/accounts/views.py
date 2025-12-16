@@ -4,11 +4,12 @@ from rest_framework.permissions import IsAuthenticated,AllowAny
 from rest_framework import status
 from django.core.cache import cache
 from django.contrib.auth import authenticate
-from .serializer import RegisterSerializer, EmailVerifySerializer, ResendEmailOtpSerializer, UserSerializer, ForgotPasswordSerializer, ResetTokenValidateSerializer, ResetPasswordSerializer
+from .serializer import RegisterSerializer, EmailVerifySerializer, ResendEmailOtpSerializer, UserSerializer, ForgotPasswordSerializer, ResetTokenValidateSerializer, ResetPasswordSerializer, GoogleAuthSerializer
 from .utils import otp_service, reset_password_service
 from .models import User
 from rest_framework_simplejwt.tokens import RefreshToken,TokenError
 from django.conf import settings
+from .services.google_auth_service import GoogleAuthService
 
 class SendOtpView(APIView):
     def post(self, request):
@@ -80,8 +81,7 @@ class VerifyOtpView(APIView):
                     "email": user.email,
                     "full_name": user.full_name
                 },
-                "access_token": access_token,
-                "refresh": str(refresh)
+                "access_token": access_token
             },
             status=status.HTTP_200_OK
         )
@@ -143,7 +143,6 @@ class LoginView(APIView):
 
         resp = Response({
             "access": str(refresh.access_token),
-            "refresh": str(refresh),
             "user": {
             "id": user.id,
             "email": user.email,
@@ -253,3 +252,46 @@ class ResetPasswordView(APIView):
             {"message": "Password reset successful"},
             status=status.HTTP_200_OK
         )
+    
+
+class GoogleAuthView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        serializer = GoogleAuthSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        token = serializer.validated_data["id_token"]
+
+        payload = GoogleAuthService.verify_token(token)
+        if not payload:
+            return Response(
+                {"error": "Invalid Google token"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        user = GoogleAuthService.get_or_create_user(payload)
+
+        refresh = RefreshToken.for_user(user)
+
+        response = Response({
+            "access": str(refresh.access_token),
+            "user": {
+                "id": user.id,
+                "email": user.email,
+                "full_name": user.full_name,
+                "profile_picture": user.profile_picture,
+                "is_google_account": user.is_google_account,
+            }
+        })
+
+        response.set_cookie(
+            key="refresh_token",
+            value=str(refresh),
+            httponly=True,
+            secure=not settings.DEBUG,
+            samesite="Lax",
+            max_age=7 * 24 * 3600,
+        )
+
+        return response

@@ -7,6 +7,10 @@ from django.conf import settings
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
 from .models import User
+from .tasks import send_otp_email_task, send_password_reset_email_task
+
+
+
 class OTPService:
 
     @staticmethod
@@ -69,21 +73,12 @@ class OTPService:
       </body>
         </html>
     """
-        try:
-            email_message = EmailMultiAlternatives(
-            subject=subject,
-            body=text_content,          # fallback text
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            to=[email],
-            )
-
-            email_message.attach_alternative(html_content, "text/html")
-            email_message.send()
-            
-        except Exception as e:
-            cache.delete(otp_key)
-            cache.delete(cooldown_key)
-            return {"error": f"Failed to send email: {e}"}
+        send_otp_email_task.delay(
+        email=email,
+        subject=subject,
+        text_content=text_content,
+        html_content=html_content,
+    )
 
         return {"success": True}
 
@@ -151,31 +146,103 @@ class PasswordResetService:
         """
 
         html_content = f"""
-        <html>
-          <body style="font-family: Arial;">
-            <h2>Password Reset</h2>
-            <p>Click the button below to reset your password:</p>
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Password Reset</title>
+  </head>
+  <body style="
+    margin:0;
+    padding:0;
+    background-color:#f5f7fa;
+    font-family: Arial, Helvetica, sans-serif;
+  ">
+    <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
+      <tr>
+        <td align="center" style="padding:40px 16px;">
+          <table
+            width="100%"
+            cellpadding="0"
+            cellspacing="0"
+            role="presentation"
+            style="
+              max-width:520px;
+              background:#ffffff;
+              border-radius:8px;
+              padding:32px;
+              box-shadow:0 4px 12px rgba(0,0,0,0.08);
+            "
+          >
+            <tr>
+              <td style="text-align:center;">
+                <h1 style="
+                  margin:0 0 16px;
+                  font-size:26px;
+                  color:#111827;
+                ">
+                  Password Reset
+                </h1>
 
-            <a href="{reset_url}"
-               style="padding:12px 20px;background:#2563eb;color:#fff;
-                      text-decoration:none;border-radius:6px;">
-              Reset Password
-            </a>
+                <p style="
+                  margin:0 0 24px;
+                  font-size:15px;
+                  color:#374151;
+                  line-height:1.6;
+                ">
+                  You requested to reset your Grolance account password.
+                  Click the button below to continue.
+                </p>
 
-            <p style="margin-top:20px;color:#6b7280;">
-              If you didn’t request this, ignore this email.
-            </p>
-          </body>
-        </html>
-        """
+                <a
+                  href="{reset_url}"
+                  style="
+                    display:inline-block;
+                    padding:14px 28px;
+                    background-color:#2563eb;
+                    color:#ffffff;
+                    font-size:16px;
+                    font-weight:600;
+                    text-decoration:none;
+                    border-radius:6px;
+                  "
+                >
+                  Reset Password
+                </a>
 
-        email_message = EmailMultiAlternatives(
-            subject=subject,
-            body=text_content,
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            to=[email],
-        )
-        email_message.attach_alternative(html_content, "text/html")
-        email_message.send()
+                <p style="
+                  margin:28px 0 0;
+                  font-size:13px;
+                  color:#6b7280;
+                  line-height:1.5;
+                ">
+                  If you didn’t request this password reset, you can safely
+                  ignore this email.
+                </p>
+
+                <p style="
+                  margin:32px 0 0;
+                  font-size:13px;
+                  color:#9ca3af;
+                ">
+                  — Grolance Team
+                </p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
+"""
+
+
+        send_password_reset_email_task.delay(
+        email=email,
+        subject=subject,
+        text_content=text_content,
+        html_content=html_content,
+    )
   
 reset_password_service = PasswordResetService()

@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import SendOtpView, VerifyOtpView, ResendOtpView, RefreshTokenView, LoginView, CurrentUserView, LogoutView,ForgotPasswordView, ValidateResetTokenView, ResetPasswordView
+from .views import SendOtpView, VerifyOtpView, ResendOtpView, RefreshTokenView, LoginView, CurrentUserView, LogoutView,ForgotPasswordView, ValidateResetTokenView, ResetPasswordView, GoogleAuthView
 
 
 
@@ -14,4 +14,6 @@ urlpatterns = [
     path("forgot-password/", ForgotPasswordView.as_view(), name="forgot-password"),
     path("reset-password/validate/",ValidateResetTokenView.as_view(),name="reset-password-validate"),
     path("reset-password/", ResetPasswordView.as_view(), name="reset-password"),
+    path("google/", GoogleAuthView.as_view(), name="google-auth"),
+
 ]

@@ -3,11 +3,12 @@ import { Plus, Bell, Mail } from "lucide-react";
 import { useSelector } from "react-redux";
 
 export default function ClientHeader() {
-  const fullName = useSelector((state)=>state.auth.user.full_name)
-  const profilePic = useSelector(state=>state.auth.user.profile_photo)
+  const user = useSelector(state => state.auth.user);
+  const fullName = user?.full_name ?? "";
+const profilePic = user?.profile_photo ?? null;
   return (
     <header className="sticky top-0 z-50 w-full border-b border-gray-200/80 bg-white/95 backdrop-blur-sm">
-      <div className="container ml-20 flex h-[73px] items-center gap-80 min-w-456 ">
+      <div className="container ml-20 flex h-[73px] items-center gap-86 min-w-456 ">
         <Link to={'/'}  className="flex items-center gap-4">
           <h1 className="text-[37px] font-bold leading-7" style={{ fontFamily: 'MuseoModerno, sans-serif' }}>
             <span className="text-[#1A1A1A]">Gro</span>

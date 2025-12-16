@@ -8,7 +8,7 @@ export default function HeroSection() {
   ];
 
   return (
-    <section className="pt-32 pb-20 px-4 md:px-8">
+    <section className="mt-40 pb-20 px-4 md:px-8 mb-20">
       <div className="max-w-[1600px] mx-auto">
         <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-12">
           <div className="flex-1 max-w-[656px]">

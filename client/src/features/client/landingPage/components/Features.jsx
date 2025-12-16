@@ -33,7 +33,7 @@ export default function FeaturesSection() {
   ];
 
   return (
-    <section className="py-20 px-4 md:px-8">
+    <section className="py-20 px-4 md:px-8 mb-30">
       <div className="max-w-[1600px] mx-auto">
         <h2 className="font-poppins font-semibold text-[48px] md:text-[65px] leading-12 text-[#111827] text-center mb-16">
           Make it all happen with freelancers

@@ -5,6 +5,7 @@ import {zodResolver} from '@hookform/resolvers/zod'
 import { signupSchema } from "../validation/authSchemas";
 import { sendOtp } from "../../../../api/auth/authApi";
 import { useModal } from "../../../../hooks/modal/useModalStore";
+
 export default function SignupForm({ }) {
   
   const [loading, setLoading] = useState(false);
@@ -24,11 +25,8 @@ export default function SignupForm({ }) {
      if (loading) return;
      setLoading(true);
     try {
+      const res = await sendOtp(formData);
     setSignupData(formData);
-    const res = await sendOtp(formData);
-
-    console.log("User registered:", res);
-
     openModal("otp",{email:formData.email})
   } catch (err) {
   const data = err.response?.data;
