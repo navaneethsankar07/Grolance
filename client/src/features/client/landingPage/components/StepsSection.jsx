@@ -37,7 +37,7 @@ export default function StepsSection() {
   ];
 
   return (
-    <section className="py-20 px-4 md:px-8">
+    <section className="py-20 px-4 md:px-8 mb-30">
       <div className="max-w-[1600px] mx-auto">
         <div className="text-center mb-16">
           <h2 className="font-grotesk font-bold text-[45px] md:text-[65px] leading-[45px] tracking-[-1px] text-[#141414] mb-4">
@@ -48,7 +48,7 @@ export default function StepsSection() {
           </p>
         </div>
 
-        <div className="flex flex-col md:flex-row items-start justify-center gap-12 md:gap-24 max-w-[1400px] mx-auto mt-30">
+        <div className="flex flex-col md:flex-row items-start justify-center gap-24 md:gap-45 max-w-[1400px] mx-auto mt-30">
           {steps.map((step) => (
             <div key={step.number} className="flex-1 flex flex-col items-center text-center max-w-[320px]">
               <div className="relative mb-8">

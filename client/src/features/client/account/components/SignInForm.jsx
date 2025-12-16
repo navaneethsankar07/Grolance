@@ -5,11 +5,12 @@ import { loginThunk } from "../auth/authThunks";
 import { useModal } from "../../../../hooks/modal/useModalStore";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { triggerGoogleSignup } from "../helper/googleSignupHelper";
 
 export default function SignInForm() {
   const dispatch = useDispatch();
   const { register, handleSubmit, formState: { errors } } = useForm();
-  const { closeModal } = useModal();
+  const { closeModal,openModal } = useModal();
   const navigate = useNavigate();
   const [loginError, setLoginError] = useState(null);
 
@@ -24,6 +25,29 @@ export default function SignInForm() {
     }
   };
 
+const handleGoogleResponse = async (response) => {
+  try {
+    const data = await googleAuth(response.credential);
+
+    dispatch(
+      setCredentials({
+        user: data.user,
+        accessToken: data.access,
+      })
+    );
+
+    closeModal();
+    navigate("/");
+  } catch (err) {
+    setLoginError(
+      err?.response?.data?.error ||
+      "Google authentication failed"
+    );
+  }
+};
+const handleGoogleLogin = () => {
+  triggerGoogleSignup(handleGoogleResponse);
+};
 
 
   return (
@@ -51,11 +75,23 @@ export default function SignInForm() {
         passwordToggle
       />
 
-    
+      <div className="text-right">
+  <button
+    type="button"
+    onClick={() => {
+      closeModal();
+      openModal("forgot-password");
+    }}
+    className="text-sm text-[#3B82F6] hover:underline"
+  >
+    Forgot password?
+  </button>
+</div>
+
 
       <button
         type="submit"
-        className="w-full py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-full
+        className="w-full py-3 bg-[#3B82F6] hover:bg-blue-600 text-white rounded-full
         font-poppins text-xl font-medium transition-colors"
       >
         Sign in
@@ -69,19 +105,21 @@ export default function SignInForm() {
         <div className="flex-1 h-px bg-gray-300 opacity-80"></div>
       </div>
 
-      <button
-        type="button"
-        className="w-full h-[52px] flex items-center justify-center gap-1 px-4 rounded-[10px] border border-[#CBCAD7] bg-white hover:bg-gray-50 transition-colors mb-6"
-      >
-        <img
-          src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png"
-          className="w-9 h-9"
-          alt="Google"
-        />
-        <span className="font-poppins font-medium text-base text-[#19181F]">
-          Create account with Google
-        </span>
-      </button>
+     <button
+  type="button"
+  onClick={handleGoogleLogin}
+  className="w-full h-[52px] flex items-center justify-center gap-1 px-4 rounded-[10px] border border-[#CBCAD7] bg-white hover:bg-gray-50 transition-colors mb-6"
+>
+  <img
+    src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png"
+    className="w-9 h-9"
+    alt="Google"
+  />
+  <span className="font-poppins font-medium text-base text-[#19181F]">
+    Continue with Google
+  </span>
+</button>
+
 
     </form>
   );

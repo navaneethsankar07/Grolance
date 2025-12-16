@@ -29,3 +29,30 @@ export const resendOtp = async ({ email }) => {
   const res = await axiosInstance.post("/auth/resend-otp/", { email });
   return res.data;
 };
+
+export const forgotPassword = async ({email})=>{
+  const res = await axiosInstance.post("/auth/forgot-password/",{ email })
+  return res.data
+}
+
+export const validateLink = async ({uid,token}) => {
+      const res = await axiosInstance.get(`/auth/reset-password/validate/?uid=${uid}&token=${token}`);
+      return res.data
+    };
+
+
+export const resetPassword = async({uid, token, newPassword, confirmPassword}) => {
+   await axiosInstance.post("/auth/reset-password/", {
+          uid,
+          token,
+          new_password: newPassword,
+          confirm_password: confirmPassword,
+        });
+}
+
+export const googleAuth = async (idToken) => {
+  const res = await axiosInstance.post("/auth/google/", {
+    token: idToken,
+  });
+  return res.data;
+};

@@ -21,7 +21,7 @@ export default function TestimonialsSection() {
   ];
 
   return (
-    <section className="py-20 px-4 md:px-8 bg-white">
+    <section className="py-20 px-4 md:px-8 bg-white mb-20">
       <div className="max-w-[1600px] mx-auto">
         <h2 className="font-inter font-bold text-[40px] md:text-[51px] leading-5 tracking-[0.7px] uppercase text-[#1A1A1A] text-center mb-16">
           What Our Clients Say

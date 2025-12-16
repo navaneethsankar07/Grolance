@@ -85,7 +85,7 @@ export default function CategoriesSection() {
   ];
 
   return (
-    <section className="py-20 px-4 md:px-8 bg-white">
+    <section className="py-20 px-4 md:px-8 bg-white mb-30">
       <div className="max-w-[1728px] mx-auto">
         <h2 className="font-grotesk font-bold text-[40px] md:text-[65px] leading-10 tracking-[-0.9px] uppercase text-[#0D191C] text-center mb-16">
           Browse By Category

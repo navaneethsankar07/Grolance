@@ -11,10 +11,18 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = [
-            "id", "full_name", "email", "profile_photo",
-            "is_freelancer", "is_admin", "is_active",
-            "created_at"
+            "id",
+            "full_name",
+            "email",
+            "profile_photo",
+            "is_freelancer",
+            "current_role",
+            "is_google_account",
+            "is_admin",
+            "is_active",
+            "created_at",
         ]
+
 
 class RegisterSerializer(serializers.Serializer):
     full_name = serializers.CharField(max_length=40)
@@ -45,12 +53,6 @@ class ResendEmailOtpSerializer(serializers.Serializer):
 class ForgotPasswordSerializer(serializers.Serializer):
     email = serializers.EmailField()
 
-    def validate_email(self, value):
-        if not User.objects.filter(email=value).exists():
-            raise serializers.ValidationError(
-                "No account found with this email address."
-            )
-        return value
     
 class ResetTokenValidateSerializer(serializers.Serializer):
     uid = serializers.CharField()
@@ -105,3 +107,7 @@ class ResetPasswordSerializer(serializers.Serializer):
 
         attrs["user"] = user
         return attrs
+    
+
+class GoogleAuthSerializer(serializers.Serializer):
+    id_token = serializers.CharField()

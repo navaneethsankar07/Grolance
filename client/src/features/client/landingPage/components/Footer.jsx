@@ -4,78 +4,7 @@ export default function Footer() {
   return (
     <footer className="border-t border-[#E5E7EB]   pb-5">
       <div className="max-w-[1800px] mx-auto">
-        {/* <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
-          <div>
-            <div className="mb-4">
-              <h2 className="text-[37px] font-museo font-extrabold leading-7">
-                <span className="text-[#1A1A1A]">Gro</span>
-                <span className="text-[#3B82F6]">lance</span>
-              </h2>
-            </div>
-            <p className="font-murecho font-medium text-[13px] leading-7 text-black pl-8 -mt-4">
-              Your Craft, Your Crown.
-            </p>
-          </div>
-
-          <div>
-            <h3 className="font-grotesk font-bold text-base leading-6 text-[#1A1A1A] mb-4">
-              Company
-            </h3>
-            <ul className="space-y-2">
-              <li>
-                <div className="font-grotesk font-bold text-sm leading-5 text-[#6C757D] hover:text-[#3B82F6]">
-                  About Us
-                </div>
-              </li>
-              <li>
-                <div className="font-grotesk font-bold text-sm leading-5 text-[#6C757D] hover:text-[#3B82F6]">
-                  Contact
-                </div>
-              </li>
-            </ul>
-          </div>
-
-          <div>
-            <h3 className="font-grotesk font-bold text-base leading-6 text-[#1A1A1A] mb-4">
-              Support
-            </h3>
-            <ul className="space-y-2">
-              <li>
-                <div className="font-grotesk font-bold text-sm leading-5 text-[#6C757D] hover:text-[#3B82F6]">
-                  FAQs
-                </div>
-              </li>
-              <li>
-                <div className="font-grotesk font-bold text-sm leading-5 text-[#6C757D] hover:text-[#3B82F6]">
-                  Dispute Resolution
-                </div>
-              </li>
-              <li>
-                <div className="font-grotesk font-bold text-sm leading-5 text-[#6C757D] hover:text-[#3B82F6]">
-                  Refund Policy
-                </div>
-              </li>
-            </ul>
-          </div>
-
-          <div>
-            <h3 className="font-grotesk font-bold text-base leading-6 text-[#1A1A1A] mb-4">
-              Legal
-            </h3>
-            <ul className="space-y-2">
-              <li>
-                <div className="font-grotesk font-bold text-sm leading-5 text-[#6C757D] hover:text-[#3B82F6]">
-                  Terms of Service
-                </div>
-              </li>
-              <li>
-                <div className="font-grotesk font-bold text-sm leading-5 text-[#6C757D] hover:text-[#3B82F6]">
-                  Privacy Policy
-                </div>
-              </li>
-            </ul>
-          </div>
-        </div> */}
+      
 
         <div className="pt-8 border-t border-[#8F8F8F] flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="font-grotesk font-bold text-sm leading-5 text-[#6C757D]">

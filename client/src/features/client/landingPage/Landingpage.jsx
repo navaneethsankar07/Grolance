@@ -13,29 +13,12 @@ function Landingpage() {
       <>
         <Header/>
         <HeroSection/>
-        <br />
-        <br />
-        <br />
         <StepsSection/>
-        <br />
-        <br />
-        <br />
         <CategoriesSection/>
-        <br />
-        <br />
-        <br />
         <FeaturesSection/>
-        <br />
-        <br />
-        <br />
         <TestimonialsSection/>
-        <br />
-        <br />
-        <br />
         <CTASection/>
-        <br />
-        <br />
-        <br />
+        
         <Footer/>
       </>
   )
