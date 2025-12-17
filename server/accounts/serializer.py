@@ -110,4 +110,4 @@ class ResetPasswordSerializer(serializers.Serializer):
     
 
 class GoogleAuthSerializer(serializers.Serializer):
-    id_token = serializers.CharField()
+    token = serializers.CharField()

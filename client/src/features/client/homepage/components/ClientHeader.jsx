@@ -5,6 +5,8 @@ import { useSelector } from "react-redux";
 export default function ClientHeader() {
   const user = useSelector(state => state.auth.user);
   const fullName = user?.full_name ?? "";
+  const displayName = fullName.split(" ")[0];
+
 const profilePic = user?.profile_photo ?? null;
   return (
     <header className="sticky top-0 z-50 w-full border-b border-gray-200/80 bg-white/95 backdrop-blur-sm">
@@ -55,7 +57,7 @@ const profilePic = user?.profile_photo ?? null;
 
           <div className="flex items-center gap-3">
             <div className="text-right">
-              <div className="text-base font-semibold text-[#1A1A1A]">{fullName}</div>
+              <div className="text-base font-semibold text-[#1A1A1A]">{displayName}</div>
               <div className="text-sm text-[#3B82F6]">Client Account</div>
             </div>
             <div className="h-11 w-11 rounded-full overflow-hidden">

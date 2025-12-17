@@ -4,8 +4,10 @@ import { useDispatch } from "react-redux";
 import { loginThunk } from "../auth/authThunks";
 import { useModal } from "../../../../hooks/modal/useModalStore";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
-import { triggerGoogleSignup } from "../helper/googleSignupHelper";
+import { useEffect, useState } from "react";
+import { initGoogleButton } from "../helper/googleSignupHelper";
+import { googleAuth } from "../../../../api/auth/authApi";
+import { setCredentials } from "../auth/authslice";
 
 export default function SignInForm() {
   const dispatch = useDispatch();
@@ -25,29 +27,29 @@ export default function SignInForm() {
     }
   };
 
-const handleGoogleResponse = async (response) => {
-  try {
-    const data = await googleAuth(response.credential);
+useEffect(() => {
+    initGoogleButton("google-signup-btn", async (response) => {
+      try {
+        const data = await googleAuth(response.credential);
 
-    dispatch(
-      setCredentials({
-        user: data.user,
-        accessToken: data.access,
-      })
-    );
+        dispatch(
+          setCredentials({
+            user: data.user,
+            accessToken: data.access,
+          })
+        );
 
-    closeModal();
-    navigate("/");
-  } catch (err) {
-    setLoginError(
-      err?.response?.data?.error ||
-      "Google authentication failed"
-    );
-  }
-};
-const handleGoogleLogin = () => {
-  triggerGoogleSignup(handleGoogleResponse);
-};
+        closeModal();
+        navigate("/");
+      } catch (err) {
+        console.log();
+        (
+          err?.response?.data?.error || "Google authentication failed"
+        );
+      }
+    });
+  }, []);
+
 
 
   return (
@@ -105,20 +107,10 @@ const handleGoogleLogin = () => {
         <div className="flex-1 h-px bg-gray-300 opacity-80"></div>
       </div>
 
-     <button
-  type="button"
-  onClick={handleGoogleLogin}
-  className="w-full h-[52px] flex items-center justify-center gap-1 px-4 rounded-[10px] border border-[#CBCAD7] bg-white hover:bg-gray-50 transition-colors mb-6"
->
-  <img
-    src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png"
-    className="w-9 h-9"
-    alt="Google"
-  />
-  <span className="font-poppins font-medium text-base text-[#19181F]">
-    Continue with Google
-  </span>
-</button>
+    <div className="w-full flex justify-center mb-5 mt-5">
+  <div id="google-signup-btn" />
+</div>
+
 
 
     </form>
