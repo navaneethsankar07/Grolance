@@ -8,10 +8,12 @@ import { useEffect, useState } from "react";
 import { initGoogleButton } from "../helper/googleSignupHelper";
 import { googleAuth } from "../../../../api/auth/authApi";
 import { setCredentials } from "../auth/authslice";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { signinSchema } from "../validation/authSchemas";
 
 export default function SignInForm() {
   const dispatch = useDispatch();
-  const { register, handleSubmit, formState: { errors } } = useForm();
+  const { register, handleSubmit, formState: { errors } } = useForm({resolver:zodResolver(signinSchema)});
   const { closeModal,openModal } = useModal();
   const navigate = useNavigate();
   const [loginError, setLoginError] = useState(null);
@@ -63,7 +65,6 @@ useEffect(() => {
         type="email"
         placeholder="Enter your email"
         register={register}
-        validation={{ required: "Email is required" }}
         error={errors.email}
       />
 
@@ -72,7 +73,6 @@ useEffect(() => {
         name="password"
         placeholder="Enter your password"
         register={register}
-        validation={{ required: "Password is required" }}
         error={errors.password}
         passwordToggle
       />

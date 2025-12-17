@@ -27,3 +27,17 @@ export const signupSchema = z.object({
   message: "Passwords do not match",
 
 })
+
+
+// signin schema 
+export const signinSchema = z.object({
+  email: z
+    .string()
+    .trim()
+    .email("Enter a valid email address"),
+
+  password: z
+    .string()
+    .min(1, "Password is required"),
+});
+
