@@ -1,26 +1,73 @@
 import { CheckCircle2, Lightbulb } from 'lucide-react';
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { useForm } from 'react-hook-form';
 import { zodResolver } from "@hookform/resolvers/zod";
 import { projectCreateSchema } from "./projectSchemas";
+import { useCategories, useSkills } from './projectQueries';
+import { useCreateProject } from "./projectMutations";
 
 
 function AddProject() {
-  const { register, handleSubmit, setValue, watch, formState: { errors }, } = useForm({ resolver: zodResolver(projectCreateSchema), defaultValues: { skills: [] } });
+  const { register, handleSubmit, setValue, watch, formState: { errors }, } = useForm({
+    resolver: zodResolver(projectCreateSchema),
+    defaultValues: {
+      skills: [],
+      budget: 0,
+      deliveryDays: 0,
+    }
+  });
+
+  const {
+    data: categories = [],
+    isLoading: categoriesLoading,
+    isError: categoriesError,
+  } = useCategories();
+
+  const { data: skillsData = [] } = useSkills();
+  const { mutateAsync: createProject, isPending } = useCreateProject();
+
+  const selectedCategory = watch("category");
+  const selectedSkills = watch("skills") || [];
+
+  const suggestedSkills = skillsData
+    .filter(
+      (skill) =>
+        String(skill.category) === String(selectedCategory) &&
+        !selectedSkills.includes(skill.name)
+    )
+    .slice(0, 8); // limit to 5–10
+
+  const addSkill = (skillName) => {
+    if (selectedSkills.includes(skillName)) return;
+
+    setValue("skills", [...selectedSkills, skillName], {
+      shouldValidate: true,
+    });
+  };
+  const handleAddSkill = () => {
+    if (!skillInput.trim()) return;
+
+    addSkill(skillInput.trim());
+    setSkillInput("");
+  };
 
   const Button = ({ children, ...props }) => <button {...props}>{children}</button>;
   const Input = (props) => <input {...props} />;
   const [skillInput, setSkillInput] = useState("");
-  const skills = watch("skills") || [];
 
-  const handleAddSkill = () => {
-    if (!skillInput.trim()) return;
-    setValue("skills", [...skills, skillInput.trim()]);
-    setSkillInput("");
-  };
-  const onSubmit = (data) => {
-    console.log(data);
-  };
+  const onSubmit = async (data) => {
+  try {
+    const response = await createProject(data);
+    console.log("Project created:", response);
+
+  } catch (error) {
+    if (error.response) {
+      console.error("Server validation error:", error.response.data);
+    } else {
+      console.error("Unexpected error:", error);
+    }
+  }
+};
 
   return (
     <>
@@ -130,7 +177,7 @@ function AddProject() {
                   </label>
                   <textarea
                     placeholder="List what the freelancer should deliver (design files, code, reports, videos, documentation, etc.)"
-                    {...register("deliverables")}
+                    {...register("expected_deliverables")}
                     className="w-full px-3 py-4 border-2 min-h-[170px] text-base border-gray-400 rounded-lg placeholder:text-[#CCC] resize-none"
 
                   />
@@ -157,12 +204,9 @@ function AddProject() {
                     className="px-3  h-[47px] w-full border-2 border-gray-300 rounded-lg"
                   >
                     <option value="">Select a category</option>
-                    <option value="web-development">Web Development</option>
-                    <option value="mobile-development">Mobile Development</option>
-                    <option value="design">Design</option>
-                    <option value="writing">Writing</option>
-                    <option value="marketing">Marketing</option>
-                    <option value="data-science">Data Science</option>
+                    {categories.map((cat) => (
+                      <option key={cat.id} value={cat.id}>{cat.name}</option>
+                    ))}
                   </select>
                   {errors.category && (
                     <p className="text-red-500 text-xs mt-1">
@@ -179,14 +223,14 @@ function AddProject() {
                     <span className="text-xs font-medium text-gray-700 leading-5">
                       Required Skills
                     </span>
-                    <span className="text-xs font-medium text-red-500 ml-1">
-                      *
-                    </span>
+                    <span className="text-xs font-medium text-red-500 ml-1">*</span>
                   </label>
+
+                  {/* Input + Add button */}
                   <div className="flex gap-2">
                     <input
                       type="text"
-                      placeholder="Type a skill and press Enter"
+                      placeholder="Type a skill"
                       value={skillInput}
                       onChange={(e) => setSkillInput(e.target.value)}
                       onKeyDown={(e) => {
@@ -195,31 +239,48 @@ function AddProject() {
                           handleAddSkill();
                         }
                       }}
-                      className="w-full px-3 py-4 border-2 h-[50px] text-base border-gray-400 rounded-lg placeholder:text-[#CCC] flex-1"
+                      className="w-full px-3 py-4 border-2 h-[50px] text-base border-gray-400 rounded-lg flex-1"
                     />
-
 
                     <Button
                       type="button"
                       onClick={handleAddSkill}
-                      variant="outline"
-                      className="px-6 py-4 border-2 h-[50px]  text-sm font-medium text-gray-700 border-gray-400 rounded-lg  "
+                      className="px-6 py-4 border-2 h-[50px] text-sm font-medium text-gray-700 border-gray-400 rounded-lg"
                     >
                       Add
                     </Button>
-
                   </div>
+
+                  {/* Validation error */}
                   {errors.skills && (
                     <p className="text-red-500 text-xs mt-1">
                       {errors.skills.message}
                     </p>
                   )}
-                  {skills.length > 0 && (
-                    <div className=" flex flex-wrap gap-2 mt-3">
-                      {skills.map((skill, index) => (
+
+                  {/* Suggested skills (chips style) */}
+                  {skillInput === "" && suggestedSkills.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-3">
+                      {suggestedSkills.map((skill) => (
+                        <button
+                          key={skill.id}
+                          type="button"
+                          onClick={() => addSkill(skill.name)}
+                          className="px-3 py-1 rounded-full text-sm bg-gray-100 text-gray-700 hover:bg-gray-200 border"
+                        >
+                          + {skill.name}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Selected skills */}
+                  {selectedSkills.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-3">
+                      {selectedSkills.map((skill, index) => (
                         <span
                           key={index}
-                          className=" bg-blue-50 text-blue-700 px-3 py-1 rounded-2xl text-sm font-medium"
+                          className="bg-blue-50 text-blue-700 px-3 py-1 rounded-2xl text-sm flex items-center"
                         >
                           {skill}
                           <button
@@ -227,11 +288,10 @@ function AddProject() {
                             onClick={() =>
                               setValue(
                                 "skills",
-                                skills.filter((_, i) => i !== index)
+                                selectedSkills.filter((_, i) => i !== index)
                               )
                             }
-
-                            className="ml-2 text-xl text-gray-500 hover:text-primary/90"
+                            className="ml-2 text-lg text-gray-500 hover:text-red-500"
                           >
                             ×
                           </button>
@@ -240,6 +300,8 @@ function AddProject() {
                     </div>
                   )}
                 </div>
+
+
 
                 {/* Budget and Delivery Days */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
@@ -256,8 +318,12 @@ function AddProject() {
                     <input
                       type="number"
                       {...register("budget", { valueAsNumber: true })}
+                      onFocus={(e) => {
+                        if (e.target.value === "0") {
+                          e.target.value = ''
+                        }
+                      }}
                       className="w-full px-3 h-[50px] border rounded-lg"
-                      placeholder='eg:15000'
                     />
                     {errors.budget && (
                       <p className="text-red-500 text-xs mt-1">
@@ -278,9 +344,13 @@ function AddProject() {
                     </label>
                     <input
                       type="number"
-                      {...register("deliveryDays", { valueAsNumber: true })}
+                      {...register("delivery_days", { valueAsNumber: true })}
+                      onFocus={(e) => {
+                        if (e.target.value === "0") {
+                          e.target.value = ''
+                        }
+                      }}
                       className="w-full px-3 h-[50px] border rounded-lg"
-                      placeholder='eg:14'
                     />
                     {errors.deliveryDays && (
                       <p className="text-red-500 text-xs mt-1">
@@ -295,10 +365,12 @@ function AddProject() {
                 <div className="mt-6">
                   <Button
                     type="submit"
-                    className="w-full h-[52px] bg-primary hover:bg-primary/90 text-white text-sm font-medium rounded-lg shadow-[0_1px_2px_0_rgba(0,0,0,0.05)]"
+                    disabled={isPending}
+                    className="w-full h-[52px] bg-primary text-white text-sm font-medium rounded-lg disabled:opacity-60"
                   >
-                    Post Project
+                    {isPending ? "Posting..." : "Post Project"}
                   </Button>
+
                 </div>
               </form>
             </div>
