@@ -8,6 +8,7 @@ import { useEffect, } from "react";
 import { fetchUser } from "../features/client/account/auth/authThunks";
 import { Loader2 } from 'lucide-react'
 import ForgotPasswordModal from "../features/client/account/ForgotPasswordModal";
+import ConfirmProjectModal from "../features/client/projectManagement/ConfirmProjectModal";
 export default function RootLayout() {
   const { modal, modalProps, closeModal } = useModal();
   const { loading } = useSelector((s) => s.auth)
@@ -31,6 +32,7 @@ useEffect(() => {
       {modal === "otp" && <OtpModal isOpen email={modalProps.email} />}
       {modal === "signin" && <SignInModal isOpen onClose={closeModal} />}
       {modal === "forgot-password" && <ForgotPasswordModal isOpen  />}
+      {modal === "confirm-project" && <ConfirmProjectModal isPending={false} onConfirm={modalProps.onConfirm}/>}
     </>
   );
 }

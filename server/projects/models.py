@@ -13,6 +13,11 @@ class Project(models.Model):
         ("cancelled", "Cancelled"),
     ]
 
+    PRICING_TYPE_CHOICES = [
+        ("fixed", "Fixed Price"),
+        ("range", "Range Price"),
+    ]
+
     client = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -21,7 +26,7 @@ class Project(models.Model):
 
     category = models.ForeignKey(
         Category,
-        on_delete=models.PROTECT,   
+        on_delete=models.PROTECT,
         related_name="projects"
     )
 
@@ -30,7 +35,34 @@ class Project(models.Model):
     requirements = models.TextField()
     expected_deliverables = models.TextField()
 
-    budget = models.DecimalField(max_digits=10, decimal_places=2)
+    pricing_type = models.CharField(
+        max_length=10,
+        choices=PRICING_TYPE_CHOICES,
+        default="fixed"
+    )
+
+    # pricing fields
+    fixed_price = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        null=True,
+        blank=True
+    )
+
+    min_budget = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        null=True,
+        blank=True
+    )
+
+    max_budget = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        null=True,
+        blank=True
+    )
+
     delivery_days = models.PositiveIntegerField()
 
     status = models.CharField(
@@ -39,7 +71,7 @@ class Project(models.Model):
         default="open"
     )
 
-    is_active = models.BooleanField(default=True)  # soft delete
+    is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

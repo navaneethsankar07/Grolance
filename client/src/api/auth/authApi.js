@@ -1,5 +1,6 @@
+import { useDispatch } from "react-redux";
 import axiosInstance from "../axiosInstance";
-
+import { logout } from "../../features/client/account/auth/authslice";
 export const sendOtp = async (data) => {
   const res = await axiosInstance.post("/auth/send-otp/", {
     full_name: data.fullName,
@@ -55,4 +56,8 @@ export const googleAuth = async (idToken) => {
     token: idToken,
   });
   return res.data;
+};
+
+export const logoutUser = async () => {
+  await axiosInstance.post("/auth/logout/");
 };
