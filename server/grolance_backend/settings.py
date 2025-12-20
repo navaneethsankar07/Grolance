@@ -50,7 +50,8 @@ INSTALLED_APPS = [
     'django_celery_results',
     'accounts',
     'projects',
-    'categories'
+    'categories',
+    'adminpanel'
     
 ]
 

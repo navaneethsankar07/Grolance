@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { adminLoginSchema } from "./adminLoginSchema";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { ShieldCheck, Mail, Lock, Eye, EyeOff, Loader2, ArrowRight } from "lucide-react";
 import { loginThunk, logoutThunk } from "../../client/account/auth/authThunks";
 import { Navigate, useNavigate } from "react-router-dom";
@@ -14,6 +14,10 @@ export default function AdminLogin() {
   const [showPassword, setShowPassword] = useState(false);
   const [serverError, setServerError] = useState("");
   const navigate = useNavigate()
+  const user = useSelector(state=>state.auth.user)
+  if(user){
+    navigate('/admin',{replace:true})
+  }
   const {
     register,
     handleSubmit,

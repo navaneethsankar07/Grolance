@@ -34,10 +34,9 @@ export const logoutThunk = createAsyncThunk(
   "auth/logout",
   async (_, thunkAPI) => {
     try {
-      await authApi.logoutUser();          // backend logout (clears cookies)
-      thunkAPI.dispatch(logout()); // redux cleanup
+      await authApi.logoutUser();          
+      thunkAPI.dispatch(logout()); 
     } catch (err) {
-      // even if backend fails, force client logout
       thunkAPI.dispatch(logout());
     }
   }

@@ -6,6 +6,7 @@ import { projectCreateSchema } from "./projectSchemas";
 import { useCategories, useSkills } from './projectQueries';
 import { useCreateProject } from "./projectMutations";
 import { useModal } from '../../../hooks/modal/useModalStore';
+import { useNavigate } from 'react-router-dom';
 
 
 function AddProject() {
@@ -31,15 +32,14 @@ function AddProject() {
   const selectedCategory = watch("category");
   const selectedSkills = watch("skills") || [];
   const pricingType = watch("pricing_type");
-
+  const navigate = useNavigate()
   const suggestedSkills = skillsData
     .filter(
       (skill) =>
         String(skill.category) === String(selectedCategory) &&
         !selectedSkills.includes(skill.name)
     )
-    .slice(0, 8); // limit to 5–10
-
+    .slice(0, 8); 
   const addSkill = (skillName) => {
     if (selectedSkills.includes(skillName)) return;
 
@@ -59,7 +59,6 @@ function AddProject() {
   const [skillInput, setSkillInput] = useState("");
 
 const onSubmit = (data) => {
-  console.log('hai');
   
   openModal("confirm-project", {
     data,
@@ -69,6 +68,7 @@ const onSubmit = (data) => {
         const res = await createProject(data);
         console.log("Project created:", res);
         closeModal();
+        navigate('/',{replace:true})
       } catch (error) {
         closeModal();
         if (error.response) {

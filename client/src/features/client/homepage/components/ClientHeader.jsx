@@ -34,12 +34,15 @@ const profilePic = user?.profile_photo ?? null;
         </nav>
 
         <div className="flex items-center gap-10">
-          <button className="flex h-12 items-center gap-2.5 rounded-lg border-2 border-black bg-transparent px-6 transition-colors hover:bg-black/5">
+          <Link 
+            to="/create-project" 
+            className="flex h-12 items-center gap-2.5 rounded-lg border-2 border-black bg-transparent px-6 transition-colors hover:bg-black/5"
+          >
             <Plus className="h-7 w-7" />
             <span className="text-base font-bold leading-6 tracking-[0.24px]">
               Post a Project
             </span>
-          </button>
+          </Link>
 
           <button className="relative">
             <Bell className="h-6 w-6 text-gray-400" />
