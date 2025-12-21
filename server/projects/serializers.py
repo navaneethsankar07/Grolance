@@ -2,10 +2,6 @@ from rest_framework import serializers
 from .models import Project, ProjectSkill
 from categories.models import Skill
 
-<<<<<<< HEAD
-=======
-
->>>>>>> features/admin
 class ProjectCreateSerializer(serializers.ModelSerializer):
     skills = serializers.ListField(
         child=serializers.CharField(),
@@ -20,20 +16,14 @@ class ProjectCreateSerializer(serializers.ModelSerializer):
             "requirements",
             "expected_deliverables",
             "category",
-<<<<<<< HEAD
-            "budget",
-=======
             "pricing_type",
             "fixed_price",
             "min_budget",
             "max_budget",
->>>>>>> features/admin
             "delivery_days",
             "skills",
         ]
 
-<<<<<<< HEAD
-=======
     def validate(self, attrs):
         pricing_type = attrs.get("pricing_type")
 
@@ -67,7 +57,6 @@ class ProjectCreateSerializer(serializers.ModelSerializer):
 
         return attrs
 
->>>>>>> features/admin
     def create(self, validated_data):
         skills_data = validated_data.pop("skills")
         user = self.context["request"].user
@@ -78,21 +67,12 @@ class ProjectCreateSerializer(serializers.ModelSerializer):
         )
 
         for skill_name in skills_data:
-            skill_name = skill_name.strip().title()
-<<<<<<< HEAD
-            
+            skill_name = skill_name.strip().title()            
             skill, _ = Skill.objects.get_or_create(
                 name=skill_name.strip(),
                 defaults={"is_custom": True}
             )
-=======
 
-            skill, _ = Skill.objects.get_or_create(
-                name=skill_name,
-                defaults={"is_custom": True}
-            )
-
->>>>>>> features/admin
             ProjectSkill.objects.create(
                 project=project,
                 skill=skill
