@@ -1,5 +1,6 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import * as authApi from "../../../../api/auth/authApi";
+import { logout } from "./authslice";
 
 
 export const loginThunk = createAsyncThunk(
@@ -25,6 +26,18 @@ export const fetchUser = createAsyncThunk(
           error.response.data.message ||
           error.response.data.error ||
           "Something went wrong");
+    }
+  }
+);
+
+export const logoutThunk = createAsyncThunk(
+  "auth/logout",
+  async (_, thunkAPI) => {
+    try {
+      await authApi.logoutUser();          
+      thunkAPI.dispatch(logout()); 
+    } catch (err) {
+      thunkAPI.dispatch(logout());
     }
   }
 );

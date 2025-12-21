@@ -27,6 +27,10 @@ class User(AbstractBaseUser, PermissionsMixin):
     )
 
     is_active = models.BooleanField(default=True)
+<<<<<<< HEAD
+=======
+    is_deleted = models.BooleanField(default=False)
+>>>>>>> features/admin
     created_at = models.DateTimeField(auto_now_add=True)
 
     objects = UserManager()

@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { loginThunk,fetchUser } from "./authThunks";
+import { loginThunk,fetchUser, logoutThunk } from "./authThunks";
 
 const initialState = {
   user: null,
@@ -43,8 +43,13 @@ const authSlice = createSlice({
 .addCase(fetchUser.rejected, (state) => {
         state.user = null;
         state.loading = false;
-      });
-  
+      })
+  .addCase(logoutThunk.fulfilled, (state) => {
+    state.user = null;
+    state.accessToken = null;
+    state.loading = false;
+  });
+
   },
 });
 

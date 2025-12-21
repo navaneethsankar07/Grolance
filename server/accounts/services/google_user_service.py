@@ -29,4 +29,8 @@ class GoogleUserService:
 
             user.save()
 
+<<<<<<< HEAD
         return user
+=======
+        return user
+>>>>>>> features/admin

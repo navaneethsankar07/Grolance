@@ -41,8 +41,14 @@ class SendOtpView(APIView):
 
 
 class VerifyOtpView(APIView):
+<<<<<<< HEAD
     def post(self, request):
         permission_classes = [AllowAny]
+=======
+    permission_classes = [AllowAny]
+    
+    def post(self, request):
+>>>>>>> features/admin
         print(request.data)
         serializer = EmailVerifySerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -55,11 +61,28 @@ class VerifyOtpView(APIView):
             return Response({"error": otp_result["error"]}, status=400)
 
         temp_data = cache.get(f"register_temp:{email}")
+<<<<<<< HEAD
         if not temp_data:
             return Response({"error": "Registration session expired. Please register again."}, status=400)
         
         if User.objects.filter(email=temp_data["email"]).exists():
             return Response({"error": "User already exists"}, status=400)
+=======
+        email = temp_data["email"]
+        if not temp_data:
+            return Response({"error": "Registration session expired. Please register again."}, status=400)
+        if User.objects.filter(email=email, is_deleted=True).exists():
+            return Response(
+                {"error": "An account with this email already exists"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+
+        if User.objects.filter(email=email).exists():
+            return Response({"error": "User already exists"}, status=400)
+        
+
+>>>>>>> features/admin
 
         user = User.objects.create_user(
             email=temp_data["email"],
@@ -139,8 +162,23 @@ class LoginView(APIView):
 
         if not user:
             return Response({"error": "Invalid credentials"}, status=401)
+<<<<<<< HEAD
 
         refresh = RefreshToken.for_user(user)
+=======
+        
+        if user.is_deleted:
+            return Response({"error": "Invalid credentials"}, status=401)
+
+        if not user.is_active:
+            return Response(
+                {"error": "Your account has been blocked by admin"},
+                status=403
+            )
+
+        refresh = RefreshToken.for_user(user)
+        print(user.is_admin)
+>>>>>>> features/admin
 
         resp = Response({
             "access": str(refresh.access_token),
@@ -148,6 +186,10 @@ class LoginView(APIView):
             "id": user.id,
             "email": user.email,
             "full_name": user.full_name,
+<<<<<<< HEAD
+=======
+            "is_admin":user.is_admin
+>>>>>>> features/admin
             }
             })
 

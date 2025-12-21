@@ -14,4 +14,8 @@ class GoogleAuthService:
             )
             return payload
         except Exception:
+<<<<<<< HEAD
             return None
+=======
+            return None
+>>>>>>> features/admin

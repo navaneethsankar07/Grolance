@@ -2,10 +2,8 @@ import { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { resetPassword, validateLink } from "../../../api/auth/authApi";
+import Header from "../landingPage/components/Header";
 import Footer from "../landingPage/components/Footer";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { resetPasswordSchema } from "./resetPasswordSchema";
-
 
 export default function ResetPasswordPage() {
   const [searchParams] = useSearchParams();
@@ -22,7 +20,7 @@ export default function ResetPasswordPage() {
     handleSubmit,
     watch,
     formState: { errors },
-  } = useForm({resolver:zodResolver(resetPasswordSchema)});
+  } = useForm();
 
   useEffect(() => {
     const checkLink = async () => {
@@ -111,6 +109,7 @@ export default function ResetPasswordPage() {
                 placeholder="New password"
                 {...register("newPassword", {
                     required: "Password is required",
+                    minLength: { value: 8, message: "Minimum 8 characters" },
                 })}
                 className="w-full h-12 px-4 border rounded-lg"
                 />
@@ -123,7 +122,10 @@ export default function ResetPasswordPage() {
               <input
                 type="password"
                 placeholder="Confirm new password"
-                {...register("confirmPassword")}
+                {...register("confirmPassword", {
+                    validate: (v) =>
+                        v === watch("newPassword") || "Passwords do not match",
+                })}
                 className="w-full h-12 px-4 border rounded-lg"
                 />
               {errors.confirmPassword && (

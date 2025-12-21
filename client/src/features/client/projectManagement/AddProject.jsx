@@ -5,16 +5,19 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { projectCreateSchema } from "./projectSchemas";
 import { useCategories, useSkills } from './projectQueries';
 import { useCreateProject } from "./projectMutations";
+import { useModal } from '../../../hooks/modal/useModalStore';
+import { useNavigate } from 'react-router-dom';
 
 
 function AddProject() {
   const { register, handleSubmit, setValue, watch, formState: { errors }, } = useForm({
-    resolver: zodResolver(projectCreateSchema),
-    defaultValues: {
-      skills: [],
-      budget: 0,
-      deliveryDays: 0,
-    }
+   resolver: zodResolver(projectCreateSchema),
+  shouldUnregister: true,
+  defaultValues: {
+    pricing_type: "fixed",
+    skills: [],
+    delivery_days: 0,
+}
   });
 
   const {
@@ -25,18 +28,18 @@ function AddProject() {
 
   const { data: skillsData = [] } = useSkills();
   const { mutateAsync: createProject, isPending } = useCreateProject();
-
+  const {openModal,closeModal} = useModal()
   const selectedCategory = watch("category");
   const selectedSkills = watch("skills") || [];
-
+  const pricingType = watch("pricing_type");
+  const navigate = useNavigate()
   const suggestedSkills = skillsData
     .filter(
       (skill) =>
         String(skill.category) === String(selectedCategory) &&
         !selectedSkills.includes(skill.name)
     )
-    .slice(0, 8); // limit to 5–10
-
+    .slice(0, 8); 
   const addSkill = (skillName) => {
     if (selectedSkills.includes(skillName)) return;
 
@@ -55,21 +58,30 @@ function AddProject() {
   const Input = (props) => <input {...props} />;
   const [skillInput, setSkillInput] = useState("");
 
-  const onSubmit = async (data) => {
-  try {
-    const response = await createProject(data);
-    console.log("Project created:", response);
-
-  } catch (error) {
-    if (error.response) {
-      console.error("Server validation error:", error.response.data);
-    } else {
-      console.error("Unexpected error:", error);
-    }
-  }
+const onSubmit = (data) => {
+  
+  openModal("confirm-project", {
+    data,
+    categories,
+    onConfirm: async () => {
+      try {
+        const res = await createProject(data);
+        console.log("Project created:", res);
+        closeModal();
+        navigate('/',{replace:true})
+      } catch (error) {
+        closeModal();
+        if (error.response) {
+          console.error("Server error:", error.response.data);
+        } else {
+          console.error("Unexpected error:", error);
+        }
+      }
+    },
+  });
 };
 
-  return (
+return (
     <>
       <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
@@ -305,32 +317,100 @@ function AddProject() {
 
                 {/* Budget and Delivery Days */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                  <div className="mb-8">
+  <label className="block mb-2 text-xs font-medium text-gray-700">
+    Pricing Type *
+  </label>
+
+  <div className="flex gap-4">
+    <label className="flex items-center gap-2 text-sm">
+      <input
+        type="radio"
+        value="fixed"
+        {...register("pricing_type")}
+      />
+      Fixed Price
+    </label>
+
+    <label className="flex items-center gap-2 text-sm">
+      <input
+        type="radio"
+        value="range"
+        {...register("pricing_type")}
+      />
+      Range Price
+    </label>
+  </div>
+
+  {errors.pricing_type && (
+    <p className="text-red-500 text-xs mt-1">
+      {errors.pricing_type.message}
+    </p>
+  )}
+</div>
+
                   {/* Budget */}
-                  <div>
-                    <label className="block mb-2">
-                      <span className="text-xs font-medium text-gray-700 leading-5">
-                        Budget (Fixed Price)
-                      </span>
-                      <span className="text-xs font-medium text-red-500 ml-1">
-                        *
-                      </span>
-                    </label>
-                    <input
-                      type="number"
-                      {...register("budget", { valueAsNumber: true })}
-                      onFocus={(e) => {
-                        if (e.target.value === "0") {
-                          e.target.value = ''
-                        }
-                      }}
-                      className="w-full px-3 h-[50px] border rounded-lg"
-                    />
-                    {errors.budget && (
-                      <p className="text-red-500 text-xs mt-1">
-                        {errors.budget.message}
-                      </p>
-                    )}
-                  </div>
+                  {pricingType === "fixed" && (
+  <div className="mb-8">
+    <label className="block mb-2 text-xs font-medium text-gray-700">
+      Fixed Budget *
+    </label>
+
+    <input
+      type="number"
+      {...register("fixed_price", { valueAsNumber: true })}
+      className="w-full px-3 h-[50px] border rounded-lg"
+    />
+
+    {errors.fixed_price && (
+      <p className="text-red-500 text-xs mt-1">
+        {errors.fixed_price.message}
+      </p>
+    )}
+  </div>
+)}
+
+{pricingType === "range" && (
+  <div className="grid grid-cols-2 gap-6 mb-8">
+    <div>
+      <label className="block mb-2 text-xs font-medium text-gray-700">
+        Minimum Budget *
+      </label>
+
+      <input
+        type="number"
+        {...register("min_budget", { valueAsNumber: true })}
+        className="w-full px-3 h-[50px] border rounded-lg"
+      />
+
+      {errors.min_budget && (
+        <p className="text-red-500 text-xs mt-1">
+          {errors.min_budget.message}
+        </p>
+      )}
+    </div>
+
+    <div>
+      <label className="block mb-2 text-xs font-medium text-gray-700">
+        Maximum Budget *
+      </label>
+
+      <input
+        type="number"
+        {...register("max_budget", { valueAsNumber: true })}
+        className="w-full px-3 h-[50px] border rounded-lg"
+      />
+
+      {errors.max_budget && (
+        <p className="text-red-500 text-xs mt-1">
+          {errors.max_budget.message}
+        </p>
+      )}
+    </div>
+  </div>
+)}
+
+
 
                   {/* Delivery Days */}
                   <div>
@@ -352,9 +432,9 @@ function AddProject() {
                       }}
                       className="w-full px-3 h-[50px] border rounded-lg"
                     />
-                    {errors.deliveryDays && (
+                    {errors.delivery_days && (
                       <p className="text-red-500 text-xs mt-1">
-                        {errors.deliveryDays.message}
+                        {errors.delivery_days.message}
                       </p>
                     )}
 
