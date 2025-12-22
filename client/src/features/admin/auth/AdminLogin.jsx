@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { adminLoginSchema } from "./adminLoginSchema";
@@ -14,10 +14,14 @@ export default function AdminLogin() {
   const [showPassword, setShowPassword] = useState(false);
   const [serverError, setServerError] = useState("");
   const navigate = useNavigate()
-  const user = useSelector(state=>state.auth.user)
-  if(user){
-    navigate('/admin',{replace:true})
-  }
+  const {user,loading} = useSelector(state=>state.auth)
+
+   useEffect(() => {
+    if (!loading && user?.is_admin) {
+      navigate("/admin", { replace: true });
+    }
+  }, [user, loading, navigate]);
+  
   const {
     register,
     handleSubmit,

@@ -7,7 +7,7 @@ export default function AdminProtectedRoute() {
   if (loading) return null; 
 
   if (!user || !user.is_admin) {
-    return <Navigate to="admin/login/" replace />;
+    return <Navigate to="/admin/login" replace />;
   }
 
   return <Outlet />;

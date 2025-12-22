@@ -15,6 +15,7 @@ class OTPService:
 
     @staticmethod
     def generate_otp():
+        print('otp generated')
         return str(random.randint(100000, 999999))
 
     @staticmethod
@@ -73,6 +74,7 @@ class OTPService:
       </body>
         </html>
     """
+        print('otp sended')
         send_otp_email_task.delay(
         email=email,
         subject=subject,

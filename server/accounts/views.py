@@ -35,7 +35,6 @@ class SendOtpView(APIView):
 
         if "error" in result:
             return Response({"error": result["error"]}, status=400)
-        print(request.data)
         return Response({"message": "OTP sent to your email. Please verify."}, status=200)
 
 
