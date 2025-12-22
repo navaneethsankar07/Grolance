@@ -16,7 +16,7 @@ const navigationItems = [
   { name: "Dashboard", icon: LayoutDashboard, path: "/admin" },
   { name: "Users", icon: Users, path: "/admin/users" },
   { name: "Disputes", icon: AlertCircle, path: "/admin/disputes" },
-  { name: "Categories", icon: Tag, path: "/admin/categories" },
+  { name: "Categories", icon: Tag, path: "/admin/category-management" },
   { name: "Transactions", icon: Repeat, path: "/admin/transactions" },
   { name: "Payment Release", icon: Wallet, path: "/admin/payment-release" },
   { name: "Reports", icon: FileText, path: "/admin/reports" },

@@ -5,6 +5,7 @@ const initialState = {
   user: null,
   accessToken: null,
   loading:false,
+  initialized: false,
   
 };
 
@@ -39,15 +40,18 @@ const authSlice = createSlice({
     .addCase(fetchUser.fulfilled, (state, action) => {
   state.user = action.payload;
   state.loading = false;
+  state.initialized = true
 })
 .addCase(fetchUser.rejected, (state) => {
         state.user = null;
         state.loading = false;
+        state.initialized = true
       })
   .addCase(logoutThunk.fulfilled, (state) => {
     state.user = null;
     state.accessToken = null;
     state.loading = false;
+    state.initialized = true
   });
 
   },

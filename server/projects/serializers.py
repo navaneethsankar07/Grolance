@@ -68,16 +68,25 @@ class ProjectCreateSerializer(serializers.ModelSerializer):
         )
 
         for skill_name in skills_data:
-            skill_name = skill_name.strip().title()
+            normalized = skill_name.strip().title()
 
-            skill, _ = Skill.objects.get_or_create(
-                name=skill_name,
-                defaults={"is_custom": True}
-            )
+            # Try to match existing GLOBAL skill
+            skill = Skill.objects.filter(
+                name__iexact=normalized,
+                is_active=True
+            ).first()
 
-            ProjectSkill.objects.create(
-                project=project,
-                skill=skill
-            )
+            if skill:
+                # Use global skill
+                ProjectSkill.objects.create(
+                    project=project,
+                    skill=skill
+                )
+            else:
+                # Store as project-only custom skill
+                ProjectSkill.objects.create(
+                    project=project,
+                    custom_name=normalized
+                )
 
         return project
