@@ -1,14 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
-import axiosInstance from "../../../api/axiosInstance";
+import { fetchSkills } from "./categoryApi";
 
-const fetchSkills = async () => {
-  const res = await axiosInstance.get("/categories/skills/");
-  return res.data;
-};
-
-export const useSkills = () => {
-  return useQuery({
-    queryKey: ["admin-skills"],
-    queryFn: fetchSkills,
+export const useSkills = ({page, search}) =>
+  useQuery({
+    queryKey: ["admin-skills",page,search],
+    queryFn: ()=>fetchSkills({page,search}),
+    select: (res) => res.data,
+    keepPreviousData:true
   });
-};
