@@ -13,6 +13,11 @@ class Project(models.Model):
         ("cancelled", "Cancelled"),
     ]
 
+    PRICING_TYPE_CHOICES = [
+        ("fixed", "Fixed Price"),
+        ("range", "Range Price"),
+    ]
+
     client = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -21,7 +26,7 @@ class Project(models.Model):
 
     category = models.ForeignKey(
         Category,
-        on_delete=models.PROTECT,   
+        on_delete=models.PROTECT,
         related_name="projects"
     )
 
@@ -30,7 +35,34 @@ class Project(models.Model):
     requirements = models.TextField()
     expected_deliverables = models.TextField()
 
-    budget = models.DecimalField(max_digits=10, decimal_places=2)
+    pricing_type = models.CharField(
+        max_length=10,
+        choices=PRICING_TYPE_CHOICES,
+        default="fixed"
+    )
+
+    # pricing fields
+    fixed_price = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        null=True,
+        blank=True
+    )
+
+    min_budget = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        null=True,
+        blank=True
+    )
+
+    max_budget = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        null=True,
+        blank=True
+    )
+
     delivery_days = models.PositiveIntegerField()
 
     status = models.CharField(
@@ -39,7 +71,7 @@ class Project(models.Model):
         default="open"
     )
 
-    is_active = models.BooleanField(default=True)  # soft delete
+    is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -56,12 +88,28 @@ class ProjectSkill(models.Model):
 
     skill = models.ForeignKey(
         Skill,
-        on_delete=models.PROTECT,  
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
         related_name="project_skills"
     )
 
+    custom_name = models.CharField(
+        max_length=100,
+        null=True,
+        blank=True
+    )
+
     class Meta:
-        unique_together = ("project", "skill")
+        constraints = [
+            models.CheckConstraint(
+                condition=(
+                    models.Q(skill__isnull=False, custom_name__isnull=True) |
+                    models.Q(skill__isnull=True, custom_name__isnull=False)
+                ),
+                name="projectskill_requires_skill_or_custom_name"
+            )
+        ]
 
     def __str__(self):
-        return f"{self.project.title} - {self.skill.name}"
+        return self.custom_name or self.skill.name

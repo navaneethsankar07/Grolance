@@ -4,6 +4,7 @@ import ClientHomepage from "../features/client/homepage/ClientHomepage";
 import ClientLayout from "../layouts/ClientLayout";
 import { useSelector } from "react-redux";
 import AddProject from "../features/client/projectManagement/AddProject";
+import MyProjects from "../features/client/projectManagement/MyProjects";
 
 export default function ClientRoutes() {
   const { user,loading } = useSelector(state => state.auth);
@@ -16,6 +17,7 @@ export default function ClientRoutes() {
         <Route element={<ClientLayout />}>
           <Route path="/" element={<ClientHomepage />} />
           <Route path="/create-project" element={<AddProject/>}/>
+          <Route path="/my-projects" element={<MyProjects/>}/>
         </Route>
           
     </Routes>
