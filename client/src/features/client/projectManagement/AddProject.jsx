@@ -16,14 +16,14 @@ function AddProject() {
       deliveryDays: 0,
     }
   });
-
   const {
-    data: categories = [],
+    data: categoriesData,
     isLoading: categoriesLoading,
     isError: categoriesError,
   } = useCategories();
-
-  const { data: skillsData = [] } = useSkills();
+  const categories = categoriesData?.results ?? [];
+  const { data: skillsResponse } = useSkills();
+  const skillsData = skillsResponse?.results ?? [];
   const { mutateAsync: createProject, isPending } = useCreateProject();
 
   const selectedCategory = watch("category");

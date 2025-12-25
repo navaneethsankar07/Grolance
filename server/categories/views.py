@@ -7,7 +7,7 @@ class CategoryListView(ListAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = CategorySerializer
     def get_queryset(self):
-        return Category.objects.filter(is_active=True)
+        return Category.objects.all().order_by('id')
 
 
 class SkillListView(ListAPIView):
@@ -16,4 +16,4 @@ class SkillListView(ListAPIView):
     
 
     def get_queryset(self):
-        return Skill.objects.filter(is_active=True)
+        return Skill.objects.all().order_by('name')
