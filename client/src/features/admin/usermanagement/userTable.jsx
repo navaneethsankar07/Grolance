@@ -1,4 +1,5 @@
 import { useModal } from "../../../hooks/modal/useModalStore";
+import { formatDateDMY } from "../../../utils/date";
 import { useSoftDeleteUser, useToggleUserActive } from "./usersMutations";
 import { MoreVertical, UserMinus, Ban, Unlock, Trash2 } from "lucide-react";
 
@@ -39,17 +40,18 @@ const handleSuspendClick = (u) => {
             <th className="px-6 py-4 font-semibold text-gray-900">User</th>
             <th className="px-6 py-4 font-semibold text-gray-900">Status</th>
             <th className="px-6 py-4 font-semibold text-gray-900">Role</th>
-            <th className="px-6 py-4 font-semibold text-gray-900 text-right">Actions</th>
+            <th className="px-4 py-4 font-semibold text-gray-900">Joined Date</th>
+            <th className="pr-0 w-5 py-4 font-semibold text-gray-900 text-center">Actions</th>
           </tr>
         </thead>
 
-        <tbody className="divide-y divide-gray-100">
+        <tbody className="divide-y gap-1 divide-gray-100">
           {users.map((u) => (
             <tr key={u.id} className="hover:bg-gray-50/50 transition-colors group">
               <td className="px-6 py-4">
                 <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-xs shadow-sm">
-                    {u.full_name?.charAt(0) || "U"}
+                  <div className="h-10 w-10 rounded-full overflow-hidden bg-primary flex items-center justify-center text-white font-bold text-xs shadow-sm">
+                    {u.profile_photo?<img className="w-full h-full object-cover" src={`${u.profile_photo}`}/>:u.full_name?.charAt(0) }
                   </div>
                   <div>
                     <p className="font-semibold text-gray-900 leading-none mb-1">
@@ -60,7 +62,7 @@ const handleSuspendClick = (u) => {
                 </div>
               </td>
 
-              <td className="px-6 py-4">
+              <td className="px-3 py-4">
                 {u.is_deleted ? (
                   <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-50 text-red-700 border border-red-100">
                     Deleted
@@ -76,13 +78,17 @@ const handleSuspendClick = (u) => {
                   </span>
                 )}
               </td>
-              <td className="px-6 py-4">
+              <td className="px-3 py-4">
                 <span className={`px-2.5 py-0.5 rounded-lg text-[11px] font-bold uppercase tracking-wider border ${getRoleStyle(u.current_role)}`}>
                   {u.current_role}
                 </span>
               </td>
 
-              <td className="px-6 py-4 text-right">
+              <td className="px-6">
+                <span className="">{formatDateDMY(u.created_at)}</span>
+              </td>
+
+              <td className="px-10 py-4 text-center">
                 {!u.is_deleted ? (
                   <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button

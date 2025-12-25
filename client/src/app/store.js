@@ -1,12 +1,13 @@
-import {configureStore} from '@reduxjs/toolkit'
+import { configureStore } from '@reduxjs/toolkit'
 import authReducer from '../features/client/account/auth/authslice'
-import {persistReducer, persistStore} from 'redux-persist'
+import { persistReducer, persistStore } from 'redux-persist'
 import storage from "redux-persist/lib/storage";
 
 const authPersistConfig = {
     key: "auth",
     storage,
-    whitelist:["user"]
+    // Added accessToken so the user stays logged in across refreshes
+    whitelist: ["user", "accessToken"] 
 }
 
 const persistedAuthReducer = persistReducer(
@@ -15,14 +16,15 @@ const persistedAuthReducer = persistReducer(
 )
 
 const store = configureStore({
-    reducer:{
-        auth:persistedAuthReducer,
+    reducer: {
+        auth: persistedAuthReducer,
     },
     middleware: (getDefaultMiddleware) => 
         getDefaultMiddleware({
-            serializableCheck:false,
+            // Required to avoid console errors with redux-persist
+            serializableCheck: false, 
         })
 });
 
 export const persistor = persistStore(store);
-export default store
+export default store;

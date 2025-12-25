@@ -16,12 +16,12 @@ export default function AdminLogin() {
   const navigate = useNavigate()
   const {user,loading} = useSelector(state=>state.auth)
 
-   useEffect(() => {
+  useEffect(() => {
     if (!loading && user?.is_admin) {
       navigate("/admin", { replace: true });
     }
   }, [user, loading, navigate]);
-  
+
   const {
     register,
     handleSubmit,

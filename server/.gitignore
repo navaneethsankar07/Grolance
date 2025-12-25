@@ -9,7 +9,6 @@ __pycache__/
 .venv/
 server/.venv/
 
-
 # Django
 *.log
 staticfiles/

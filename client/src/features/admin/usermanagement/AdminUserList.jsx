@@ -11,7 +11,6 @@ export default function AdminUserList() {
 
   return (
     <div className="max-w-7xl mx-auto">
-      {/* Header Section */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
         <div>
           <h2 className="text-2xl font-bold text-gray-900 tracking-tight">User Management</h2>
@@ -20,18 +19,16 @@ export default function AdminUserList() {
           </p>
         </div>
         
-        {/* Quick Stats or Add User Button could go here */}
       </div>
 
-      {/* Filters Bar */}
       <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-wrap items-center gap-4 mb-6">
-        <div className="relative flex-1 min-w-[240px]">
+        <div className="relative flex-1 min-w-60">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
           <input
             value={search}
             onChange={(e) => { setSearch(e.target.value); setPage(1); }}
             placeholder="Search by name or email..."
-            className="w-full h-11 pl-10 pr-4 bg-gray-50 border-none rounded-lg text-sm focus:ring-2 focus:ring-blue-500 transition-all"
+            className="w-full h-11 pl-10 pr-4 bg-gray-50 border-none rounded-lg text-sm focus:ring-2 focus:ring-primary transition-all"
           />
         </div>
 
@@ -51,7 +48,6 @@ export default function AdminUserList() {
         </div>
       </div>
 
-      {/* Table State Handling */}
       {isLoading ? (
         <div className="flex flex-col items-center justify-center py-20 bg-white rounded-xl border border-dashed border-gray-300">
            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-4"></div>

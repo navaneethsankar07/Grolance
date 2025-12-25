@@ -11,15 +11,21 @@ import ForgotPasswordModal from "../features/client/account/ForgotPasswordModal"
 import ConfirmProjectModal from "../features/client/projectManagement/ConfirmProjectModal";
 import DeleteUserModal from "../features/admin/usermanagement/components/DeleteUserModal";
 import SuspendUserModal from "../features/admin/usermanagement/components/SuspendUserModal";
+import { EditCategoryModal } from "../features/admin/categorymanagement/components/EditCategoryModal";
+import { AddCategoryModal } from "../features/admin/categorymanagement/components/AddCategoryModal";
+import { DeleteCategoryModal } from "../features/admin/categorymanagement/components/DeleteCategoryModal";
+import AddSkillModal from "../features/admin/categorymanagement/components/AddSkillsModal";
+import EditSkillModal from "../features/admin/categorymanagement/components/EditSkillsModal";
+import DeleteSkillModal from "../features/admin/categorymanagement/components/DeleteSkillModal";
 export default function RootLayout() {
   const { modal, modalProps, closeModal } = useModal();
-  const { loading } = useSelector((s) => s.auth)
+  const { loading, initialized } = useSelector((s) => s.auth)
   const dispatch = useDispatch();
 useEffect(() => {
    dispatch(fetchUser());
   }, []);
 
-  if (loading) { 
+  if (!initialized) { 
     return (
       <div className="h-screen flex items-center justify-center">
          <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
@@ -35,6 +41,12 @@ useEffect(() => {
       {modal === "signin" && <SignInModal isOpen onClose={closeModal} />}
       {modal === "forgot-password" && <ForgotPasswordModal isOpen  />}
       {modal === "confirm-project" && <ConfirmProjectModal isPending={false} onConfirm={modalProps.onConfirm}/>}
+      {modal === 'edit-category' && <EditCategoryModal open onOpenChange={closeModal} category={modalProps} />  }
+      {modal === 'edit-skill' && <EditSkillModal open onOpenChange={closeModal} skill={modalProps.item} categories={modalProps.categories} />  }
+      {modal === 'add-category' && <AddCategoryModal open onOpenChange={closeModal} />}
+      {modal === 'add-skill' && <AddSkillModal categories={modalProps.categories} onClose={closeModal} />}
+      {modal === 'delete-category' && <DeleteCategoryModal open onOpenChange={closeModal} category={modalProps}/> }
+      {modal === 'delete-skill' && <DeleteSkillModal open onOpenChange={closeModal} skill={modalProps}/> }
       {modal === "delete-user" && ( <DeleteUserModal isOpen onClose={closeModal} modalProps={modalProps} />)}
       {modal === "suspend-user" && (<SuspendUserModal isOpen onClose={closeModal} modalProps={modalProps} />)}
     </>

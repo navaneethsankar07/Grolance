@@ -89,12 +89,28 @@ class ProjectSkill(models.Model):
 
     skill = models.ForeignKey(
         Skill,
-        on_delete=models.PROTECT,  
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
         related_name="project_skills"
     )
 
+    custom_name = models.CharField(
+        max_length=100,
+        null=True,
+        blank=True
+    )
+
     class Meta:
-        unique_together = ("project", "skill")
+        constraints = [
+            models.CheckConstraint(
+                condition=(
+                    models.Q(skill__isnull=False, custom_name__isnull=True) |
+                    models.Q(skill__isnull=True, custom_name__isnull=False)
+                ),
+                name="projectskill_requires_skill_or_custom_name"
+            )
+        ]
 
     def __str__(self):
-        return f"{self.project.title} - {self.skill.name}"
+        return self.custom_name or self.skill.name

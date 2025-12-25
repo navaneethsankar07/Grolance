@@ -8,6 +8,7 @@ class AdminUserListSerializer(serializers.ModelSerializer):
             "id",
             "full_name",
             "email",
+            "profile_photo",
             "is_active",
             "is_deleted",
             "is_admin",
