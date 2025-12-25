@@ -3,11 +3,11 @@ __pycache__/
 *.py[cod]
 *.pyo
 *.pyd
+*.pyc
 
 # Virtual environment
 .venv/
-env/
-venv/
+server/.venv/
 
 # Django
 *.log
