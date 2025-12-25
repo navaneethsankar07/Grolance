@@ -90,7 +90,7 @@ class ProjectListSerializer(serializers.ModelSerializer):
     skills = serializers.SerializerMethodField()
     class Meta:
         model = Project
-        fields = ['id','title','category_name', 'pricing_type', 'fixed_price', 'min_budget', 'max_budget', 'delivery_days', 'status', 'created_at', 'skills']
+        fields = ['id','title','description','category_name', 'pricing_type', 'fixed_price', 'min_budget', 'max_budget', 'delivery_days', 'status', 'created_at', 'skills']
 
     def get_skills(self,obj):
         skills = []

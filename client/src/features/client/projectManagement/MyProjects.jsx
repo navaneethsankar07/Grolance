@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 import ProjectCard from "./components/ProjectCard";
 import { useMyProjects } from "./projectQueries";
-
+import { Briefcase, CircleCheck, Hourglass } from "lucide-react";
 export default function MyProjects() {
   const [activeTab, setActiveTab] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [page, setPage] = useState(1);
 
-  const { data, isLoading, isError } = useMyProjects({
+  const { data, isLoading } = useMyProjects({
     page,
     status: activeTab === "all" ? "" : activeTab,
     search: searchQuery,
@@ -16,78 +16,89 @@ export default function MyProjects() {
   const jobs = data?.results ?? [];
   const totalCount = data?.count ?? 0;
 
-  if (isLoading) return <div className="p-10 text-center">Loading Projects...</div>;
+  const TabButton = ({ id, label, Icon, count }) => (
+    <button
+      onClick={() => { setActiveTab(id); setPage(1); }}
+      className={`flex items-center gap-2 px-1 py-4 border-b-2 transition-colors ${
+        activeTab === id ? "border-blue-500 text-blue-600" : "border-transparent text-gray-500 hover:text-gray-700"
+      }`}
+    >
+      <Icon className="material-icons text-xl"/>
+      <span className="text-sm font-medium">{label}</span>
+      <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
+        activeTab === id ? "bg-blue-100 text-blue-600" : "bg-gray-100 text-gray-600"
+      }`}>
+        {count || 0}
+      </span>
+    </button>
+  );
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50" style={{ fontFamily: "Roboto, sans-serif" }}>
       <div className="max-w-[1536px] mx-auto px-4 md:px-8 py-8">
         
-        {/* Header & Search */}
         <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4 mb-6">
-          <h1 className="text-2xl font-bold text-gray-800">My Job Posts</h1>
-          <div className="relative w-full lg:w-[400px]">
+          <div className="flex flex-col gap-1">
+            <h1 className="text-2xl md:text-[30px] font-bold text-gray-800 leading-9">My Job Posts</h1>
+            <p className="text-sm md:text-base text-gray-500">View, manage, and track all the projects you've posted.</p>
+          </div>
+
+          {/* Search */}
+          <div className="relative w-full lg:w-[414px]">
+            <span className="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xl">search</span>
             <input
               type="text"
               placeholder="Search Jobs..."
               value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setPage(1); // Reset to page 1 on search
-              }}
-              className="w-full h-11 pl-4 pr-4 border rounded-md focus:ring-2 focus:ring-blue-500 outline-none"
+              onChange={(e) => { setSearchQuery(e.target.value); setPage(1); }}
+              className="w-full h-[46px] pl-11 pr-4 border border-gray-300 rounded-md text-base text-gray-900 focus:ring-2 focus:ring-blue-500 outline-none"
             />
           </div>
         </div>
 
-        {/* Tabs */}
-        <div className="border-b mb-6 flex gap-6">
-          {["all", "open", "in-progress", "completed"].map((tab) => (
-            <button
-              key={tab}
-              onClick={() => {
-                setActiveTab(tab);
-                setPage(1);
-              }}
-              className={`pb-4 text-sm font-medium capitalize transition-all ${
-                activeTab === tab ? "border-b-2 border-blue-500 text-blue-600" : "text-gray-500"
-              }`}
-            >
-              {tab.replace("-", " ")}
-            </button>
-          ))}
+        <div className="border-b border-gray-200 mb-6">
+          <nav className="flex gap-6">
+            <TabButton id="all" label="All Posts" Icon={Briefcase} count={activeTab === 'all' ? totalCount : null} />
+            <TabButton id="completed" label="Completed" Icon={CircleCheck} />
+            <TabButton id="in-progress" label="In Progress" Icon={Hourglass} />
+          </nav>
         </div>
 
-        {/* List */}
         <div className="space-y-6">
-          {jobs.length > 0 ? (
+          {isLoading ? (
+            [...Array(3)].map((_, i) => <div key={i} className="h-40 bg-gray-200 animate-pulse rounded-lg" />)
+          ) : jobs.length > 0 ? (
             jobs.map((job) => <ProjectCard key={job.id} job={job} />)
           ) : (
-            <div className="bg-white p-10 text-center rounded-lg border">No projects found.</div>
+            <div className="bg-white p-20 text-center rounded-lg border text-gray-400">
+              <span className="material-icons text-5xl mb-2">inventory_2</span>
+              <p>No projects found in this category.</p>
+            </div>
           )}
         </div>
 
-        {/* Pagination Controls */}
-        {totalCount > 0 && (
-          <div className="flex justify-between items-center mt-8">
-            <p className="text-sm text-gray-600">Total {totalCount} results</p>
-            <div className="flex gap-2">
-              <button
-                disabled={!data?.previous}
-                onClick={() => setPage((p) => p - 1)}
-                className="px-4 py-2 border rounded bg-white disabled:opacity-50"
-              >
-                Previous
-              </button>
-              <button
-                disabled={!data?.next}
-                onClick={() => setPage((p) => p + 1)}
-                className="px-4 py-2 border rounded bg-white disabled:opacity-50"
-              >
-                Next
-              </button>
+        <div className="flex flex-col md:flex-row justify-between items-center gap-4 mt-8 pt-2">
+          <p className="text-sm text-gray-600">Showing {jobs.length} of {totalCount} results</p>
+          <nav className="flex items-center rounded-md shadow-sm">
+            <button 
+              disabled={!data?.previous}
+              onClick={() => setPage(p => p - 1)}
+              className="h-9 w-9 flex items-center justify-center border border-gray-300 rounded-l-md hover:bg-gray-50 disabled:opacity-50"
+            >
+              <span className="material-icons text-gray-400 text-xl">chevron_left</span>
+            </button>
+            <div className="h-9 px-4 bg-blue-500 text-white text-sm font-semibold flex items-center border-t border-b border-blue-500">
+              {page}
             </div>
-          </div>
-        )}
+            <button 
+              disabled={!data?.next}
+              onClick={() => setPage(p => p + 1)}
+              className="h-9 w-9 flex items-center justify-center border border-gray-300 rounded-r-md hover:bg-gray-50 disabled:opacity-50"
+            >
+              <span className="material-icons text-gray-400 text-xl">chevron_right</span>
+            </button>
+          </nav>
+        </div>
       </div>
     </div>
   );

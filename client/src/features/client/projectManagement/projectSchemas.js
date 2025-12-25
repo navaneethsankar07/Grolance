@@ -7,7 +7,7 @@ export const projectCreateSchema = z
     requirements: z.string().min(20),
     expected_deliverables: z.string().min(10),
 
-    category: z.string().min(1),
+    category: z.preprocess((val) => Number(val), z.number().min(1)),
     skills: z.array(z.string()).min(1),
 
     pricing_type: z.enum(["fixed", "range"]),

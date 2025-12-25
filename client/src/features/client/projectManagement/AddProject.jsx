@@ -59,13 +59,21 @@ function AddProject() {
   const [skillInput, setSkillInput] = useState("");
 
 const onSubmit = (data) => {
+  const formattedData = { ...data };
   
+  if (data.pricing_type === "fixed") {
+    delete formattedData.min_budget;
+    delete formattedData.max_budget;
+  } else {
+    delete formattedData.fixed_price;
+  }
+
   openModal("confirm-project", {
-    data,
+    data: formattedData,
     categories,
     onConfirm: async () => {
       try {
-        const res = await createProject(data);
+        const res = await createProject(formattedData);
         console.log("Project created:", res);
         closeModal();
         navigate('/',{replace:true})
@@ -193,11 +201,9 @@ return (
                     className="w-full px-3 py-4 border-2 min-h-[170px] text-base border-gray-400 rounded-lg placeholder:text-[#CCC] resize-none"
 
                   />
-                  {errors.deliverables && (
-                    <p className="text-red-500 text-xs mt-1">
-                      {errors.deliverables.message}
-                    </p>
-                  )}
+                  {errors.expected_deliverables && (
+  <p className="text-red-500 text-xs mt-1">{errors.expected_deliverables.message}</p>
+)}
 
                 </div>
 
