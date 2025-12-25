@@ -3,10 +3,10 @@ __pycache__/
 *.py[cod]
 *.pyo
 *.pyd
+*.pyc
 
 # Virtual environment
 .venv/
-env/
 server/.venv/
 
 
