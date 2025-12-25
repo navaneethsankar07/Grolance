@@ -15,7 +15,7 @@ class CategoryListView(ListAPIView):
     search_fields = ["name"]
     ordering = ["-id"]
     def get_queryset(self):
-        return Category.objects.all()
+        return Category.objects.all().order_by('id')
 
 class CategoryCreateView(CreateAPIView):
     permission_classes = [IsAdminUser]

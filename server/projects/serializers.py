@@ -2,6 +2,7 @@ from rest_framework import serializers
 from .models import Project, ProjectSkill
 from categories.models import Skill
 
+
 class ProjectCreateSerializer(serializers.ModelSerializer):
     skills = serializers.ListField(
         child=serializers.CharField(),
@@ -79,3 +80,24 @@ class ProjectCreateSerializer(serializers.ModelSerializer):
             )
 
         return project
+
+
+class ProjectListSerializer(serializers.ModelSerializer):
+    category_name = serializers.CharField(
+        source="category.name",
+        read_only = True
+    )
+    skills = serializers.SerializerMethodField()
+    class Meta:
+        model = Project
+        fields = ['id','title','category_name', 'pricing_type', 'fixed_price', 'min_budget', 'max_budget', 'delivery_days', 'status', 'created_at', 'skills']
+
+    def get_skills(self,obj):
+        skills = []
+        for ps in obj.project_skills.all():
+            if ps.skill:
+                skills.append(ps.skill.name)
+            
+            else:
+                skills.append(ps.custom_name)
+        return skills

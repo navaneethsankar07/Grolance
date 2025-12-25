@@ -33,8 +33,6 @@ class Project(models.Model):
     description = models.TextField()
     requirements = models.TextField()
     expected_deliverables = models.TextField()
-
-
     pricing_type = models.CharField(
         max_length=10,
         choices=PRICING_TYPE_CHOICES,
@@ -70,8 +68,6 @@ class Project(models.Model):
         choices=STATUS_CHOICES,
         default="open"
     )
-
-
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
