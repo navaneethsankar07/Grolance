@@ -1,8 +1,8 @@
-from rest_framework.generics import CreateAPIView,ListAPIView
+from rest_framework.generics import CreateAPIView,ListAPIView, RetrieveUpdateAPIView
 from rest_framework.permissions import IsAuthenticated
 from .permissions import IsClientUser
 from .models import Project
-from .serializers import ProjectCreateSerializer, ProjectListSerializer
+from .serializers import ProjectCreateSerializer, ProjectListSerializer, ProjectUpdateSerializer
 
 class ProjectCreateAPIView(CreateAPIView):
     serializer_class = ProjectCreateSerializer
@@ -17,7 +17,6 @@ class ProjectListView(ListAPIView):
         user = self.request.user
         queryset = Project.objects.filter(client=user)
 
-        # Add Filtering
         status = self.request.query_params.get('status')
         search = self.request.query_params.get('search')
 
@@ -27,3 +26,10 @@ class ProjectListView(ListAPIView):
             queryset = queryset.filter(title__icontains=search)
 
         return queryset.select_related('category').prefetch_related('project_skills__skill').order_by('-created_at')
+
+class ProjectUpdateAPIView(RetrieveUpdateAPIView):
+    serializer_class = ProjectUpdateSerializer
+    permission_classes = [IsAuthenticated, IsClientUser]
+
+    def get_queryset(self):
+        return Project.objects.filter(client=self.request.user)

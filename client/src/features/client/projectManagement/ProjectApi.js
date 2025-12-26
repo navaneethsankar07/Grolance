@@ -30,4 +30,12 @@ const [_key, { page, status, search }] = queryKey;
   return res.data;
 };
 
+export const fetchProjectById = async (id) => {
+  const res = await axiosInstance.get(`/projects/${id}/`);
+  return res.data;
+};
 
+export const updateProject = async ({id,data}) => {
+  const res = await axiosInstance.patch(`/projects/${id}/`,data);
+  return res.data;
+};
