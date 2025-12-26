@@ -7,7 +7,6 @@ export default function EditSkillModal({ open, onOpenChange, skill, categories }
 
   const updateSkillMutation = useUpdateSkill();
 
-  // Populate form when modal opens
   useEffect(() => {
     if (open && skill) {
       setName(skill.name);
@@ -44,7 +43,6 @@ export default function EditSkillModal({ open, onOpenChange, skill, categories }
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
       <div className="w-full max-w-[448px] bg-white rounded-xl shadow-2xl">
         
-        {/* Header */}
         <div className="flex items-center justify-between px-8 pt-8 pb-6">
           <h2 className="text-[17px] font-semibold text-slate-800">
             Edit Skill
@@ -57,7 +55,6 @@ export default function EditSkillModal({ open, onOpenChange, skill, categories }
           </button>
         </div>
 
-        {/* Content */}
         <div className="px-8 pb-8">
           <p className="text-xs text-slate-600 mb-8">
             Update the skill details below.
@@ -65,7 +62,6 @@ export default function EditSkillModal({ open, onOpenChange, skill, categories }
 
           <form onSubmit={handleSubmit} className="space-y-6">
             
-            {/* Skill Name */}
             <div className="space-y-2">
               <label className="text-xs font-medium text-slate-700">
                 Skill Name
@@ -77,7 +73,6 @@ export default function EditSkillModal({ open, onOpenChange, skill, categories }
               />
             </div>
 
-            {/* Category */}
             <div className="space-y-2">
               <label className="text-xs font-medium text-slate-700">
                 Category
@@ -96,7 +91,6 @@ export default function EditSkillModal({ open, onOpenChange, skill, categories }
               </select>
             </div>
 
-            {/* Buttons */}
             <div className="flex gap-3 pt-2">
               <button
                 type="button"

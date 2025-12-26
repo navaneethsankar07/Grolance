@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import ProjectCard from "./components/ProjectCard";
 import { useMyProjects } from "./projectQueries";
-import { Briefcase, CircleCheck, Hourglass } from "lucide-react";
+import { Briefcase, CircleCheck, Hourglass , Search, ChevronRight, ChevronLeft, FolderOpen} from "lucide-react";
 export default function MyProjects() {
   const [activeTab, setActiveTab] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
@@ -44,7 +44,8 @@ export default function MyProjects() {
           </div>
 
           <div className="relative w-full lg:w-[414px]">
-            <span className="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xl">search</span>
+
+            <Search className="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xl"/>
             <input
               type="text"
               placeholder="Search Jobs..."
@@ -69,8 +70,9 @@ export default function MyProjects() {
           ) : jobs.length > 0 ? (
             jobs.map((job) => <ProjectCard key={job.id} job={job} />)
           ) : (
-            <div className="bg-white p-20 text-center rounded-lg border text-gray-400">
-              <span className="material-icons text-5xl mb-2">inventory_2</span>
+
+            <div className="bg-white flex p-20 pl-150 gap-3 text-center rounded-lg border text-gray-400">
+              <FolderOpen className=" tmaterial-icons text-5xl mb-2"/>
               <p>No projects found in this category.</p>
             </div>
           )}
@@ -84,7 +86,7 @@ export default function MyProjects() {
               onClick={() => setPage(p => p - 1)}
               className="h-9 w-9 flex items-center justify-center border border-gray-300 rounded-l-md hover:bg-gray-50 disabled:opacity-50"
             >
-              <span className="material-icons text-gray-400 text-xl">chevron_left</span>
+              <ChevronLeft className="material-icons text-gray-400 text-xl"/>
             </button>
             <div className="h-9 px-4 bg-blue-500 text-white text-sm font-semibold flex items-center border-t border-b border-blue-500">
               {page}
@@ -94,7 +96,7 @@ export default function MyProjects() {
               onClick={() => setPage(p => p + 1)}
               className="h-9 w-9 flex items-center justify-center border border-gray-300 rounded-r-md hover:bg-gray-50 disabled:opacity-50"
             >
-              <span className="material-icons text-gray-400 text-xl">chevron_right</span>
+              <ChevronRight className="material-icons text-gray-400 text-xl"/>
             </button>
           </nav>
         </div>

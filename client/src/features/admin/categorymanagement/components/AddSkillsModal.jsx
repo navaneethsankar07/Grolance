@@ -38,7 +38,6 @@ export default function AddSkillModal({ categories, onClose }) {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
       <div className="w-full max-w-[448px] bg-white rounded-xl shadow-2xl">
         
-        {/* Header */}
         <div className="flex items-center justify-between px-8 pt-8 pb-6">
           <h2 className="text-[17px] font-semibold text-slate-800">
             Add Skill
@@ -48,7 +47,6 @@ export default function AddSkillModal({ categories, onClose }) {
           </button>
         </div>
 
-        {/* Content */}
         <div className="px-8 pb-8">
           <p className="text-xs text-slate-600 mb-8">
             Add a new skill to your freelancing platform.
@@ -56,7 +54,6 @@ export default function AddSkillModal({ categories, onClose }) {
 
           <form onSubmit={handleSubmit} className="space-y-6">
 
-            {/* Skill Name */}
             <div className="space-y-2">
               <label className="text-xs font-medium text-slate-700">
                 Skill Name
@@ -69,7 +66,6 @@ export default function AddSkillModal({ categories, onClose }) {
               />
             </div>
 
-            {/* Category */}
             <div className="space-y-2">
               <label className="text-xs font-medium text-slate-700">
                 Category
@@ -88,7 +84,6 @@ export default function AddSkillModal({ categories, onClose }) {
               </select>
             </div>
 
-            {/* Buttons */}
             <div className="flex gap-3 pt-2">
               <button
                 type="button"

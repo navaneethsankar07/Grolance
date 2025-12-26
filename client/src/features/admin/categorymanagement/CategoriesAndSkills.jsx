@@ -7,19 +7,12 @@ import { useModal } from "../../../hooks/modal/useModalStore";
 
 export default function CategoriesAndSkills() {
   const { openModal } = useModal();
-
-  // Pagination
   const [categoryPage, setCategoryPage] = useState(1);
   const [skillPage, setSkillPage] = useState(1);
-
-  // Search input (typing)
   const [categoryInput, setCategoryInput] = useState("");
   const [skillInput, setSkillInput] = useState("");
-
-  // Search query (submitted)
   const [categorySearch, setCategorySearch] = useState("");
   const [skillSearch, setSkillSearch] = useState("");
-
   const { data: categoryData, isLoading: catLoading } = useCategories({
     page: categoryPage,
     search: categorySearch,

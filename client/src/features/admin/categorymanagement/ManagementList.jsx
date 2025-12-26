@@ -20,7 +20,6 @@ export const ManagementList = ({
 }) => {
   return (
     <div className="mb-12">
-      {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-4">
           <div className="p-3 rounded-xl bg-white shadow">
@@ -43,7 +42,6 @@ export const ManagementList = ({
         </button>
       </div>
 
-      {/* Search */}
       <div className="mb-4">
         <input
           value={searchValue}
@@ -57,8 +55,6 @@ export const ManagementList = ({
           className="w-full h-10 px-4 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
       </div>
-
-      {/* List */}
       <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm">
         <div className="divide-y divide-gray-50">
           {items.map((item) => (
@@ -97,8 +93,6 @@ export const ManagementList = ({
           )}
         </div>
       </div>
-
-      {/* Pagination */}
       <div className="flex items-center justify-end gap-3 mt-4">
         <button
           disabled={!hasPrev}

@@ -6,6 +6,7 @@ from adminpanel.permissions import IsAdminUser
 from  rest_framework.exceptions import ValidationError
 from common.pagination import AdminPageNumberPagination
 from rest_framework.filters import SearchFilter, OrderingFilter
+from django.db.models.deletion import ProtectedError
 
 class CategoryListView(ListAPIView):
     permission_classes = [IsAuthenticated]
@@ -61,10 +62,9 @@ class SkillDetailView(RetrieveUpdateDestroyAPIView):
     queryset = Skill.objects.all()
 
     def perform_destroy(self, instance):
-        # Future-proof check (example)
-        if hasattr(instance, "projects") and instance.projects.exists():
+        try:
+            instance.delete()
+        except ProtectedError:
             raise ValidationError(
-                "This skill is in use and cannot be deleted."
+                "This skill is currently being used in projects and cannot be deleted."
             )
-
-        instance.delete()

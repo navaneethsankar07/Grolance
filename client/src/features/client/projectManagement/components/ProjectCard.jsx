@@ -1,12 +1,12 @@
 import React from "react";
 import { IndianRupee, ClipboardList, Clock } from "lucide-react";
-
+import { useNavigate } from "react-router-dom";
 export default function ProjectCard({ job }) {
+  const navigate = useNavigate();
   const renderBudget = () => {
     const fixed = job.fixed_price ? Number(job.fixed_price).toLocaleString() : "0";
     const min = job.min_budget ? Number(job.min_budget).toLocaleString() : "0";
     const max = job.max_budget ? Number(job.max_budget).toLocaleString() : "0";
-
     if (job.pricing_type === "fixed") {
       return (
         <span className="text-sm text-gray-600 font-medium">
@@ -65,11 +65,11 @@ export default function ProjectCard({ job }) {
         </div>
       </div>
 
-      <div className="flex flex-col justify-center gap-3 w-full md:w-[160px]">
-        <button className="h-11 px-4 bg-[#3b82f6] text-white text-sm font-medium rounded-md hover:bg-blue-600 transition-colors shadow-sm">
+      <div className="flex flex-col justify-center gap-3 w-full md:w-40">
+        <button onClick={()=>navigate(`/my-projects/${job.id}/proposals`)} className="h-11 px-4 bg-[#3b82f6] text-white text-sm font-medium rounded-md hover:bg-blue-600 transition-colors shadow-sm">
           View Proposals
         </button>
-        <button className="h-11 px-4 border border-gray-300 bg-white text-gray-700 text-sm font-medium rounded-md hover:bg-gray-50 transition-colors shadow-sm">
+        <button onClick={() => navigate(`/my-projects/${job.id}/edit`)} className="h-11 px-4 border border-gray-300 bg-white text-gray-700 text-sm font-medium rounded-md hover:bg-gray-50 transition-colors shadow-sm">
           Edit Post
         </button>
       </div>

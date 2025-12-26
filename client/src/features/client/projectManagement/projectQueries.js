@@ -1,11 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
-import { fetchCategories, fetchMyProjects, fetchSkills} from './ProjectApi';
+import { fetchCategories, fetchMyProjects, fetchProjectById, fetchSkills} from './ProjectApi';
 
 export const useCategories = () => {
   return useQuery({
     queryKey: ["categories"],
     queryFn: fetchCategories,
-    staleTime: 5 * 60 * 1000, // 5 min cache
+    staleTime: 5 * 60 * 1000, 
   });
 };
 
@@ -25,3 +25,10 @@ export const useMyProjects = ({page,status, search}) =>{
     keepPreviousData:true,
   })
 }
+export const useProjectDetails = (id) => {
+  return useQuery({
+    queryKey: ["project", id],
+    queryFn: () => fetchProjectById(id),
+    enabled: !!id,
+  });
+};
