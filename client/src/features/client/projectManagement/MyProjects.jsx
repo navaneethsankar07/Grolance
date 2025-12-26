@@ -43,7 +43,6 @@ export default function MyProjects() {
             <p className="text-sm md:text-base text-gray-500">View, manage, and track all the projects you've posted.</p>
           </div>
 
-          {/* Search */}
           <div className="relative w-full lg:w-[414px]">
             <span className="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xl">search</span>
             <input

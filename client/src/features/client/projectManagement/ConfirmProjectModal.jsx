@@ -1,12 +1,12 @@
 import { useModal } from "../../../hooks/modal/useModalStore";
-import { 
-  X, 
-  Wallet, 
-  Calendar, 
-  Tag, 
-  Briefcase, 
-  CheckCircle2, 
-  AlertCircle 
+import {
+  X,
+  Wallet,
+  Calendar,
+  Tag,
+  Briefcase,
+  CheckCircle2,
+  AlertCircle
 } from 'lucide-react';
 
 function ConfirmProjectModal({ isPending, onConfirm }) {
@@ -22,8 +22,7 @@ function ConfirmProjectModal({ isPending, onConfirm }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm bg-black/40 animate-in fade-in duration-200">
       <div className="bg-white rounded-2xl w-full max-w-xl shadow-2xl overflow-hidden border border-gray-100">
-        
-        {/* Header */}
+
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
           <div className="flex items-center gap-2">
             <div className="bg-blue-50 p-2 rounded-lg">
@@ -33,7 +32,7 @@ function ConfirmProjectModal({ isPending, onConfirm }) {
               Review Project
             </h2>
           </div>
-          <button 
+          <button
             onClick={closeModal}
             className="text-gray-400 hover:text-gray-600 transition-colors"
           >
@@ -41,11 +40,9 @@ function ConfirmProjectModal({ isPending, onConfirm }) {
           </button>
         </div>
 
-        {/* Content Body */}
         <div className="p-6 max-h-[70vh] overflow-y-auto">
           <div className="space-y-6">
-            
-            {/* Title Section */}
+
             <div>
               <label className="text-[11px] uppercase tracking-wider font-bold text-gray-400 mb-1 block">Project Title</label>
               <h3 className="text-lg font-semibold text-gray-800 leading-snug">
@@ -53,7 +50,6 @@ function ConfirmProjectModal({ isPending, onConfirm }) {
               </h3>
             </div>
 
-            {/* Grid Stats */}
             <div className="grid grid-cols-2 gap-4">
               <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
                 <div className="flex items-center gap-2 text-gray-500 mb-1">
@@ -64,23 +60,23 @@ function ConfirmProjectModal({ isPending, onConfirm }) {
               </div>
 
               <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
-  <div className="flex items-center gap-2 text-gray-500 mb-1">
-    <Wallet className="w-4 h-4" />
-    <span className="text-xs font-medium uppercase tracking-tight">
-      Budget
-    </span>
-  </div>
+                <div className="flex items-center gap-2 text-gray-500 mb-1">
+                  <Wallet className="w-4 h-4" />
+                  <span className="text-xs font-medium uppercase tracking-tight">
+                    Budget
+                  </span>
+                </div>
 
-  {data.pricing_type === "fixed" ? (
-    <p className="font-semibold text-gray-700">
-      ₹{data.fixed_price.toLocaleString()}
-    </p>
-  ) : (
-    <p className="font-semibold text-gray-700">
-      ₹{data.min_budget.toLocaleString()} – ₹{data.max_budget.toLocaleString()}
-    </p>
-  )}
-</div>
+                {data.pricing_type === "fixed" ? (
+                  <p className="font-semibold text-gray-700">
+                    ₹{data.fixed_price.toLocaleString()}
+                  </p>
+                ) : (
+                  <p className="font-semibold text-gray-700">
+                    ₹{data.min_budget.toLocaleString()} – ₹{data.max_budget.toLocaleString()}
+                  </p>
+                )}
+              </div>
 
 
               <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
@@ -97,18 +93,17 @@ function ConfirmProjectModal({ isPending, onConfirm }) {
                   <span className="text-xs font-medium uppercase tracking-tight">Type</span>
                 </div>
                 <p className="font-semibold text-gray-700">
-  {data.pricing_type === "fixed" ? "Fixed Price" : "Range Price"}
-</p>
+                  {data.pricing_type === "fixed" ? "Fixed Price" : "Range Price"}
+                </p>
 
               </div>
             </div>
 
-            {/* Skills Section */}
             <div>
               <label className="text-[11px] uppercase tracking-wider font-bold text-gray-400 mb-2 block">Required Skills</label>
               <div className="flex flex-wrap gap-2">
                 {data.skills.map((skill, idx) => (
-                  <span 
+                  <span
                     key={idx}
                     className="px-3 py-1 bg-blue-50 text-blue-600 text-xs font-semibold rounded-full border border-blue-100"
                   >
@@ -118,7 +113,6 @@ function ConfirmProjectModal({ isPending, onConfirm }) {
               </div>
             </div>
 
-            {/* Note */}
             <div className="flex gap-3 p-4 bg-amber-50 rounded-lg border border-amber-100">
               <AlertCircle className="w-5 h-5 text-amber-500 shrink-0" />
               <p className="text-xs text-amber-700 leading-relaxed">
@@ -128,7 +122,6 @@ function ConfirmProjectModal({ isPending, onConfirm }) {
           </div>
         </div>
 
-        {/* Footer Actions */}
         <div className="bg-gray-50 px-6 py-4 flex items-center justify-end gap-3 border-t border-gray-100">
           <button
             onClick={closeModal}
