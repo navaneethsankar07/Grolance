@@ -52,7 +52,8 @@ INSTALLED_APPS = [
     'projects',
     'categories',
     'adminpanel',
-    'common'
+    'common',
+    'profiles'
     
 ]
 

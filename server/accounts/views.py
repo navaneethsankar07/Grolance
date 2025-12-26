@@ -4,7 +4,7 @@ from rest_framework.permissions import IsAuthenticated,AllowAny
 from rest_framework import status
 from django.core.cache import cache
 from django.contrib.auth import authenticate
-from .serializer import RegisterSerializer, EmailVerifySerializer, ResendEmailOtpSerializer, UserSerializer, ForgotPasswordSerializer, ResetTokenValidateSerializer, ResetPasswordSerializer, GoogleAuthSerializer
+from .serializer import RegisterSerializer, EmailVerifySerializer, ResendEmailOtpSerializer, UserSerializer, ForgotPasswordSerializer, ResetTokenValidateSerializer, ResetPasswordSerializer, GoogleAuthSerializer, ChangePasswordSerializer
 from .utils import otp_service, reset_password_service
 from .models import User
 from rest_framework_simplejwt.tokens import RefreshToken,TokenError
@@ -315,3 +315,21 @@ class GoogleAuthView(APIView):
         )
 
         return response
+    
+class ChangePasswordAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        serializer = ChangePasswordSerializer(
+            data=request.data,
+            context={"request": request}
+        )
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(
+                {"detail": "Password updated successfully."},
+                status=status.HTTP_200_OK
+            )
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
