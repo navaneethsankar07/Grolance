@@ -1,25 +1,52 @@
 import { z } from "zod";
 
-export const projectCreateSchema = z.object({
-  title: z.string().min(5, "Project title must be at least 5 characters"),
+export const projectCreateSchema = z
+  .object({
+    title: z.string().min(5),
+    description: z.string().min(50),
+    requirements: z.string().min(20),
+    expected_deliverables: z.string().min(10),
 
-  description: z
-    .string()
-    .min(50, "Project description must be at least 50 characters"),
+    category: z.preprocess((val) => Number(val), z.number().min(1)),
+    skills: z.array(z.string()).min(1),
 
-  requirements: z
-    .string()
-    .min(20, "Requirements must be at least 20 characters"),
+    pricing_type: z.enum(["fixed", "range"]),
 
-  expected_deliverables: z
-    .string()
-    .min(10, "Deliverables must be at least 10 characters"),
+    fixed_price: z.number().positive().optional(),
+    min_budget: z.number().positive().optional(),
+    max_budget: z.number().positive().optional(),
 
-  category: z.string().min(1, "Category is required"),
+    delivery_days: z
+      .number()
+      .int()
+      .positive()
+      .max(99),
+  }).superRefine((data, ctx) => {
+  if (data.pricing_type === "fixed") {
+    if (data.fixed_price == null) {
+      ctx.addIssue({
+        path: ["fixed_price"],
+        message: "Fixed price is required",
+      });
+    }
+  }
 
-  skills: z.array(z.string().min(1)).min(1, "At least one skill is required"),
+  if (data.pricing_type === "range") {
+    if (data.min_budget == null || data.max_budget == null) {
+      ctx.addIssue({
+        path: ["min_budget"],
+        message: "Budget range is required",
+      });
+      return;
+    }
 
-  budget: z.number().positive("Budget must be greater than 0"),
+    if (data.min_budget >= data.max_budget) {
+      ctx.addIssue({
+        path: ["max_budget"],
+        message: "Max budget must be greater than min budget",
+      });
+    }
+  }
 
-  delivery_days: z.number().int().positive("Delivery days must be greater than 0").max(99,"Delivery days must be less than 100"),
-});
+
+  });

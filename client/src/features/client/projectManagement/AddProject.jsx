@@ -5,15 +5,18 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { projectCreateSchema } from "./projectSchemas";
 import { useCategories, useSkills } from './projectQueries';
 import { useCreateProject } from "./projectMutations";
+import { useModal } from '../../../hooks/modal/useModalStore';
+import { useNavigate } from 'react-router-dom';
 
 
 function AddProject() {
   const { register, handleSubmit, setValue, watch, formState: { errors }, } = useForm({
     resolver: zodResolver(projectCreateSchema),
+    shouldUnregister: true,
     defaultValues: {
+      pricing_type: "fixed",
       skills: [],
-      budget: 0,
-      deliveryDays: 0,
+      delivery_days: 0,
     }
   });
   const {
@@ -25,18 +28,18 @@ function AddProject() {
   const { data: skillsResponse } = useSkills();
   const skillsData = skillsResponse?.results ?? [];
   const { mutateAsync: createProject, isPending } = useCreateProject();
-
+  const { openModal, closeModal } = useModal()
   const selectedCategory = watch("category");
   const selectedSkills = watch("skills") || [];
-
+  const pricingType = watch("pricing_type");
+  const navigate = useNavigate()
   const suggestedSkills = skillsData
     .filter(
       (skill) =>
         String(skill.category) === String(selectedCategory) &&
         !selectedSkills.includes(skill.name)
     )
-    .slice(0, 8); // limit to 5–10
-
+    .slice(0, 8);
   const addSkill = (skillName) => {
     if (selectedSkills.includes(skillName)) return;
 
@@ -55,25 +58,41 @@ function AddProject() {
   const Input = (props) => <input {...props} />;
   const [skillInput, setSkillInput] = useState("");
 
-  const onSubmit = async (data) => {
-  try {
-    const response = await createProject(data);
-    console.log("Project created:", response);
+  const onSubmit = (data) => {
+    const formattedData = { ...data };
 
-  } catch (error) {
-    if (error.response) {
-      console.error("Server validation error:", error.response.data);
+    if (data.pricing_type === "fixed") {
+      delete formattedData.min_budget;
+      delete formattedData.max_budget;
     } else {
-      console.error("Unexpected error:", error);
+      delete formattedData.fixed_price;
     }
-  }
-};
+
+    openModal("confirm-project", {
+      data: formattedData,
+      categories,
+      onConfirm: async () => {
+        try {
+          const res = await createProject(formattedData);
+          console.log("Project created:", res);
+          closeModal();
+          navigate('/', { replace: true })
+        } catch (error) {
+          closeModal();
+          if (error.response) {
+            console.error("Server error:", error.response.data);
+          } else {
+            console.error("Unexpected error:", error);
+          }
+        }
+      },
+    });
+  };
 
   return (
     <>
       <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
-          {/* Header */}
           <div className="text-center mb-8">
             <h1 className="text-[31px] font-bold text-gray-900 leading-10 mb-2 font-inter">
               Post a New Project
@@ -83,16 +102,12 @@ function AddProject() {
               our community of skilled freelancers.
             </p>
           </div>
-
-          {/* Main Content */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            {/* Form Section */}
             <div className="lg:col-span-8">
               <form
                 onSubmit={handleSubmit(onSubmit)}
                 className="bg-white rounded-xl shadow-[0_4px_6px_-4px_rgba(0,0,0,0.1),0_10px_15px_-3px_rgba(0,0,0,0.1)] p-8"
               >
-                {/* Project Title */}
                 <div className="mb-8">
                   <label className="block mb-2">
                     <span className="text-xs font-medium text-gray-700 leading-5">
@@ -117,7 +132,6 @@ function AddProject() {
 
                 </div>
 
-                {/* Project Description */}
                 <div className="mb-8">
                   <label className="block mb-2">
                     <span className="text-xs font-medium text-gray-700 leading-5">
@@ -141,7 +155,6 @@ function AddProject() {
 
                 </div>
 
-                {/* Requirements From Freelancer */}
                 <div className="mb-8">
                   <label className="block mb-2">
                     <span className="text-xs font-medium text-gray-700 leading-5">
@@ -165,7 +178,6 @@ function AddProject() {
 
                 </div>
 
-                {/* Expected Deliverables */}
                 <div className="mb-8">
                   <label className="block mb-2">
                     <span className="text-xs font-medium text-gray-700 leading-5">
@@ -181,15 +193,12 @@ function AddProject() {
                     className="w-full px-3 py-4 border-2 min-h-[170px] text-base border-gray-400 rounded-lg placeholder:text-[#CCC] resize-none"
 
                   />
-                  {errors.deliverables && (
-                    <p className="text-red-500 text-xs mt-1">
-                      {errors.deliverables.message}
-                    </p>
+                  {errors.expected_deliverables && (
+                    <p className="text-red-500 text-xs mt-1">{errors.expected_deliverables.message}</p>
                   )}
 
                 </div>
 
-                {/* Category */}
                 <div className="mb-8">
                   <label htmlFor='category' className="block mb-2">
                     <span className="text-xs font-medium text-gray-700 leading-5">
@@ -217,7 +226,6 @@ function AddProject() {
 
                 </div>
 
-                {/* Required Skills */}
                 <div className="mb-8">
                   <label className="block mb-2">
                     <span className="text-xs font-medium text-gray-700 leading-5">
@@ -226,7 +234,6 @@ function AddProject() {
                     <span className="text-xs font-medium text-red-500 ml-1">*</span>
                   </label>
 
-                  {/* Input + Add button */}
                   <div className="flex gap-2">
                     <input
                       type="text"
@@ -251,14 +258,12 @@ function AddProject() {
                     </Button>
                   </div>
 
-                  {/* Validation error */}
                   {errors.skills && (
                     <p className="text-red-500 text-xs mt-1">
                       {errors.skills.message}
                     </p>
                   )}
 
-                  {/* Suggested skills (chips style) */}
                   {skillInput === "" && suggestedSkills.length > 0 && (
                     <div className="flex flex-wrap gap-2 mt-3">
                       {suggestedSkills.map((skill) => (
@@ -274,7 +279,6 @@ function AddProject() {
                     </div>
                   )}
 
-                  {/* Selected skills */}
                   {selectedSkills.length > 0 && (
                     <div className="flex flex-wrap gap-2 mt-3">
                       {selectedSkills.map((skill, index) => (
@@ -303,36 +307,99 @@ function AddProject() {
 
 
 
-                {/* Budget and Delivery Days */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                  {/* Budget */}
-                  <div>
-                    <label className="block mb-2">
-                      <span className="text-xs font-medium text-gray-700 leading-5">
-                        Budget (Fixed Price)
-                      </span>
-                      <span className="text-xs font-medium text-red-500 ml-1">
-                        *
-                      </span>
+                  <div className="mb-8">
+                    <label className="block mb-2 text-xs font-medium text-gray-700">
+                      Pricing Type *
                     </label>
-                    <input
-                      type="number"
-                      {...register("budget", { valueAsNumber: true })}
-                      onFocus={(e) => {
-                        if (e.target.value === "0") {
-                          e.target.value = ''
-                        }
-                      }}
-                      className="w-full px-3 h-[50px] border rounded-lg"
-                    />
-                    {errors.budget && (
+
+                    <div className="flex gap-4">
+                      <label className="flex items-center gap-2 text-sm">
+                        <input
+                          type="radio"
+                          value="fixed"
+                          {...register("pricing_type")}
+                        />
+                        Fixed Price
+                      </label>
+
+                      <label className="flex items-center gap-2 text-sm">
+                        <input
+                          type="radio"
+                          value="range"
+                          {...register("pricing_type")}
+                        />
+                        Range Price
+                      </label>
+                    </div>
+
+                    {errors.pricing_type && (
                       <p className="text-red-500 text-xs mt-1">
-                        {errors.budget.message}
+                        {errors.pricing_type.message}
                       </p>
                     )}
                   </div>
 
-                  {/* Delivery Days */}
+                  {pricingType === "fixed" && (
+                    <div className="mb-8">
+                      <label className="block mb-2 text-xs font-medium text-gray-700">
+                        Fixed Budget *
+                      </label>
+
+                      <input
+                        type="number"
+                        {...register("fixed_price", { valueAsNumber: true })}
+                        className="w-full px-3 h-[50px] border rounded-lg"
+                      />
+
+                      {errors.fixed_price && (
+                        <p className="text-red-500 text-xs mt-1">
+                          {errors.fixed_price.message}
+                        </p>
+                      )}
+                    </div>
+                  )}
+
+                  {pricingType === "range" && (
+                    <div className="grid grid-cols-2 gap-6 mb-8">
+                      <div>
+                        <label className="block mb-2 text-xs font-medium text-gray-700">
+                          Minimum Budget *
+                        </label>
+
+                        <input
+                          type="number"
+                          {...register("min_budget", { valueAsNumber: true })}
+                          className="w-full px-3 h-[50px] border rounded-lg"
+                        />
+
+                        {errors.min_budget && (
+                          <p className="text-red-500 text-xs mt-1">
+                            {errors.min_budget.message}
+                          </p>
+                        )}
+                      </div>
+
+                      <div>
+                        <label className="block mb-2 text-xs font-medium text-gray-700">
+                          Maximum Budget *
+                        </label>
+
+                        <input
+                          type="number"
+                          {...register("max_budget", { valueAsNumber: true })}
+                          className="w-full px-3 h-[50px] border rounded-lg"
+                        />
+
+                        {errors.max_budget && (
+                          <p className="text-red-500 text-xs mt-1">
+                            {errors.max_budget.message}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
                   <div>
                     <label className="block mb-2">
                       <span className="text-xs font-medium text-gray-700 leading-5">
@@ -352,16 +419,15 @@ function AddProject() {
                       }}
                       className="w-full px-3 h-[50px] border rounded-lg"
                     />
-                    {errors.deliveryDays && (
+                    {errors.delivery_days && (
                       <p className="text-red-500 text-xs mt-1">
-                        {errors.deliveryDays.message}
+                        {errors.delivery_days.message}
                       </p>
                     )}
 
                   </div>
                 </div>
 
-                {/* Submit Button */}
                 <div className="mt-6">
                   <Button
                     type="submit"
@@ -375,10 +441,8 @@ function AddProject() {
               </form>
             </div>
 
-            {/* Tips Section */}
             <div className="lg:col-span-4">
               <div className="bg-white border border-blue-100 rounded-lg p-6 sticky top-8">
-                {/* Header */}
                 <div className="flex items-center gap-3 mb-6">
                   <div className="flex items-center justify-center">
                     <Lightbulb className="w-6 h-6 text-blue-500" />
@@ -388,7 +452,6 @@ function AddProject() {
                   </h3>
                 </div>
 
-                {/* Tips List */}
                 <div className="space-y-4">
                   <div className="flex items-start gap-3">
                     <CheckCircle2 className="w-6 h-6 text-green-500 shrink-0 mt-0.5" />
