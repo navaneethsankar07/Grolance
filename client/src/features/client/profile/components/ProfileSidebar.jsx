@@ -7,16 +7,19 @@ import {
   TrendingUp,
   Trash2,
 } from "lucide-react";
+import { useModal } from "../../../../hooks/modal/useModalStore";
+
 
 const navigation = [
   { name: "Profile Overview", href: "/profile", icon: User },
-  { name: "Edit Profile", href: "/profile", icon: Edit3 },
+  { name: "Edit Profile", href: "", icon: Edit3 },
   { name: "Skills & Interests", href: "/profile/interests", icon: Sparkles },
   { name: "Account Settings", href: "/profile/settings", icon: Settings },
-  { name: "Spending Summary", href: "/profile/spending", icon: TrendingUp },
+  { name: "Spending Summary", href: "", icon: TrendingUp },
 ];
 
 export default function ProfileSidebar({ onNavigate }) {
+  const { openModal } = useModal()
   return (
     <div className="h-full px-6 pt-6 overflow-y-auto">
       <div className="mb-8">
@@ -56,14 +59,16 @@ export default function ProfileSidebar({ onNavigate }) {
         })}
 
         <div className="pt-4">
-          <Link
-            to="/profile/delete"
-            onClick={onNavigate}
-            className="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
+          <button
+            onClick={() => {
+              openModal("delete-account"); // Trigger the modal
+              if(onNavigate) onNavigate(); // Close mobile sidebar if applicable
+            }}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
           >
             <Trash2 className="w-5 h-5 text-red-600" strokeWidth={2} />
             <span>Delete Account</span>
-          </Link>
+          </button>
         </div>
       </nav>
       </div>

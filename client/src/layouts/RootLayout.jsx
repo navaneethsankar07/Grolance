@@ -17,13 +17,18 @@ import { DeleteCategoryModal } from "../features/admin/categorymanagement/compon
 import AddSkillModal from "../features/admin/categorymanagement/components/AddSkillsModal";
 import EditSkillModal from "../features/admin/categorymanagement/components/EditSkillsModal";
 import DeleteSkillModal from "../features/admin/categorymanagement/components/DeleteSkillModal";
+import ProfileModal from "../features/client/homepage/components/ProfileModal";
+import DeleteAccountModal from "../features/client/account/components/DeleteModal";
 export default function RootLayout() {
   const { modal, modalProps, closeModal } = useModal();
   const { loading, initialized } = useSelector((s) => s.auth)
   const dispatch = useDispatch();
 useEffect(() => {
-   dispatch(fetchUser());
-  }, []);
+  if (!initialized) {
+    dispatch(fetchUser());
+  }
+}, [initialized]);
+
 
   if (!initialized) { 
     return (
@@ -49,6 +54,8 @@ useEffect(() => {
       {modal === 'delete-skill' && <DeleteSkillModal open onOpenChange={closeModal} skill={modalProps}/> }
       {modal === "delete-user" && ( <DeleteUserModal isOpen onClose={closeModal} modalProps={modalProps} />)}
       {modal === "suspend-user" && (<SuspendUserModal isOpen onClose={closeModal} modalProps={modalProps} />)}
+      {modal === "profile-menu" && <ProfileModal isOpen onClose={closeModal}/>}
+      {modal === "delete-account" && <DeleteAccountModal onClose={closeModal}/>}
     </>
   );
 }

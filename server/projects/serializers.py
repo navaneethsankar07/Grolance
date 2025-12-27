@@ -109,11 +109,6 @@ class ProjectListSerializer(serializers.ModelSerializer):
             else:
                 skills.append(ps.custom_name)
         return skills
-    
-
-from rest_framework import serializers
-from .models import Project, ProjectSkill
-from categories.models import Skill
 
 
 class ProjectUpdateSerializer(serializers.ModelSerializer):

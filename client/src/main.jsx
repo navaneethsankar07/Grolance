@@ -13,7 +13,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 const queryClient = new QueryClient();
 
 createRoot(document.getElementById('root')).render(
-  <StrictMode>
+  // <StrictMode>
     <Provider store={store}>
     <PersistGate loading={null} persistor={persistor}>
     <ModalProvider>
@@ -23,5 +23,5 @@ createRoot(document.getElementById('root')).render(
   </ModalProvider>
     </PersistGate>
     </Provider>
-  </StrictMode>,
+ // </StrictMode>,
 )

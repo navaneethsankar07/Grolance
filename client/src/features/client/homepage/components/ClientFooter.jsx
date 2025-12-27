@@ -7,7 +7,7 @@ export default function ClientFooter() {
           <div className="flex flex-col gap-2">
             <h2 className="text-[37px] font-bold leading-7" style={{ fontFamily: 'MuseoModerno, sans-serif' }}>
               <span className="text-[#1A1A1A]">Gro</span>
-              <span className="text-[#3B82F6]">lance</span>
+              <span className="text-primary">lance</span>
             </h2>
             <p className=" text-sm font-medium text-black ml-8 " style={{ fontFamily: 'Murecho, sans-serif' }}>
               Your Craft, Your Crown.

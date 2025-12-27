@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { loginThunk,fetchUser, logoutThunk } from "./authThunks";
+import { loginThunk,fetchUser, logoutThunk, deleteAccount } from "./authThunks";
 
 const initialState = {
   user: null,
@@ -51,7 +51,10 @@ const authSlice = createSlice({
     state.accessToken = null;
     state.loading = false;
     state.initialized = true
-  });
+  }).addCase(deleteAccount.fulfilled, (state) => {
+  state.user = null;
+  state.initialized = true;
+})
 
   },
 });

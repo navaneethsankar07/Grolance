@@ -1,6 +1,7 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import * as authApi from "../../../../api/auth/authApi";
 import { logout } from "./authslice";
+import axiosInstance from "../../../../api/axiosInstance";
 
 
 export const loginThunk = createAsyncThunk(
@@ -38,6 +39,18 @@ export const logoutThunk = createAsyncThunk(
       thunkAPI.dispatch(logout()); 
     } catch (err) {
       thunkAPI.dispatch(logout());
+    }
+  }
+);
+
+export const deleteAccount = createAsyncThunk(
+  "auth/deleteAccount",
+  async (password, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.post("/auth/delete-account/", { password });
+      return response.data;
+    } catch (err) {
+      return rejectWithValue(err.response.data);
     }
   }
 );

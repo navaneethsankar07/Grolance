@@ -137,3 +137,19 @@ class ChangePasswordSerializer(serializers.Serializer):
         user.set_password(self.validated_data["new_password"])
         user.save(update_fields=["password"])
         return user
+    
+
+class DeleteAccountSerializer(serializers.Serializer):
+    password = serializers.CharField(write_only=True, required=False)
+
+    def validate(self, data):
+        user = self.context['request'].user
+        
+        if not user.is_google_account:
+            password = data.get("password")
+            if not password:
+                raise serializers.ValidationError({"password": "Password is required to delete your account."})
+            if not user.check_password(password):
+                raise serializers.ValidationError({"password": "Current password is incorrect."})
+        
+        return data

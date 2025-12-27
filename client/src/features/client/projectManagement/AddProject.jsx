@@ -76,7 +76,7 @@ function AddProject() {
           const res = await createProject(formattedData);
           console.log("Project created:", res);
           closeModal();
-          navigate('/', { replace: true })
+          navigate('/my-projects', { replace: true })
         } catch (error) {
           closeModal();
           if (error.response) {

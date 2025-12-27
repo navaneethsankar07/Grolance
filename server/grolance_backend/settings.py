@@ -13,7 +13,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 from pathlib import Path
 import environ
 import os
-
+from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -53,9 +53,21 @@ INSTALLED_APPS = [
     'categories',
     'adminpanel',
     'common',
-    'profiles'
+    'profiles',
+    'rest_framework_simplejwt.token_blacklist',
     
 ]
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),
+    
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+    
+    'ROTATE_REFRESH_TOKENS': True,
+    
+    'BLACKLIST_AFTER_ROTATION': True,
+    
+    'AUTH_HEADER_TYPES': ('Bearer',),
+}
 
 AUTH_USER_MODEL = 'accounts.User'
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"

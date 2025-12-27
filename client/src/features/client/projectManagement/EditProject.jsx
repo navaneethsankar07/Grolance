@@ -27,7 +27,9 @@ export default function EditProject() {
   const selectedCategory = watch("category");
   const selectedSkills = watch("skills") || [];
   const pricingType = watch("pricing_type");
-
+const onFormError = (errors) => {
+  console.log("❌ Zod Validation Errors:", errors);
+};
   const suggestedSkills = skillsData
     .filter(
       (skill) =>
@@ -93,7 +95,7 @@ export default function EditProject() {
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           <div className="lg:col-span-8">
-            <form onSubmit={handleSubmit(onSubmit)} className="bg-white rounded-xl shadow-sm p-8 border border-gray-200">
+            <form onSubmit={handleSubmit(onSubmit, onFormError)} className="bg-white rounded-xl shadow-sm p-8 border border-gray-200">
               
               <div className="mb-8">
                 <label className="block text-xs font-medium text-gray-700 mb-2">Project Title *</label>

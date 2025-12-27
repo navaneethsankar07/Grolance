@@ -4,14 +4,14 @@ from .models import Category,Skill
 from .serializers import CategorySerializer, SkillSerializer, CategoryWriteSerializer, SkillWriteSerializer
 from adminpanel.permissions import IsAdminUser
 from  rest_framework.exceptions import ValidationError
-from common.pagination import AdminPageNumberPagination
+from common.pagination import AdminUserPagination
 from rest_framework.filters import SearchFilter, OrderingFilter
 from django.db.models.deletion import ProtectedError
 
 class CategoryListView(ListAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = CategorySerializer
-    pagination_class = AdminPageNumberPagination
+    pagination_class = AdminUserPagination
     filter_backends = [SearchFilter, OrderingFilter]
     search_fields = ["name"]
     ordering = ["-id"]
@@ -41,7 +41,7 @@ class CategoryDetailView(RetrieveUpdateDestroyAPIView):
 class SkillListView(ListAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = SkillSerializer
-    pagination_class = AdminPageNumberPagination
+    pagination_class = AdminUserPagination
     filter_backends = [SearchFilter, OrderingFilter]
     SearchFilter = ["name", "category_name"]
     ordering = ["-id"]

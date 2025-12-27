@@ -19,35 +19,42 @@ const processQueue = (error, token = null) => {
   });
   failedQueue = [];
 };
-
 axiosInstance.interceptors.request.use(
   (config) => {
-    const state = store.getState();
-    const token = state.auth.accessToken;
+    const token = store.getState().auth.accessToken;
 
-    if (token) config.headers.Authorization = `Bearer ${token}`;
+    if (token && !config.headers.Authorization) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
 
     return config;
   },
   (error) => Promise.reject(error)
 );
 
+
 axiosInstance.interceptors.response.use(
   (response) => response,
-
   async (error) => {
     const originalRequest = error.config;
+
     if (publicPaths.some(p => originalRequest.url.includes(p))) {
-  return Promise.reject(error); 
-}
+      return Promise.reject(error);
+    }
+
+    // ✅ STOP refresh if user is already logged out
+    const state = store.getState();
+    if (!state.auth.accessToken) {
+      return Promise.reject(error);
+    }
 
     if (error.response?.status === 401 && !originalRequest._retry) {
       if (isRefreshing) {
-        return new Promise(function (resolve, reject) {
+        return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
         })
           .then((token) => {
-            originalRequest.headers.Authorization = "Bearer " + token;
+            originalRequest.headers.Authorization = `Bearer ${token}`;
             return axiosInstance(originalRequest);
           })
           .catch((err) => Promise.reject(err));
@@ -58,21 +65,22 @@ axiosInstance.interceptors.response.use(
 
       try {
         const res = await axiosInstance.post("/auth/refresh/");
-
         const newAccessToken = res.data.access;
 
-        store.dispatch(setCredentials({
-  user: store.getState().auth.user,
-  accessToken: newAccessToken,
-  refreshToken: res.data.refresh
-}));
+        store.dispatch(
+          setCredentials({
+            user: store.getState().auth.user,
+            accessToken: newAccessToken,
+          })
+        );
 
+        axiosInstance.defaults.headers.common.Authorization =
+          `Bearer ${newAccessToken}`;
 
         processQueue(null, newAccessToken);
-
         isRefreshing = false;
 
-        originalRequest.headers.Authorization = "Bearer " + newAccessToken;
+        originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
         return axiosInstance(originalRequest);
 
       } catch (err) {

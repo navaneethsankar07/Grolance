@@ -4,7 +4,7 @@ from rest_framework.permissions import IsAuthenticated,AllowAny
 from rest_framework import status
 from django.core.cache import cache
 from django.contrib.auth import authenticate
-from .serializer import RegisterSerializer, EmailVerifySerializer, ResendEmailOtpSerializer, UserSerializer, ForgotPasswordSerializer, ResetTokenValidateSerializer, ResetPasswordSerializer, GoogleAuthSerializer, ChangePasswordSerializer
+from .serializer import RegisterSerializer, EmailVerifySerializer, ResendEmailOtpSerializer, UserSerializer, ForgotPasswordSerializer, ResetTokenValidateSerializer, ResetPasswordSerializer, GoogleAuthSerializer, ChangePasswordSerializer,DeleteAccountSerializer
 from .utils import otp_service, reset_password_service
 from .models import User
 from rest_framework_simplejwt.tokens import RefreshToken,TokenError
@@ -195,11 +195,27 @@ class LogoutView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        response = Response({"message": "Logged out successfully."})
-        
-        response.delete_cookie("refresh_token")
+        try:
+            refresh_token = request.COOKIES.get("refresh")
 
-        return response
+            if refresh_token:
+                token = RefreshToken(refresh_token)
+                token.blacklist()
+
+            response = Response(
+                {"message": "Logged out successfully"},
+                status=status.HTTP_200_OK
+            )
+
+            response.delete_cookie("refresh")
+
+            return response
+
+        except Exception:
+            return Response(
+                {"error": "Logout failed"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
     
 
 class ForgotPasswordView(APIView):
@@ -333,3 +349,21 @@ class ChangePasswordAPIView(APIView):
             )
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    
+class DeleteAccountView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        serializer = DeleteAccountSerializer(data=request.data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+
+        user = request.user
+        user.is_active = False
+        user.is_deleted = True
+        user.save()
+
+        response = Response({"message": "Account deleted successfully."}, status=status.HTTP_200_OK)
+        # Clear cookies on deletion
+        response.delete_cookie("refresh_token")
+        return response

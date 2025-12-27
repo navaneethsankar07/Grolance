@@ -3,10 +3,10 @@ import Landingpage from "../features/client/landingPage/Landingpage";
 import { Navigate, replace } from "react-router-dom";
 
 export default function ProtectedRoute({ children }) {
-  const user = useSelector((state)=>state.auth.user);
-  
-  
-  
+  const { user, initialized } = useSelector((state) => state.auth);
+  if (!initialized) {
+  return null;}
+
   if (!user) {
     return <Landingpage/>
   }

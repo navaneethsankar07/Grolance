@@ -16,7 +16,7 @@ export default function ClientHeroSection() {
           <p className="text-lg leading-[27px] text-gray-200">
             Browse thousands of skilled professionals across hundreds of categories.
           </p>
-          <button className="flex h-14 items-center justify-center gap-2 rounded-[13px] border border-[#135BEC] bg-[#3B82F6] px-7 transition-colors hover:bg-[#2563EB]">
+          <button className="flex h-14 items-center justify-center gap-2 rounded-[13px] border border-[#135BEC] bg-primary px-7 transition-colors hover:bg-[#2563EB]">
             <Search className="h-6 w-6 text-white" />
             <span className="text-2xl font-bold leading-5 text-white">Find Talents</span>
           </button>

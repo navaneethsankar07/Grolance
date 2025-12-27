@@ -5,7 +5,7 @@ from rest_framework.filters import SearchFilter, OrderingFilter
 from django.contrib.auth import get_user_model
 from rest_framework.response import Response
 from adminpanel.serializers.user_serializers import AdminUserListSerializer
-from adminpanel.pagination import AdminUserPagination
+from common.pagination import AdminUserPagination
 from adminpanel.permissions import IsAdminUser
 from rest_framework import status
 
