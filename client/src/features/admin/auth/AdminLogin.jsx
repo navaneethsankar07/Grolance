@@ -8,6 +8,7 @@ import { loginThunk, logoutThunk } from "../../client/account/auth/authThunks";
 import { Navigate, useNavigate } from "react-router-dom";
 import { logout } from "../../client/account/auth/authslice";
 import { logoutUser } from "../../../api/auth/authApi";
+import { toast } from "react-toastify";
 
 export default function AdminLogin() {
   const dispatch = useDispatch();
@@ -38,16 +39,19 @@ export default function AdminLogin() {
 
       if (!res.user?.is_admin) {
         setServerError("Access denied. You are not an administrator.");
+        toast.error("Access Denied")
         await logoutUser()
         dispatch(logout())
         return;
       }
       navigate('/admin', {replace:true})
+      toast.success("Login Successful")
 
     } catch (err) {
       setServerError(
         err?.message || "Invalid admin credentials"
       );
+      toast.error(err?.message||"invalid admin credentials")
     }
   };
 

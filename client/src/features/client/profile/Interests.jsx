@@ -3,6 +3,7 @@ import { X, Plus, Search } from "lucide-react";
 import { useCategories } from "../projectManagement/projectQueries";
 import { useProfile } from "./profileQueries";
 import { useUpdateProfile } from "./profileMutations";
+import { toast } from "react-toastify";
 
 export default function Interests() {
   const { data: categoriesData } = useCategories();
@@ -30,10 +31,10 @@ export default function Interests() {
       },
       {
         onSuccess: () => {
-          console.log("Updated successfully");
+          toast.success("Updated successfully");
         },
         onError: (error) => {
-          console.error("Failed to update:", error);
+          toast.error("Failed to update:", error);
         }
       }
     );

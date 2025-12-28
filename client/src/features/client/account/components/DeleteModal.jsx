@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { deleteAccount } from "../auth/authThunks";
 import { AlertTriangle, Loader2 } from "lucide-react";
+import { toast } from "react-toastify";
 
 export default function DeleteAccountModal({ onClose }) {
   const [password, setPassword] = useState("");
@@ -20,10 +21,12 @@ export default function DeleteAccountModal({ onClose }) {
     
     if (deleteAccount.fulfilled.match(result)) {
       onClose();
-      window.location.href = "/"; 
+      window.location.href = "/";
+      toast.success("Account Deleted Successfully") 
     } else {
       setLocalError(result.payload?.password || "Failed to delete account");
       setIsDeleting(false);
+      toast.error("Account Deletion Failed Try Again")
     }
   };
 

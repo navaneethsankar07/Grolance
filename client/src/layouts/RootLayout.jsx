@@ -8,7 +8,7 @@ import { useEffect, } from "react";
 import { fetchUser } from "../features/client/account/auth/authThunks";
 import { Loader2 } from 'lucide-react'
 import ForgotPasswordModal from "../features/client/account/ForgotPasswordModal";
-import ConfirmProjectModal from "../features/client/projectManagement/ConfirmProjectModal";
+import ConfirmProjectModal from "../features/client/projectManagement/components/ConfirmProjectModal";
 import DeleteUserModal from "../features/admin/usermanagement/components/DeleteUserModal";
 import SuspendUserModal from "../features/admin/usermanagement/components/SuspendUserModal";
 import { EditCategoryModal } from "../features/admin/categorymanagement/components/EditCategoryModal";

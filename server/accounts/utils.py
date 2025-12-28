@@ -132,11 +132,11 @@ class PasswordResetService:
   @staticmethod
   def send_reset_link(email, uid, token):
         reset_url = (
-            f"{settings.FRONTEND_URL}/reset-password"
-            f"?uid={uid}&token={token}"
+            f"{settings.FRONTEND_URL}/reset-password?uid={uid}&token={token}"
         )
+        print(reset_url)
 
-        subject = "Reset your Grolance password"
+        subject = "Reset  Grolance password"
 
         text_content = f"""
         You requested a password reset.
@@ -197,7 +197,7 @@ class PasswordResetService:
                 </p>
 
                 <a
-                  href="{reset_url}"
+                  href='{reset_url}'
                   style="
                     display:inline-block;
                     padding:14px 28px;

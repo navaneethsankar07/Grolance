@@ -1,6 +1,7 @@
 import * as React from "react";
 import * as Dialog from "@radix-ui/react-dialog";
 import { useCreateCategory } from "../categoryMutations";
+import { toast } from "react-toastify";
 
 export function AddCategoryModal({ open, onOpenChange }) {
   const [name, setName] = React.useState("");
@@ -18,6 +19,7 @@ export function AddCategoryModal({ open, onOpenChange }) {
         },
       }
     );
+    toast.success("Category created")
   };
 
   return (

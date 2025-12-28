@@ -1,5 +1,6 @@
 import * as Dialog from "@radix-ui/react-dialog";
 import { useDeleteCategory } from "../categoryMutations";
+import { toast } from "react-toastify";
 
 export function DeleteCategoryModal({ open, onOpenChange, category }) {
   const deleteMutation = useDeleteCategory();
@@ -12,7 +13,7 @@ export function DeleteCategoryModal({ open, onOpenChange, category }) {
                             error.response?.data?.detail || 
                             "An error occurred";
       
-      alert(serverMessage);
+      toast.success(serverMessage);
       }
     });
   };

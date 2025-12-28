@@ -1,5 +1,6 @@
 import React from 'react';
 import { useDeleteSkill } from "../skillMutations";
+import { toast } from 'react-toastify';
 
 export default function DeleteSkillModal({ open, onOpenChange, skill }) {
   const deleteSkillMutation = useDeleteSkill();
@@ -12,10 +13,12 @@ export default function DeleteSkillModal({ open, onOpenChange, skill }) {
         onOpenChange(false);
       },
     });
+    toast.success("Skill removed")
   };
 
   const handleCancel = () => {
     deleteSkillMutation.reset();
+
     onOpenChange(false);
   };
 

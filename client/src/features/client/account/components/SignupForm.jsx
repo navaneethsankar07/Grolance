@@ -5,6 +5,7 @@ import {zodResolver} from '@hookform/resolvers/zod'
 import { signupSchema } from "../validation/authSchemas";
 import { sendOtp } from "../../../../api/auth/authApi";
 import { useModal } from "../../../../hooks/modal/useModalStore";
+import { toast } from "react-toastify";
 
 export default function SignupForm({ }) {
   
@@ -28,6 +29,7 @@ export default function SignupForm({ }) {
       const res = await sendOtp(formData);
     setSignupData(formData);
     openModal("otp",{email:formData.email})
+    toast.success("OTP Sent! Check your Email")
   } catch (err) {
   const data = err.response?.data;
 

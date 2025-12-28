@@ -6,6 +6,7 @@ import { CheckCircle2, Lightbulb, X } from "lucide-react";
 import { projectCreateSchema } from "./projectSchemas";
 import { useCategories, useSkills, useProjectDetails } from "./projectQueries";
 import { useUpdateProject } from "./projectMutations";
+import { toast } from "react-toastify";
 
 export default function EditProject() {
   const { id } = useParams();
@@ -79,8 +80,9 @@ const onFormError = (errors) => {
     try {
       await editProject({ id, data: formattedData });
       navigate("/my-projects");
+      toast.success("Post Edited Successfully")
     } catch (error) {
-      console.error("Update failed:", error);
+      toast.error("Update failed:", error);
     }
   };
 

@@ -237,11 +237,10 @@ class ForgotPasswordView(APIView):
         uid = token_data["uid"]
         token = token_data["token"]
 
-
         reset_password_service.send_reset_link(
             email=user.email,
-            uid=token_data["uid"],
-            token=token_data["token"],
+            uid=uid,
+            token=token
         )
 
         return Response(

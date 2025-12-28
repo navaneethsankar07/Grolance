@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import { initGoogleButton } from "../helper/googleSignupHelper";
 import { googleAuth } from "../../../../api/auth/authApi";
 import { setCredentials } from "../auth/authslice";
+import { toast } from "react-toastify";
 
 export default function SignInForm() {
   const dispatch = useDispatch();
@@ -22,8 +23,10 @@ export default function SignInForm() {
       await dispatch(loginThunk({ email, password })).unwrap();
       navigate("/");
       closeModal();
+      toast.success('Login Successfull')
     } catch (err) {
       setLoginError(err?.error || "Invalid email or password");
+      toast.error('Login failed try again')
     }
   };
 
@@ -41,11 +44,13 @@ useEffect(() => {
 
         closeModal();
         navigate("/");
+        toast.success('Login Successful')
       } catch (err) {
         console.log();
         (
           err?.response?.data?.error || "Google authentication failed"
         );
+        toast.error("Login Failed try again")
       }
     });
   }, []);

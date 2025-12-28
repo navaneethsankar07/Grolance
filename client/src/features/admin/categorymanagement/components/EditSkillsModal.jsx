@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useUpdateSkill } from "../skillMutations";
+import { toast } from "react-toastify";
 
 export default function EditSkillModal({ open, onOpenChange, skill, categories }) {
   const [name, setName] = useState("");
@@ -33,6 +34,7 @@ export default function EditSkillModal({ open, onOpenChange, skill, categories }
         },
       }
     );
+    toast.success("skill updated")
   };
 
   const handleCancel = () => {

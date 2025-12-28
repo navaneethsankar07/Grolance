@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { setCredentials } from './auth/authslice';
 import { resendOtp } from "../../../api/auth/authApi";
+import { toast } from 'react-toastify';
 
 export default function VerifyOtp({ email }) {
   const dispatch = useDispatch();
@@ -47,6 +48,7 @@ export default function VerifyOtp({ email }) {
 
       closeModal();
       navigate("/");
+      toast.success("Welcome To Grolance")
     } catch (err) {
        const message =
     err.response?.data?.error ||
@@ -54,6 +56,7 @@ export default function VerifyOtp({ email }) {
     "Invalid or expired OTP";
 
   setError(message);
+  toast.error(message)
     }
   };
 
@@ -64,8 +67,9 @@ export default function VerifyOtp({ email }) {
       await resendOtp({ email });
       setTimer(60);
       setCanResend(false);
+      toast.success('Otp sent! check your email')
     } catch (err) {
-      console.log("Resend OTP Error:", err.response?.data || err.message);
+      toast.error("Resend OTP Error:", err.response?.data || err.message);
     }
   };
 

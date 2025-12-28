@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useCreateSkill } from "../skillMutations";
+import { toast } from "react-toastify";
 
 export default function AddSkillModal({ categories, onClose }) {
     if (!categories)return null;
@@ -26,6 +27,7 @@ export default function AddSkillModal({ categories, onClose }) {
         },
       }
     );
+    toast.success("skill created")
   };
 
   const handleCancel = () => {

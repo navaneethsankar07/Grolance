@@ -1,6 +1,7 @@
 import * as Dialog from "@radix-ui/react-dialog";
 import { useUpdateCategory } from "../categoryMutations";
 import { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 
 export function EditCategoryModal({ open, onOpenChange, category }) {
   const [name, setName] = useState("");
@@ -22,6 +23,7 @@ useEffect(() => {
         onSuccess: () => onOpenChange(false),
       }
     );
+    toast.success("Category updated")
   };
 
   if (!category) return null;

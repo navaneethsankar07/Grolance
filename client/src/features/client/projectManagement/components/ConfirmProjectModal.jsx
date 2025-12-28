@@ -1,4 +1,4 @@
-import { useModal } from "../../../hooks/modal/useModalStore";
+import { useModal } from "../../../../hooks/modal/useModalStore";
 import {
   X,
   Wallet,

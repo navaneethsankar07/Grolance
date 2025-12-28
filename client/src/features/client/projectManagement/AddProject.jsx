@@ -7,6 +7,7 @@ import { useCategories, useSkills } from './projectQueries';
 import { useCreateProject } from "./projectMutations";
 import { useModal } from '../../../hooks/modal/useModalStore';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 
 function AddProject() {
@@ -77,12 +78,14 @@ function AddProject() {
           console.log("Project created:", res);
           closeModal();
           navigate('/my-projects', { replace: true })
+          toast.success("Project Posted Successfully")
         } catch (error) {
           closeModal();
           if (error.response) {
-            console.error("Server error:", error.response.data);
+            toast.error("Server error:", error.response.data);
+  
           } else {
-            console.error("Unexpected error:", error);
+            toast.error("Unexpected error:", error);
           }
         }
       },

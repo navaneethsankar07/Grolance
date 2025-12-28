@@ -35,7 +35,7 @@ export default function ProfileModal({ isOpen, onClose }) {
   return (
     <div
       ref={menuRef}
-      className="profile-menu-container absolute right-0 top-14 z-50 w-72 rounded-xl border border-gray-100 bg-white"
+      className="profile-menu-container fixed  right-0 top-18 z-50 w-72 rounded-xl border border-gray-100 bg-white"
       style={{
         boxShadow:
           "0 8px 10px -6px rgba(0, 0, 0, 0.10), 0 20px 25px -5px rgba(0, 0, 0, 0.10)",

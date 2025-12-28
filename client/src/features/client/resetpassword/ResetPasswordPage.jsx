@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import { resetPassword, validateLink } from "../../../api/auth/authApi";
 import Header from "../landingPage/components/Header";
 import Footer from "../landingPage/components/Footer";
+import { toast } from "react-toastify";
 
 export default function ResetPasswordPage() {
   const [searchParams] = useSearchParams();
@@ -44,6 +45,7 @@ export default function ResetPasswordPage() {
     try {
       await resetPassword({ uid, token, newPassword, confirmPassword });
       setStatus("success");
+      toast.success("Password updated")
     } catch (err) {
       setError(
         err.response?.data?.error ||
