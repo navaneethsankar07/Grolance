@@ -69,12 +69,9 @@ class ProjectCreateSerializer(serializers.ModelSerializer):
 
         for skill_name in skills_data:
             normalized = skill_name.strip().title()
-            skill, _ = Skill.objects.get_or_create(
-                name=skill_name.strip(),
-                defaults={"is_custom": True}
-            )
 
-            skill = Skill.objects.filter(name__iexact=normalized).first()
+            skill = Skill.objects.filter(
+                name__iexact=normalized).first()
 
             if skill:
                 ProjectSkill.objects.create(
