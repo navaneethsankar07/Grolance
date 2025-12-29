@@ -86,9 +86,10 @@ axiosInstance.interceptors.response.use(
       } catch (err) {
         processQueue(err, null);
         isRefreshing = false;
-
-        store.dispatch(logout());
-        return Promise.reject(err);
+        if (err.response?.status === 401) {
+          store.dispatch(logout());
+  }
+      return Promise.reject(err);
       }
     }
 

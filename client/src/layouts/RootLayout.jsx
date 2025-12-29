@@ -5,7 +5,7 @@ import OtpModal from "../features/client/account/OtpModal";
 import SignInModal from "../features/client/account/SignInModal";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect, } from "react";
-import { fetchUser } from "../features/client/account/auth/authThunks";
+import { fetchUser, refreshSession } from "../features/client/account/auth/authThunks";
 import { Loader2 } from 'lucide-react'
 import ForgotPasswordModal from "../features/client/account/ForgotPasswordModal";
 import ConfirmProjectModal from "../features/client/projectManagement/components/ConfirmProjectModal";
@@ -21,13 +21,18 @@ import ProfileModal from "../features/client/homepage/components/ProfileModal";
 import DeleteAccountModal from "../features/client/account/components/DeleteModal";
 export default function RootLayout() {
   const { modal, modalProps, closeModal } = useModal();
-  const { loading, initialized } = useSelector((s) => s.auth)
+const { loading, initialized, accessToken } = useSelector((s) => s.auth);
   const dispatch = useDispatch();
 useEffect(() => {
-  if (!initialized) {
+
+  dispatch(refreshSession());
+}, [dispatch]);
+
+useEffect(() => {
+  if (accessToken) {
     dispatch(fetchUser());
   }
-}, [initialized]);
+}, [accessToken, dispatch]);
 
 
   if (!initialized) { 

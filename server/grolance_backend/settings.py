@@ -69,6 +69,7 @@ SIMPLE_JWT = {
     'AUTH_HEADER_TYPES': ('Bearer',),
 }
 
+
 AUTH_USER_MODEL = 'accounts.User'
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 

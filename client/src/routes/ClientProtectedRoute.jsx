@@ -1,18 +1,20 @@
-import {  useSelector } from "react-redux";
-import Landingpage from "../features/client/landingPage/Landingpage";
-import { Navigate, replace } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { Navigate } from "react-router-dom";
 
 export default function ProtectedRoute({ children }) {
-  const { user, initialized } = useSelector((state) => state.auth);
+  const { user, initialized } = useSelector(state => state.auth);
+
   if (!initialized) {
-  return null;}
+    return null; 
+  }
 
   if (!user) {
-    return <Landingpage/>
+    return <Navigate to="/landing-page" replace />;
   }
-  if(user.is_admin){
-    return <Navigate to='/admin' replace/>
+
+  if (user.is_admin) {
+    return <Navigate to="/admin" replace />;
   }
-  
+
   return children;
 }
