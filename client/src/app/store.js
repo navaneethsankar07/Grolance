@@ -6,7 +6,6 @@ import storage from "redux-persist/lib/storage";
 const authPersistConfig = {
     key: "auth",
     storage,
-    // Added accessToken so the user stays logged in across refreshes
     whitelist: ["user", "accessToken"] 
 }
 
@@ -21,7 +20,6 @@ const store = configureStore({
     },
     middleware: (getDefaultMiddleware) => 
         getDefaultMiddleware({
-            // Required to avoid console errors with redux-persist
             serializableCheck: false, 
         })
 });

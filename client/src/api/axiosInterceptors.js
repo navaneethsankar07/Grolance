@@ -63,9 +63,7 @@ axiosInstance.interceptors.response.use(
 
         store.dispatch(setCredentials({
   user: store.getState().auth.user,
-  accessToken: newAccessToken,
-  refreshToken: res.data.refresh
-}));
+  accessToken: newAccessToken}));
 
 
         processQueue(null, newAccessToken);
@@ -78,9 +76,10 @@ axiosInstance.interceptors.response.use(
       } catch (err) {
         processQueue(err, null);
         isRefreshing = false;
-
-        store.dispatch(logout());
-        return Promise.reject(err);
+        if (err.response?.status === 401) {
+          store.dispatch(logout());
+  }
+      return Promise.reject(err);
       }
     }
 

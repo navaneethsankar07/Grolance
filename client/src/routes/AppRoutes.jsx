@@ -7,6 +7,7 @@ import AdminRoutes from './AdminRoutes'
 import AdminProtectedRoute from './AdminProtectedRoutes'
 import AdminLogin from '../features/admin/auth/AdminLogin'
 import AdminLayout from '../layouts/AdminLayout'
+import Landingpage from '../features/client/landingPage/Landingpage'
 
 
 function AppRoutes() {
@@ -23,7 +24,7 @@ function AppRoutes() {
               </ProtectedRoute>
             }
           />
-
+           <Route path="/landing-page" element={<Landingpage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route element={<AdminProtectedRoute />}>

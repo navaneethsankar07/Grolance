@@ -41,3 +41,15 @@ export const logoutThunk = createAsyncThunk(
     }
   }
 );
+
+export const refreshSession = createAsyncThunk(
+  "auth/refresh",
+  async (_, thunkAPI) => {
+    try {
+      const res = await authApi.refreshToken();
+      return res.access;
+    } catch (err) {
+      return thunkAPI.rejectWithValue("Refresh failed");
+    }
+  }
+);

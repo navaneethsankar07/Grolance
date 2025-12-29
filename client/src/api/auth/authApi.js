@@ -61,3 +61,9 @@ export const googleAuth = async (idToken) => {
 export const logoutUser = async () => {
   await axiosInstance.post("/auth/logout/");
 };
+
+
+export const refreshToken = async () => {
+  const res = await axiosInstance.post("/auth/refresh/");
+  return res.data;
+};
