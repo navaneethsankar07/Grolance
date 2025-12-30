@@ -1,4 +1,4 @@
-from rest_framework.generics import CreateAPIView,ListAPIView, RetrieveUpdateAPIView
+from rest_framework.generics import CreateAPIView,ListAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.permissions import IsAuthenticated
 from .permissions import IsClientUser
 from .models import Project
@@ -27,9 +27,9 @@ class ProjectListView(ListAPIView):
 
         return queryset.select_related('category').prefetch_related('project_skills__skill').order_by('-created_at')
 
-class ProjectUpdateAPIView(RetrieveUpdateAPIView):
+class ProjectUpdateAPIView(RetrieveUpdateDestroyAPIView):
     serializer_class = ProjectUpdateSerializer
     permission_classes = [IsAuthenticated, IsClientUser]
-
+    
     def get_queryset(self):
         return Project.objects.filter(client=self.request.user)
