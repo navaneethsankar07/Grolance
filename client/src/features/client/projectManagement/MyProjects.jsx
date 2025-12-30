@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import ProjectCard from "./components/ProjectCard";
 import { useMyProjects } from "./projectQueries";
 import { Briefcase, CircleCheck, Hourglass , Search, ChevronRight, ChevronLeft, FolderOpen} from "lucide-react";
@@ -6,7 +6,7 @@ export default function MyProjects() {
   const [activeTab, setActiveTab] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [page, setPage] = useState(1);
-
+  const searchInputRef = useRef(null);
   const { data, isLoading } = useMyProjects({
     page,
     status: activeTab === "all" ? "" : activeTab,
@@ -15,7 +15,14 @@ export default function MyProjects() {
 
   const jobs = data?.results ?? [];
   const totalCount = data?.count ?? 0;
-
+  const handleSearch = () => {
+    const value = searchInputRef.current.value;
+    setSearchQuery(value);
+    setPage(1);
+  }
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') handleSearch();
+  }
   const TabButton = ({ id, label, Icon, count }) => (
     <button
       onClick={() => { setActiveTab(id); setPage(1); }}
@@ -43,18 +50,26 @@ export default function MyProjects() {
             <p className="text-sm md:text-base text-gray-500">View, manage, and track all the projects you've posted.</p>
           </div>
 
-          <div className="relative w-full lg:w-[414px]">
-
-            <Search className="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xl"/>
-            <input
-              type="text"
-              placeholder="Search Jobs..."
-              value={searchQuery}
-              onChange={(e) => { setSearchQuery(e.target.value); setPage(1); }}
-              className="w-full h-[46px] pl-11 pr-4 border border-gray-300 rounded-md text-base text-gray-900 focus:ring-2 focus:ring-blue-500 outline-none"
-            />
-          </div>
-        </div>
+          <div className="relative flex w-full lg:w-[414px] items-center">
+      <div className="relative flex-1">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+        <input
+          type="text"
+          ref={searchInputRef}
+          onKeyDown={handleKeyDown}
+          placeholder="Search Jobs..."
+          className="w-full h-[46px] pl-11 pr-4 border border-gray-300 rounded-l-md text-base focus:ring-2 focus:ring-blue-500 outline-none"
+        />
+      </div>
+      
+      <button
+        onClick={handleSearch} // 5. Trigger on click
+        className="h-[46px] px-5 bg-primary hover:bg-primary/90 text-white rounded-r-md flex items-center justify-center transition-colors"
+      >
+        <Search className="w-5 h-5" />
+      </button>
+    </div>
+    </div>
 
         <div className="border-b border-gray-200 mb-6">
           <nav className="flex gap-6">
