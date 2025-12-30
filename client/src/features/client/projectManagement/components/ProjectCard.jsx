@@ -1,12 +1,15 @@
 import React from "react";
 import { IndianRupee, ClipboardList, Clock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useModal } from "../../../../hooks/modal/useModalStore";
 export default function ProjectCard({ job }) {
   const navigate = useNavigate();
+  const {openModal} = useModal()
   const renderBudget = () => {
     const fixed = job.fixed_price ? Number(job.fixed_price).toLocaleString() : "0";
     const min = job.min_budget ? Number(job.min_budget).toLocaleString() : "0";
     const max = job.max_budget ? Number(job.max_budget).toLocaleString() : "0";
+
     if (job.pricing_type === "fixed") {
       return (
         <span className="text-sm text-gray-600 font-medium">
@@ -71,6 +74,10 @@ export default function ProjectCard({ job }) {
         </button>
         <button onClick={() => navigate(`/my-projects/${job.id}/edit`)} className="h-11 px-4 border border-gray-300 bg-white text-gray-700 text-sm font-medium rounded-md hover:bg-gray-50 transition-colors shadow-sm">
           Edit Post
+        </button>
+
+        <button onClick={() =>{openModal('delete-project',{projectId:job.id})}} className="h-11 px-4 border border-red-300 bg-white text-red-600 text-sm font-medium rounded-md hover:bg-gray-50 transition-colors shadow-sm">
+          Delete Post
         </button>
       </div>
     </div>

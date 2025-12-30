@@ -39,3 +39,8 @@ export const updateProject = async ({id,data}) => {
   const res = await axiosInstance.patch(`/projects/${id}/`,data);
   return res.data;
 };
+
+export const deleteProject = async ({id}) =>{
+  const res = await axiosInstance.delete(`/projects/${id}/`);
+  return res.data;
+}

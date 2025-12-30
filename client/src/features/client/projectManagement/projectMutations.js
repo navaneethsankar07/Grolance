@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { createProject, updateProject } from "./ProjectApi";
+import { createProject, deleteProject, updateProject } from "./ProjectApi";
 
 export const useCreateProject = () => {
   const queryClient = useQueryClient();
@@ -23,3 +23,15 @@ export const useUpdateProject = () => {
     },
   });
 };
+
+export const useDeleteProject = ()=>{
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn:deleteProject,
+    onSuccess:(_,projectId)=>{
+      queryClient.invalidateQueries({queryKey:['my-projects']})
+      queryClient.removeQueries({queryKey:['project',projectId]})
+    }
+  
+  })
+}

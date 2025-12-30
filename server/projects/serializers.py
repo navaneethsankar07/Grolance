@@ -198,6 +198,6 @@ class ProjectUpdateSerializer(serializers.ModelSerializer):
                 custom_name=None if skill else normalized,
             )
 
-
+    
         return instance
     

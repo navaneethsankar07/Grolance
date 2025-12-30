@@ -19,6 +19,7 @@ import EditSkillModal from "../features/admin/categorymanagement/components/Edit
 import DeleteSkillModal from "../features/admin/categorymanagement/components/DeleteSkillModal";
 import ProfileModal from "../features/client/homepage/components/ProfileModal";
 import DeleteAccountModal from "../features/client/account/components/DeleteModal";
+import ProjectDeleteModal from "../features/client/projectManagement/components/ProjectDeleteModal";
 export default function RootLayout() {
   const { modal, modalProps, closeModal } = useModal();
 const { loading, initialized, accessToken } = useSelector((s) => s.auth);
@@ -54,6 +55,7 @@ useEffect(() => {
       {modal === "suspend-user" && (<SuspendUserModal isOpen onClose={closeModal} modalProps={modalProps} />)}
       {modal === "profile-menu" && <ProfileModal isOpen onClose={closeModal}/>}
       {modal === "delete-account" && <DeleteAccountModal onClose={closeModal}/>}
+      {modal === 'delete-project' && <ProjectDeleteModal projectId={modalProps.projectId} onClose={closeModal} />}
     </>
   );
 }
