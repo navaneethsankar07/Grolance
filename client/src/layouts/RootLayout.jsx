@@ -24,17 +24,10 @@ export default function RootLayout() {
 const { loading, initialized, accessToken } = useSelector((s) => s.auth);
   const dispatch = useDispatch();
 useEffect(() => {
-
-  dispatch(refreshSession());
-}, [dispatch]);
-
-useEffect(() => {
-  if (accessToken) {
-    dispatch(fetchUser());
+  if(!accessToken){
+   dispatch(fetchUser());
   }
-}, [accessToken, dispatch]);
-
-
+  }, []);
   if (!initialized) { 
     return (
       <div className="h-screen flex items-center justify-center">

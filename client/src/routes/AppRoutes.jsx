@@ -24,7 +24,6 @@ function AppRoutes() {
               </ProtectedRoute>
             }
           />
-           <Route path="/landing-page" element={<Landingpage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route element={<AdminProtectedRoute />}>

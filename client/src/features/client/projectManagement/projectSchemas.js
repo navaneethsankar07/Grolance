@@ -2,49 +2,54 @@ import { z } from "zod";
 
 export const projectCreateSchema = z
   .object({
-    title: z.string().min(5),
+    title: z
+      .string()
+      .min(5)
+      .regex(/^[^0-9]*$/, "Title cannot contain numbers")
+      .regex(/^[a-zA-Z\s]*$/, "Full name can only contain letters and spaces"),
     description: z.string().min(50),
     requirements: z.string().min(20),
     expected_deliverables: z.string().min(10),
 
     category: z.preprocess((val) => Number(val), z.number().min(1)),
-    skills: z.array(z.string()).min(1),
-
+    skills: z
+      .array(z.string().regex(/^[^0-9]*$/, "Title cannot contain numbers")
+      .regex(/^[a-zA-Z\s]*$/, "Full name can only contain letters and spaces"))
+      .min(3)
+      
+      ,
     pricing_type: z.enum(["fixed", "range"]),
 
-    fixed_price: z.number().positive().optional(),
-    min_budget: z.number().positive().optional(),
-    max_budget: z.number().positive().optional(),
+    fixed_price: z.number().positive().nullish().optional(),
+    min_budget: z.number().positive().nullish().optional(),
+    max_budget: z.number().positive().nullish().optional(),
 
-    delivery_days: z
-      .number()
-      .int()
-      .positive()
-      .max(99),
-  }).superRefine((data, ctx) => {
-  if (data.pricing_type === "fixed") {
-    if (data.fixed_price == null) {
-      ctx.addIssue({
-        path: ["fixed_price"],
-        message: "Fixed price is required",
-      });
-    }
-  }
-
-  if (data.pricing_type === "range") {
-    if (data.min_budget == null || data.max_budget == null) {
-      ctx.addIssue({
-        path: ["min_budget"],
-        message: "Budget range is required",
-      });
-      return;
+    delivery_days: z.number().int().positive().max(99),
+  })
+  .superRefine((data, ctx) => {
+    if (data.pricing_type === "fixed") {
+      if (data.fixed_price == null) {
+        ctx.addIssue({
+          path: ["fixed_price"],
+          message: "Fixed price is required",
+        });
+      }
     }
 
-    if (data.min_budget >= data.max_budget) {
-      ctx.addIssue({
-        path: ["max_budget"],
-        message: "Max budget must be greater than min budget",
-      });
+    if (data.pricing_type === "range") {
+      if (data.min_budget == null || data.max_budget == null) {
+        ctx.addIssue({
+          path: ["min_budget"],
+          message: "Budget range is required",
+        });
+        return;
+      }
+
+      if (data.min_budget >= data.max_budget) {
+        ctx.addIssue({
+          path: ["max_budget"],
+          message: "Max budget must be greater than min budget",
+        });
+      }
     }
-  }
   });

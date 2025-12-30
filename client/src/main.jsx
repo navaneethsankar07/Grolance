@@ -15,8 +15,12 @@ const queryClient = new QueryClient();
 createRoot(document.getElementById('root')).render(
   // <StrictMode>
     <Provider store={store}>
-    <PersistGate loading={null} persistor={persistor}>
-    <ModalProvider>
+<PersistGate
+  persistor={persistor}
+  onBeforeLift={() => {
+    store.dispatch({ type: "app/rehydrated" });
+  }}
+>    <ModalProvider>
     <QueryClientProvider client={queryClient}>
     <App />
   </QueryClientProvider>

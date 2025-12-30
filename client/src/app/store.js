@@ -18,7 +18,7 @@ const resettableRootReducer = (state, action) => {
 const authPersistConfig = {
     key: "auth",
     storage,
-    whitelist: ["user", "accessToken"] 
+    whitelist: ["user"] 
 }
 
 const persistedReducer = persistReducer(authPersistConfig, resettableRootReducer)
@@ -27,9 +27,7 @@ const store = configureStore({
     reducer: persistedReducer,
     middleware: (getDefaultMiddleware) => 
         getDefaultMiddleware({
-            serializableCheck: {
-                ignoredActions: [FLUSH,REHYDRATE,PAUSE,PERSIST, PURGE, REGISTER],
-            }, 
+            serializableCheck: false
 
         })
 });
