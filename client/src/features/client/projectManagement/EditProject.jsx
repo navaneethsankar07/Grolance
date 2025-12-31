@@ -57,6 +57,17 @@ const onFormError = (errors) => {
     }
   }, [project, reset]);
 
+useEffect(() => {
+  const unloadCallback = (event) => {
+    event.preventDefault();
+    event.returnValue = "";
+    return "";
+  };
+
+  window.addEventListener("beforeunload", unloadCallback);
+  return () => window.removeEventListener("beforeunload", unloadCallback);
+}, []);
+
   const addSkill = (skillName) => {
     if (selectedSkills.includes(skillName)) return;
     setValue("skills", [...selectedSkills, skillName], { shouldValidate: true });

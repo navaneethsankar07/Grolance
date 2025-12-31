@@ -1,5 +1,5 @@
 import { CheckCircle2, Lightbulb } from 'lucide-react';
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form';
 import { zodResolver } from "@hookform/resolvers/zod";
 import { projectCreateSchema } from "./projectSchemas";
@@ -11,6 +11,17 @@ import { toast } from 'react-toastify';
 
 
 function AddProject() {
+useEffect(() => {
+  const unloadCallback = (event) => {
+    event.preventDefault();
+    event.returnValue = "";
+    return "";
+  };
+
+  window.addEventListener("beforeunload", unloadCallback);
+  return () => window.removeEventListener("beforeunload", unloadCallback);
+}, []);
+
   const { register, handleSubmit, setValue, watch, formState: { errors }, } = useForm({
     resolver: zodResolver(projectCreateSchema),
     shouldUnregister: true,
