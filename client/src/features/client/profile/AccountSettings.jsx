@@ -44,8 +44,7 @@ export default function AccountSettings() {
           Account Settings
         </h1>
 
-        {/* EMAIL */}
-        <div className="bg-white rounded-xl border p-6 mb-8">
+         <div className="bg-white rounded-xl border p-6 mb-8">
           <div className="flex gap-4">
             <div className="w-10 h-10 bg-blue-50 flex items-center justify-center rounded-lg">
               <Mail className="w-5 h-5 text-blue-500" />
@@ -86,7 +85,6 @@ export default function AccountSettings() {
               </div>
             </div>
 
-            {/* CURRENT PASSWORD */}
             <div className="space-y-1 mb-4">
               <div className="relative">
                 <input
@@ -114,7 +112,6 @@ export default function AccountSettings() {
               )}
             </div>
 
-            {/* NEW PASSWORD */}
             <div className="space-y-1 mb-4">
               <div className="relative">
                 <input
@@ -144,7 +141,6 @@ export default function AccountSettings() {
               )}
             </div>
 
-            {/* CONFIRM PASSWORD */}
             <div className="space-y-1 mb-6">
               <div className="relative">
                 <input

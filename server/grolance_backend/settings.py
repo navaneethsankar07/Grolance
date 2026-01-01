@@ -14,6 +14,7 @@ from pathlib import Path
 import environ
 import os
 from datetime import timedelta
+import cloudinary
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -55,6 +56,8 @@ INSTALLED_APPS = [
     'common',
     'profiles',
     'rest_framework_simplejwt.token_blacklist',
+    'cloudinary',
+    'cloudinary_storage'
     
 ]
 SIMPLE_JWT = {
@@ -83,7 +86,7 @@ EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD")
 DEFAULT_FROM_EMAIL = "Grolance <grolance.noreply@gmail.com>"
 FRONTEND_URL = env("FRONTEND_URL")
 GOOGLE_CLIENT_ID = env("GOOGLE_CLIENT_ID")
-
+DEFAULT_FILE_STORAGE='cloudinary_storage.storage.MediaCloudinaryStorage'
 
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
@@ -160,6 +163,12 @@ DATABASES = {
     }
 }
 
+
+cloudinary.config(
+    cloud_name=env("CLOUDINARY_NAME"),
+    api_key=env("CLOUDINARY_API_KEY"),
+    api_secret=env("CLOUDINARY_API_SECRET"),
+)
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
