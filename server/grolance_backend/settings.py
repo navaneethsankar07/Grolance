@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 from pathlib import Path
 import environ
 import os
+import cloudinary
 
 from  datetime import timedelta
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -53,11 +54,13 @@ INSTALLED_APPS = [
     'categories',
     'adminpanel',
     'common',
-    'profiles'
+    'profiles',
+    'cloudinary',
+    'cloudinary_storage'
     
 ]
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(seconds=20),
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=20),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
 }
 
@@ -75,7 +78,7 @@ EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD")
 DEFAULT_FROM_EMAIL = "Grolance <grolance.noreply@gmail.com>"
 FRONTEND_URL = env("FRONTEND_URL")
 GOOGLE_CLIENT_ID = env("GOOGLE_CLIENT_ID")
-
+DEFAULT_FILE_STORAGE='cloudinary_storage.storage.MediaCloudinaryStorage'
 
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
@@ -152,6 +155,12 @@ DATABASES = {
     }
 }
 
+
+cloudinary.config(
+    cloud_name=env("CLOUDINARY_NAME"),
+    api_key=env("CLOUDINARY_API_KEY"),
+    api_secret=env("CLOUDINARY_API_SECRET"),
+)
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (

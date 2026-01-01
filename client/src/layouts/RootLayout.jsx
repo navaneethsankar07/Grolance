@@ -22,14 +22,16 @@ export default function RootLayout() {
 const { loading, initialized, accessToken } = useSelector((s) => s.auth);
   const dispatch = useDispatch();
 useEffect(() => {
-  dispatch(refreshSession());
-}, [dispatch]);
+  if (!initialized) {
+    dispatch(refreshSession());
+  }
+}, [dispatch, initialized]);
 
 useEffect(() => {
-  if (accessToken) {
+  if (accessToken && !initialized) {
     dispatch(fetchUser());
   }
-}, [accessToken, dispatch]);
+}, [accessToken, initialized]);
 
 
 

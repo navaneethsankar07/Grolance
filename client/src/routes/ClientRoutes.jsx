@@ -1,5 +1,4 @@
 import { Route, Routes } from "react-router-dom";
-import Landingpage from "../features/client/landingPage/Landingpage";
 import ClientHomepage from "../features/client/homepage/ClientHomepage";
 import ClientLayout from "../layouts/ClientLayout";
 import { useSelector } from "react-redux";
@@ -11,6 +10,7 @@ import ClientProfileLayout from "../layouts/ClientProfileLayout";
 import ProfileOverview from "../features/client/profile/ProfileOverview";
 import AccountSettings from "../features/client/profile/AccountSettings";
 import Interests from "../features/client/profile/Interests";
+import ProfileEdit from "../features/client/profile/EditProfile";
 
 export default function ClientRoutes() {
   const { user,loading } = useSelector(state => state.auth);
@@ -30,6 +30,7 @@ export default function ClientRoutes() {
           <Route path="/profile" element={<ProfileOverview/>}/>
           <Route path="/profile/settings" element={<AccountSettings/>}/>
           <Route path="/profile/interests" element={<Interests/>}/>
+          <Route path="profile/edit" element={<ProfileEdit/>}/>
           </Route>
         </Route>
           

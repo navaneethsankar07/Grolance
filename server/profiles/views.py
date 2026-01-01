@@ -41,7 +41,15 @@ class ClientProfileUpdateAPIView(UpdateAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_object(self):
-        profile, _ = ClientProfile.objects.get_or_create(
-            user=self.request.user
-        )
+        profile, _ = ClientProfile.objects.get_or_create(user=self.request.user)
         return profile
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+
+        serializer = self.get_serializer(instance, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        read_serializer = ClientProfileOverviewSerializer(instance)
+        return Response(read_serializer.data)

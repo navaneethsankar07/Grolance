@@ -1,4 +1,4 @@
-import { Link, useLocation } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import {
   User,
   Edit3,
@@ -10,7 +10,7 @@ import {
 
 const navigation = [
   { name: "Profile Overview", href: "/profile", icon: User },
-  { name: "Edit Profile", href: "/profile", icon: Edit3 },
+  { name: "Edit Profile", href: "/profile/edit", icon: Edit3 },
   { name: "Skills & Interests", href: "/profile/interests", icon: Sparkles },
   { name: "Account Settings", href: "/profile/settings", icon: Settings },
   { name: "Spending Summary", href: "/profile/spending", icon: TrendingUp },
@@ -30,40 +30,42 @@ export default function ProfileSidebar({ onNavigate }) {
 
       <nav className="flex-1 space-y-1">
         {navigation.map((item) => {
-          const isActive = location.pathname === item.href;
-          const Icon = item.icon;
-
           return (
-            <Link
+            <NavLink
               key={item.name}
               to={item.href}
+              end
               onClick={onNavigate}
-              className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
+              className={({ isActive }) =>
+              `flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
                 isActive
                   ? "bg-blue-500 text-white shadow-sm"
                   : "text-gray-700 hover:bg-gray-50"
-              }`}
-            >
-              <Icon
-                className={`w-5 h-5 ${
-                  isActive ? "text-white" : "text-gray-500"
-                }`}
-                strokeWidth={2}
-              />
-              <span>{item.name}</span>
-            </Link>
+              }`
+            }
+          >
+              {({ isActive }) => (
+              <>
+                <item.icon
+                  className={`w-5 h-5 ${isActive ? "text-white" : "text-gray-500"}`}
+                  strokeWidth={2}
+                />
+                <span>{item.name}</span>
+              </>
+            )}
+            </NavLink>
           );
         })}
 
         <div className="pt-4">
-          <Link
+          <NavLink
             to="/profile/delete"
             onClick={onNavigate}
             className="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
           >
             <Trash2 className="w-5 h-5 text-red-600" strokeWidth={2} />
             <span>Delete Account</span>
-          </Link>
+          </NavLink>
         </div>
       </nav>
       </div>

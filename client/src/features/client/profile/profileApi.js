@@ -7,6 +7,8 @@ export const getMyProfile = async () => {
 
 
 export const updateProfile = async (payload) => {
+  console.log('hello');
+  
   const { data } = await axiosInstance.patch("/profile/me/update/", payload);
   return data;
 };
