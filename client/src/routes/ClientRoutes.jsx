@@ -30,7 +30,7 @@ export default function ClientRoutes() {
           <Route path="/profile" element={<ProfileOverview/>}/>
           <Route path="/profile/settings" element={<AccountSettings/>}/>
           <Route path="/profile/interests" element={<Interests/>}/>
-          <Route path="profile/edit" element={<ProfileEdit/>}/>
+          <Route path="/profile/edit" element={<ProfileEdit/>}/>
           </Route>
         </Route>
           

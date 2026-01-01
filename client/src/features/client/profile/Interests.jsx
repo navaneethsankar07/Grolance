@@ -122,12 +122,11 @@ export default function Interests() {
               </h3>
 
               <div className="flex flex-wrap gap-3">
-                {(searchQuery ? filteredCategories : popularCategories).map(
+                {(searchQuery ? filteredCategories : popularCategories).filter((cat)=>!selected.find((s) => s.id === cat.id)).map(
                   (cat) => (
                     <SkillButton
                       key={cat.id}
                       label={cat.name}
-                      isAdded={!!selected.find((s) => s.id === cat.id)}
                       onClick={() => addCategory(cat)}
                     />
                   )
@@ -173,7 +172,6 @@ function SkillButton({ label, onClick, isAdded }) {
   return (
     <button
       onClick={onClick}
-      disabled={isAdded}
       className={`inline-flex items-center gap-2 rounded-full px-[17px] py-[10px] text-xs font-medium border transition ${
         isAdded
           ? "bg-[#F3F4F6] border-[#E5E7EB] text-[#9CA3AF] cursor-not-allowed"

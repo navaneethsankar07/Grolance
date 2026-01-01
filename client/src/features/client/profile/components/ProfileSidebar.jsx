@@ -15,7 +15,7 @@ const navigation = [
   { name: "Edit Profile", href: "/profile/edit", icon: Edit3 },
   { name: "Skills & Interests", href: "/profile/interests", icon: Sparkles },
   { name: "Account Settings", href: "/profile/settings", icon: Settings },
-  { name: "Spending Summary", href: "", icon: TrendingUp },
+  { name: "Spending Summary", href: "/profile/spending", icon: TrendingUp },
 ];
 
 export default function ProfileSidebar({ onNavigate }) {

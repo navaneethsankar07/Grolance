@@ -8,6 +8,7 @@ import { uploadToCloudinary } from "./cloudinaryHelper";
 import { useUpdateProfile } from "./profileMutations";
 import { useNavigate } from "react-router-dom";
 import { useProfile } from "./profileQueries";
+import { toast } from "react-toastify";
 
 export default function ProfileEdit() {
   const { user } = useSelector((state) => state.auth);
@@ -62,6 +63,7 @@ export default function ProfileEdit() {
         profile_photo: profilePhotoUrl,
       });
       navigate("/profile")
+      toast.success("profile updated")
     } finally {
       setIsUploading(false);
     }
