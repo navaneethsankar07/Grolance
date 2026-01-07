@@ -27,7 +27,7 @@ function StepFive() {
             <div className="absolute top-0 left-0 w-full h-2 bg-primary/10" />
             <div className="flex flex-col md:flex-row gap-8 items-start">
               <div className="relative">
-                {user?.profile_photo ? (
+                {user?.profile_photo? (
                   <img className="w-24 h-24 rounded-2xl object-cover ring-4 ring-gray-50 shadow-sm" src={user.profile_photo} alt="Profile" />
                 ) : (
                   <div className="w-24 h-24 bg-linear-to-br from-primary/20 to-primary/5 rounded-2xl flex items-center justify-center text-2xl font-black text-primary border border-primary/10">
@@ -46,13 +46,15 @@ function StepFive() {
                     {formData.experienceLevel}
                   </span>
                 </div>
-                <p className="text-lg font-bold text-primary leading-tight">
-                  {formData.tagline || "No tagline added"}
-                </p>
-                <p className="text-sm text-gray-500 leading-relaxed max-w-2xl">
-                  {formData.bio || "No bio added"}
-                </p>
-                <div className="flex items-center gap-4 pt-2">
+               <div className="w-150">
+    <p className="text-lg font-bold text-primary leading-tight truncate block">
+      {formData.tagline || "No tagline added"}
+    </p>
+  </div>
+                  <p className="text-sm text-gray-500 leading-relaxed max-w-2xl line-clamp-3">
+    {formData.bio || "No bio added"}
+  </p>
+                  <div className="flex items-center gap-4 pt-2">
                    <div className="flex items-center gap-2 text-[11px] font-bold text-gray-400 uppercase">
                       <span className="w-2 h-2 bg-gray-300 rounded-full" />
                       {formData.phone}

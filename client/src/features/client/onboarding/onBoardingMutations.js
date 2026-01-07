@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { sendPhoneOtp, verifyPhoneOtp } from "./OnboardingAPI";
+import { sendPhoneOtp, submitFreelancerOnboarding, verifyPhoneOtp } from "./OnboardingAPI";
 
 export const useSendPhoneOtp = () => {
   return useMutation({
@@ -15,5 +15,11 @@ export const useVerifyPhoneOtp = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["freelancer-profile"] });
     },
+  });
+};
+
+export const useSubmitFreelancerOnboarding = () => {
+  return useMutation({
+    mutationFn: submitFreelancerOnboarding,
   });
 };

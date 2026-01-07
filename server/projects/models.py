@@ -39,7 +39,6 @@ class Project(models.Model):
         default="fixed"
     )
 
-    # pricing fields
     fixed_price = models.DecimalField(
         max_digits=10,
         decimal_places=2,

@@ -4,10 +4,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useOnBoarding } from '../OnBoardingContext';
 import OnboardingLayout from '../../../../layouts/OnBoardingLayout';
 import { stepSixSchema } from "./stepSixSchema";
+import { toast } from 'react-toastify';
+import { useNavigate } from 'react-router-dom';
+import { useSubmitFreelancerOnboarding } from '../onBoardingMutations';
 
 export default function StepSix() {
   const { formData, updateFormData, nextStep } = useOnBoarding();
-
+  const navigate = useNavigate(0)
+  const {mutateAsync, isPending} = useSubmitFreelancerOnboarding()
   const {
     register,
     handleSubmit,
@@ -26,9 +30,29 @@ export default function StepSix() {
     },
   });
 
-  const onSubmit = (data) => {
-    updateFormData(data);
-    nextStep();
+
+ const onSubmit = async (data) => {
+  const { confirmAccountNumber, isConfirmed, ...cleanBankDetails } = data.bankDetails;
+
+const payload = {
+  tagline: formData.tagline,
+  bio: formData.bio,
+  phone: formData.phone,
+  primary_category: formData.primaryCategory,
+  skills: formData.skills,
+  experience_level: formData.experienceLevel,
+  packages: formData.packages,
+  portfolios: formData.portfolios,
+  bank_details: cleanBankDetails,
+}
+
+    try {
+      await mutateAsync(payload);
+      toast.success("Profile completed successfully 🎉");
+      navigate("/freelancer/dashboard");
+    } catch (err) {
+      toast.error("Failed to complete onboarding");
+    }
   };
 
   return (

@@ -6,7 +6,8 @@ from categories.models import Skill
 class ProjectCreateSerializer(serializers.ModelSerializer):
     skills = serializers.ListField(
         child=serializers.CharField(),
-        write_only=True
+        write_only=True,
+        min_length = 1
     )
 
     class Meta:
@@ -57,6 +58,10 @@ class ProjectCreateSerializer(serializers.ModelSerializer):
                 )
 
         return attrs
+    def validate_category(self, value):
+        if not value:
+            raise serializers.ValidationError("Category is required")
+        return value
 
     def create(self, validated_data):
         skills_data = validated_data.pop("skills")
@@ -76,13 +81,16 @@ class ProjectCreateSerializer(serializers.ModelSerializer):
             if skill:
                 ProjectSkill.objects.create(
                     project=project,
-                    skill=skill
+                    skill=skill,
+                    custom_name=None
                 )
             else:
                 ProjectSkill.objects.create(
                     project=project,
+                    skill=None,
                     custom_name=normalized
                 )
+
 
         return project
 
@@ -97,15 +105,15 @@ class ProjectListSerializer(serializers.ModelSerializer):
         model = Project
         fields = ['id','title','description','category_name', 'pricing_type', 'fixed_price', 'min_budget', 'max_budget', 'delivery_days', 'status', 'created_at', 'skills']
 
-    def get_skills(self,obj):
+    def get_skills(self, obj):
         skills = []
         for ps in obj.project_skills.all():
-            if ps.skill:
+            if ps.skill_id:
                 skills.append(ps.skill.name)
-            
-            else:
+            elif ps.custom_name:
                 skills.append(ps.custom_name)
         return skills
+
 
 
 class ProjectUpdateSerializer(serializers.ModelSerializer):
@@ -201,3 +209,33 @@ class ProjectUpdateSerializer(serializers.ModelSerializer):
     
         return instance
     
+
+
+class RecommendedProjectSerializer(serializers.ModelSerializer):
+    category = serializers.CharField(source="category.name")
+    skills = serializers.SerializerMethodField()
+    budget = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Project
+        fields = [
+            "id",
+            "title",
+            "description",
+            "category",
+            "budget",
+            "delivery_days",
+            "skills",
+            "created_at",
+        ]
+
+    def get_skills(self, obj):
+        return [
+            ps.skill.name if ps.skill else ps.custom_name
+            for ps in obj.project_skills.all()
+        ]
+
+    def get_budget(self, obj):
+        if obj.pricing_type == "fixed":
+            return str(obj.fixed_price)
+        return f"{obj.min_budget} - {obj.max_budget}"

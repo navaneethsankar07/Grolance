@@ -71,6 +71,7 @@ class FreelancerProfileSerializer(serializers.ModelSerializer):
             'tagline',
             'bio',
             'phone',
+            'is_phone_verified',
             'category',
             'experience_level',
             'availability',
@@ -134,9 +135,14 @@ class SendPhoneOTPSerializer(serializers.Serializer):
     def validate_phone(self, phone):
         if not phone.isdigit() or len(phone) != 10:
             raise serializers.ValidationError("Enter a valid 10-digit mobile number")
+        user = self.context['request'].user
+        already_verified = FreelancerProfile.objects.filter(
+            phone=phone, 
+            is_phone_verified=True
+        ).exclude(user=user).exists()
 
-        if FreelancerProfile.objects.filter(phone=phone, is_phone_verified=True).exists():
-            raise serializers.ValidationError("This phone number is already verified")
+        if already_verified:
+            raise serializers.ValidationError("This phone number is already verified by another account")
 
         return phone
     
@@ -148,3 +154,6 @@ class VerifyPhoneOTPSerializer(serializers.Serializer):
         if not phone.isdigit() or len(phone) != 10:
             raise serializers.ValidationError("Invalid phone number")
         return phone
+    
+class RoleSwitchSerializer(serializers.Serializer):
+    role = serializers.ChoiceField(choices=["client", "freelancer"])

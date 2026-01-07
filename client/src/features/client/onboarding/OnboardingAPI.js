@@ -10,13 +10,21 @@ export const sendPhoneOtp = async ({ phone }) => {
 
 export const verifyPhoneOtp = async ({ phone, otp }) => {
   const { data } = await axiosInstance.post(
-    "/profile/freelancer/phone/verify-otp/",
+    "/profile/freelancer/verify-phone-otp/",
     { phone, otp }
   );
   return data;
 };
 
 export const fetchFreelancerProfile = async () => {
-  const { data } = await axiosInstance.get("/profile/me/");
+  const { data } = await axiosInstance.get("/profile/freelancer/me/");
+  return data;
+};
+
+export const submitFreelancerOnboarding = async (payload) => {
+  const { data } = await axiosInstance.post(
+    "/profile/freelancer/onboarding/",
+    payload
+  );
   return data;
 };
