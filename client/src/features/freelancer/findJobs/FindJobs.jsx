@@ -3,16 +3,17 @@ import JobCard from "./components/JobCard";
 import { useFreelancerProjects } from "./findJobsQueries";
 import { useCategories, useSkills } from '../../client/projectManagement/projectQueries';
 import { toast } from 'react-toastify';
+import { Link } from 'react-router-dom';
 
 export default function FindJobs() {
   const [searchInput, setSearchInput] = useState("");
   const [appliedSearch, setAppliedSearch] = useState("");
-  
+
   const [selectedCategory, setSelectedCategory] = useState("");
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
-  
-  const [selectedSkill, setSelectedSkill] = useState(""); 
-  const [isSkillsOpen, setIsSkillsOpen] = useState(false); 
+
+  const [selectedSkill, setSelectedSkill] = useState("");
+  const [isSkillsOpen, setIsSkillsOpen] = useState(false);
 
   const { data: skillsData, isLoading: skillsLoading } = useSkills();
   const skills = skillsData?.results ?? [];
@@ -20,7 +21,7 @@ export default function FindJobs() {
   const { data: categoriesData, isLoading: categoriesLoading } = useCategories();
   const categories = categoriesData?.results ?? [];
 
-  const { data, isLoading } = useFreelancerProjects({ 
+  const { data, isLoading } = useFreelancerProjects({
     search: appliedSearch || undefined,
     category: selectedCategory || undefined,
     skill: selectedSkill || undefined
@@ -29,7 +30,7 @@ export default function FindJobs() {
   const projects = data?.results || [];
 
   const handleSearchSubmit = (e) => {
-    e.preventDefault(); 
+    e.preventDefault();
     setAppliedSearch(searchInput);
   };
 
@@ -77,28 +78,26 @@ export default function FindJobs() {
         </div>
       </header>
 
-      {/* Filter Bar */}
       <div className="bg-white border-b border-[#F3F4F6] py-4 sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-6 flex flex-wrap justify-between items-center gap-4">
           <div className="flex flex-wrap gap-3">
-            
-            {/* Category Filter */}
+
             <div className="relative">
-              <button 
+              <button
                 onClick={() => {
                   setIsCategoryOpen(!isCategoryOpen);
-                  setIsSkillsOpen(false); // Close other dropdown
+                  setIsSkillsOpen(false);
                 }}
                 className={`flex items-center gap-2 px-4 py-2 border rounded-xl text-sm font-medium transition-colors ${selectedCategory ? 'border-blue-500 bg-blue-50 text-blue-700' : 'border-[#E5E7EB] text-[#374151] hover:bg-gray-50'}`}
               >
                 <span>{selectedCategory || "Category"}</span>
-                <svg className={`transition-transform ${isCategoryOpen ? 'rotate-180' : ''}`} width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M4 6L8 10L12 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                <svg className={`transition-transform ${isCategoryOpen ? 'rotate-180' : ''}`} width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M4 6L8 10L12 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
               </button>
               {isCategoryOpen && (
                 <div className="absolute mt-2 w-48 bg-white border border-[#E5E7EB] rounded-xl shadow-lg py-2 z-50 max-h-60 overflow-y-auto">
-                  <button onClick={() => {setSelectedCategory(""); setIsCategoryOpen(false);}} className="w-full text-left px-4 py-2 text-sm text-blue-600 font-medium hover:bg-gray-50 border-b border-gray-100">All Categories</button>
+                  <button onClick={() => { setSelectedCategory(""); setIsCategoryOpen(false); }} className="w-full text-left px-4 py-2 text-sm text-blue-600 font-medium hover:bg-gray-50 border-b border-gray-100">All Categories</button>
                   {categories.map((cat) => (
-                    <button key={cat.id} onClick={() => {setSelectedCategory(cat.name); setIsCategoryOpen(false);}} className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                    <button key={cat.id} onClick={() => { setSelectedCategory(cat.name); setIsCategoryOpen(false); }} className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
                       {cat.name}
                     </button>
                   ))}
@@ -106,12 +105,11 @@ export default function FindJobs() {
               )}
             </div>
 
-            {/* Skills Filter Dropdown */}
             <div className="relative">
-              <button 
+              <button
                 onClick={() => {
                   setIsSkillsOpen(!isSkillsOpen);
-                  setIsCategoryOpen(false); // Close other dropdown
+                  setIsCategoryOpen(false);
                 }}
                 className={`flex items-center gap-2 px-4 py-2 border rounded-xl text-sm font-medium transition-colors ${selectedSkill ? 'border-blue-500 bg-blue-50 text-blue-700' : 'border-[#E5E7EB] text-[#374151] hover:bg-gray-50'}`}
               >
@@ -120,18 +118,18 @@ export default function FindJobs() {
                   <div className="w-3 h-3 border-2 border-gray-300 border-t-blue-500 rounded-full animate-spin"></div>
                 ) : (
                   <svg className={`transition-transform ${isSkillsOpen ? 'rotate-180' : ''}`} width="12" height="12" viewBox="0 0 16 16" fill="none">
-                    <path d="M4 6L8 10L12 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M4 6L8 10L12 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 )}
               </button>
 
               {isSkillsOpen && (
                 <div className="absolute mt-2 w-56 bg-white border border-[#E5E7EB] rounded-xl shadow-xl py-2 z-50 max-h-60 overflow-y-auto">
-                  <button onClick={() => {setSelectedSkill(""); setIsSkillsOpen(false);}} className="w-full text-left px-4 py-2 text-sm text-blue-600 font-medium hover:bg-blue-50 border-b border-gray-100">
+                  <button onClick={() => { setSelectedSkill(""); setIsSkillsOpen(false); }} className="w-full text-left px-4 py-2 text-sm text-blue-600 font-medium hover:bg-blue-50 border-b border-gray-100">
                     All Skills
                   </button>
                   {skills.map((skill) => (
-                    <button key={skill.id} onClick={() => {setSelectedSkill(skill.name); setIsSkillsOpen(false);}} className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                    <button key={skill.id} onClick={() => { setSelectedSkill(skill.name); setIsSkillsOpen(false); }} className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
                       {skill.name}
                     </button>
                   ))}
@@ -139,11 +137,10 @@ export default function FindJobs() {
               )}
             </div>
 
-            {/* Other static filters */}
             {['Budget', 'Delivery'].map((name) => (
               <button key={name} className="flex items-center gap-2 px-4 py-2 border border-[#E5E7EB] rounded-xl text-sm font-medium text-[#374151] hover:bg-gray-50">
                 {name}
-                <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M4 6L8 10L12 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M4 6L8 10L12 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
               </button>
             ))}
           </div>
@@ -168,15 +165,16 @@ export default function FindJobs() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
             {projects.length > 0 ? (
               projects.map((job) => (
-                <JobCard 
-                  key={job.id} 
-                  category={job.category_name} 
-                  title={job.title}
-                  description={job.description}
-                  priceRange={job.pricing_type === 'fixed' ? `$${job.fixed_price}` : `$${job.min_budget}-$${job.max_budget}`}
-                  duration={`${job.delivery_days} days`}
-                  skills={job.skills || []}
-                />
+                <Link key={job.id} to={`/freelancer/jobs/${job.id}`}>
+                  <JobCard
+                    category={job.category_name}
+                    title={job.title}
+                    description={job.description}
+                    priceRange={job.pricing_type === 'fixed' ? `$${job.fixed_price}` : `$${job.min_budget}-$${job.max_budget}`}
+                    duration={`${job.delivery_days} days`}
+                    skills={job.skills || []}
+                  />
+                </Link>
               ))
             ) : (
               <div className="col-span-full py-20 text-center text-gray-400 border-2 border-dashed border-gray-100 rounded-3xl">

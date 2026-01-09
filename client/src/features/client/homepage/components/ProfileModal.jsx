@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux"; 
 import { logoutThunk } from "../../account/auth/authThunks";
-import { useModal } from "../../../../hooks/modal/useModalStore"; 
+import { useSwitchRole } from "../homePageMutation";
 export default function ProfileModal({ isOpen, onClose }) {
   const menuRef = useRef(null);
   const dispatch = useDispatch();
@@ -10,6 +10,7 @@ export default function ProfileModal({ isOpen, onClose }) {
 const { mutateAsync } = useSwitchRole();
 
 const user = useSelector((state) => state.auth.user);
+console.log(user.current_role);
 
 useEffect(() => {
   function handleClickOutside(event) {

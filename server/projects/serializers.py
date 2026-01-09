@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from .models import Project, ProjectSkill
 from categories.models import Skill
-
+from profiles.models import ClientProfile
 
 class ProjectCreateSerializer(serializers.ModelSerializer):
     skills = serializers.ListField(
@@ -239,3 +239,42 @@ class RecommendedProjectSerializer(serializers.ModelSerializer):
         if obj.pricing_type == "fixed":
             return str(obj.fixed_price)
         return f"{obj.min_budget} - {obj.max_budget}"
+
+
+class ProjectClientSerializer(serializers.ModelSerializer):
+    full_name = serializers.CharField(source="user.full_name", read_only=True)
+    profile_photo = serializers.URLField(source="user.profile_photo", read_only=True)
+    member_since = serializers.SerializerMethodField()
+    total_jobs_posted = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ClientProfile
+        fields = ["full_name", "profile_photo", "member_since", "total_jobs_posted"]
+
+    def get_member_since(self, obj):
+        return obj.user.created_at.strftime("%b %Y") 
+
+    def get_total_jobs_posted(self, obj):
+        try:
+            return obj.user.projects.count()
+        except AttributeError:
+            return obj.user.project_set.count()
+    
+
+class ProjectDetailSerializer(ProjectListSerializer):
+    requirements = serializers.CharField()
+    expected_deliverables = serializers.CharField()
+    client_info = serializers.SerializerMethodField()
+
+    class Meta(ProjectListSerializer.Meta):
+        fields = ProjectListSerializer.Meta.fields + [
+            'requirements', 
+            'expected_deliverables', 
+            'client_info'
+        ]
+
+    def get_client_info(self, obj):
+        client_profile = ClientProfile.objects.filter(user=obj.client).first()
+        if client_profile:
+            return ProjectClientSerializer(client_profile).data
+        return None

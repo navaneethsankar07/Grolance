@@ -1,8 +1,8 @@
-from rest_framework.generics import CreateAPIView,ListAPIView, RetrieveUpdateDestroyAPIView
+from rest_framework.generics import CreateAPIView,ListAPIView, RetrieveUpdateDestroyAPIView,RetrieveAPIView
 from rest_framework.permissions import IsAuthenticated
 from .permissions import IsClientUser, IsFreelancerUser
 from .models import Project
-from .serializers import ProjectCreateSerializer, ProjectListSerializer, ProjectUpdateSerializer, RecommendedProjectSerializer
+from .serializers import ProjectCreateSerializer, ProjectListSerializer, ProjectUpdateSerializer, RecommendedProjectSerializer, ProjectDetailSerializer
 from .recommendation import get_recommended_projects
 from django.db import models
 
@@ -87,4 +87,17 @@ class FreelancerProjectListAPIView(ListAPIView):
             .select_related("category")
             .prefetch_related("project_skills__skill")
             .order_by("-created_at")
+        )
+    
+
+class FreelancerProjectDetailView(RetrieveAPIView):
+    permission_classes = [IsAuthenticated,IsFreelancerUser]
+    serializer_class = ProjectDetailSerializer
+    queryset = Project.objects.filter(is_active = True)
+
+    def get_queryset(self):
+        return (
+            Project.objects.filter(is_active=True, status="open")
+            .select_related('category', 'client__client_profile') # Optimization
+            .prefetch_related('project_skills__skill')
         )

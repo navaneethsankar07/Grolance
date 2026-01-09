@@ -18,7 +18,7 @@ urlpatterns = [
     path("freelancer/send-phone-otp/", SendPhoneOTPAPIView.as_view()),
     path("freelancer/verify-phone-otp/", VerifyPhoneOTPAPIView.as_view()),
     path("freelancer/recommended-projects/",RecommendedProjectsAPIView.as_view(),),
-    path("auth/switch-role/", SwitchRoleAPIView.as_view()),
+    path("switch-role/", SwitchRoleAPIView.as_view()),
 
 
 ]

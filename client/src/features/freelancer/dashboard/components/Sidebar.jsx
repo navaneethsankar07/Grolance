@@ -4,7 +4,7 @@ import { Link, useLocation } from "react-router-dom";
 
 const menuItems = [
   { icon: Home, label: "Dashboard", path: "/freelancer/dashboard" }, // Updated path
-  { icon: Briefcase, label: "Find Jobs", path: "/freelancer/find-jobs" },
+  { icon: Briefcase, label: "Find Jobs", path: "/freelancer/jobs" },
   { icon: FileText, label: "Contracts", path: "/contracts" },
   { icon: MessageSquare, label: "Proposals", path: "/proposals" },
   { icon: CheckSquare, label: "Invitations", path: "/invitations" },
@@ -15,7 +15,6 @@ export function Sidebar() {
   const {user} = useSelector(state=>state.auth) 
   
 
-  console.log('ehhlo');
   
 
   return (

@@ -9,6 +9,7 @@ import AdminLogin from '../features/admin/auth/AdminLogin'
 import AdminLayout from '../layouts/AdminLayout'
 import Landingpage from '../features/client/landingPage/Landingpage'
 import FreelancerRoutes from './FreelancerRoutes'
+import FreelancerProtectedRoute from './FreelancerProtectedRoutes'
 
 
 function AppRoutes() {
@@ -18,7 +19,7 @@ function AppRoutes() {
         <Route element={<RootLayout />}>
 
           
-          <Route path='/freelancer/*' element={<FreelancerRoutes/>}/>
+          <Route path='/freelancer/*' element={<FreelancerProtectedRoute><FreelancerRoutes/></FreelancerProtectedRoute> }/>
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route element={<AdminProtectedRoute />}>
             <Route path="/admin/*" element={<AdminLayout />}>
