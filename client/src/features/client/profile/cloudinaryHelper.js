@@ -1,4 +1,3 @@
-// cloudinaryHelper.js
 export const uploadToCloudinary = async (file) => {
   const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
   const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
@@ -19,7 +18,7 @@ export const uploadToCloudinary = async (file) => {
     if (!response.ok) throw new Error("Image upload failed");
 
     const data = await response.json();
-    return data; // This contains the 'secure_url'
+    return data; 
   } catch (error) {
     console.error("Cloudinary Error:", error);
     throw error;

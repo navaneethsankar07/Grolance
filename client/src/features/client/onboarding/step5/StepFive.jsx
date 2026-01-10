@@ -23,7 +23,7 @@ function StepFive() {
       <form id="onboarding-form" onSubmit={handleFinalSubmit}>
         <div className="space-y-8">
           
-          <div className="relative p-8 border border-gray-100 rounded-[24px] bg-white shadow-sm overflow-hidden">
+          <div className="relative p-8 border border-gray-100 rounded-3xl bg-white shadow-sm overflow-hidden">
             <div className="absolute top-0 left-0 w-full h-2 bg-primary/10" />
             <div className="flex flex-col md:flex-row gap-8 items-start">
               <div className="relative">
@@ -111,25 +111,34 @@ function StepFive() {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {formData.portfolios?.map((item, index) => (
-                <div key={index} className="group cursor-pointer">
-                  <div className="relative aspect-square mb-3 overflow-hidden rounded-[20px] border border-gray-100 shadow-xs bg-gray-50">
-                    {item.files?.[0] && (
-                      <img 
-                        src={URL.createObjectURL(item.files[0])} 
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
-                        alt="portfolio" 
-                      />
-                    )}
-                   
-                  </div>
-                  <h4 className="text-sm font-bold text-gray-900 truncate group-hover:text-primary transition-colors">
-                    {item.title}
-                  </h4>
-                  <p className="text-[11px] text-gray-400 font-medium mt-0.5">{item.description}</p>
-                </div>
-              ))}
-            </div>
+  {formData.portfolios?.map((item, index) => (
+    <div key={index} className="group cursor-pointer">
+      <div className="relative aspect-square mb-3 overflow-hidden rounded-[20px] border border-gray-100 shadow-xs bg-gray-50">
+        {item.image_url ? (
+          <img 
+            src={item.image_url} 
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+            alt={item.title} 
+          />
+        ) : item.files?.[0] ? (
+          <img 
+            src={URL.createObjectURL(item.files[0])} 
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+            alt={item.title} 
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-gray-300">
+            No Image
+          </div>
+        )}
+      </div>
+      <h4 className="text-sm font-bold text-gray-900 truncate group-hover:text-primary transition-colors">
+        {item.title}
+      </h4>
+      <p className="text-[11px] text-gray-400 font-medium mt-0.5">{item.description}</p>
+    </div>
+  ))}
+</div>
           </div>
 
         </div>

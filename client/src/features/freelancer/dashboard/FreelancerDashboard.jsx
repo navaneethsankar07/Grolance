@@ -6,7 +6,7 @@ import JobRecommendation from './components/JobRecommendation';
 
 function FreelancerDashboard() {
   return (
-    <div className="max-w-[100rem] mx-auto mb-10">
+    <div className="max-w-400 mt-5 mx-auto mb-10">
       <div className="bg-[#EFF6FF] rounded-2xl p-8 flex flex-col md:flex-row items-center justify-between mb-8 border border-blue-100">
         <div className="flex flex-col gap-2">
           <h1 className="text-[30px] font-bold text-[#1E293B] leading-9" style={{ fontFamily: 'Poppins, sans-serif' }}>

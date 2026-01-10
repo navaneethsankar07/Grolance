@@ -4,12 +4,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import OnboardingLayout from '../../../../layouts/OnBoardingLayout';
 import { useOnBoarding } from '../OnBoardingContext';
 import { stepFourSchema } from "./stepFourSchema";
+import { uploadToCloudinary } from '../../profile/cloudinaryHelper';
 
 function StepFour() {
   const { formData, updateFormData, nextStep } = useOnBoarding();
   const [localItem, setLocalItem] = useState({ title: '', description: '', files: [] });
   const [inputError, setInputError] = useState("");
   const [localErrors, setLocalErrors] = useState({});
+  const [isUploading, setIsUploading] = useState(false);
 
   const {
     handleSubmit,
@@ -45,7 +47,7 @@ function StepFour() {
     updateLocalField('files', [file]);
   };
 
-  const handleSavePortfolio = () => {
+  const handleSavePortfolio = async () => {
     const itemSchema = stepFourSchema.shape.portfolios.element;
     const result = itemSchema.safeParse(localItem);
 
@@ -58,13 +60,33 @@ function StepFour() {
       return;
     }
 
-    const newPortfolios = [...portfolios, localItem];
-    setValue("portfolios", newPortfolios, { shouldValidate: true });
-    
-    setLocalItem({ title: '', description: '', files: [] });
-    setLocalErrors({});
-    setInputError("");
-  };
+    if (localItem.files.length === 0) {
+      setInputError("Please upload an image first.");
+      return;
+    }
+
+    try {
+      setIsUploading(true);
+      const cloudinaryData = await uploadToCloudinary(localItem.files[0]);
+      
+      const portfolioEntry = {
+        title: localItem.title,
+        description: localItem.description,
+        image_url: cloudinaryData.secure_url,
+        files: localItem.files // Keep this so the Zod array validation passes
+      };
+
+      const newPortfolios = [...portfolios, portfolioEntry];
+      setValue("portfolios", newPortfolios, { shouldValidate: true });
+      
+      setLocalItem({ title: '', description: '', files: [] });
+      setLocalErrors({});
+      setIsUploading(false);
+    } catch (error) {
+      setIsUploading(false);
+      setInputError("Failed to upload image.");
+    }
+};
 
   const removePortfolio = (index) => {
     const filtered = portfolios.filter((_, i) => i !== index);
@@ -88,10 +110,10 @@ function StepFour() {
       <form id="onboarding-form" onSubmit={handleSubmit(onSubmit)} className="space-y-8">
         
         {errors.portfolios?.message && (
-  <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-xs font-bold text-center">
-    {errors.portfolios.message}
-  </div>
-)}
+          <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-xs font-bold text-center">
+            {errors.portfolios.message}
+          </div>
+        )}
 
         {portfolios?.length > 0 && (
           <div className="grid grid-cols-1 gap-4">
@@ -99,13 +121,11 @@ function StepFour() {
               <div key={index} className="flex items-center justify-between p-4 border border-primary/20 bg-primary/5 rounded-2xl">
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 bg-white rounded-lg border border-primary/10 flex items-center justify-center overflow-hidden">
-                    {item.files[0] && (
-                      <img src={URL.createObjectURL(item.files[0])} alt="preview" className="w-full h-full object-cover" />
-                    )}
+                    <img src={item.image_url} alt="preview" className="w-full h-full object-cover" />
                   </div>
                   <div>
                     <h4 className="text-sm font-bold text-gray-900">{item.title}</h4>
-                    <p className="text-[11px] text-gray-500">1 Image Uploaded</p>
+                    <p className="text-[11px] text-gray-500">Image successfully uploaded</p>
                   </div>
                 </div>
                 <button type="button" onClick={() => removePortfolio(index)} className="text-xs text-red-500 font-bold px-3">Remove</button>
@@ -121,7 +141,7 @@ function StepFour() {
             <div className="space-y-3">
               <label className="text-xs font-bold text-gray-700 uppercase">Step 1: Upload Screenshot</label>
               <div className={`relative h-[140px] border-2 border-dashed rounded-2xl flex flex-col items-center justify-center transition-all cursor-pointer ${localErrors.files ? 'border-red-500 bg-red-50' : 'border-gray-200 bg-gray-50'}`}>
-                <input type="file" accept="image/*" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onChange={handleFileChange} />
+                <input type="file" accept="image/*" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onChange={handleFileChange} disabled={isUploading} />
                 <p className="text-sm font-bold text-gray-700">{localItem.files.length > 0 ? "Change Image" : "Click to upload"}</p>
               </div>
               {localErrors.files && <p className="text-red-500 text-[11px] font-bold">{localErrors.files}</p>}
@@ -139,6 +159,7 @@ function StepFour() {
                 <input
                   type="text"
                   value={localItem.title}
+                  disabled={isUploading}
                   placeholder="e.g., E-commerce Dashboard Design"
                   onChange={(e) => updateLocalField('title', e.target.value)}
                   className={`w-full h-[50px] px-4 rounded-xl border outline-none ${localErrors.title ? 'border-red-500' : 'border-gray-200'}`}
@@ -150,6 +171,7 @@ function StepFour() {
                 <label className="text-xs font-bold text-gray-700 uppercase block mb-2">Step 3: Description</label>
                 <textarea
                   value={localItem.description}
+                  disabled={isUploading}
                   placeholder="Briefly explain your role and the tools used..."
                   onChange={(e) => updateLocalField('description', e.target.value)}
                   className={`w-full min-h-[100px] p-4 rounded-xl border outline-none resize-none ${localErrors.description ? 'border-red-500' : 'border-gray-200'}`}
@@ -162,15 +184,16 @@ function StepFour() {
               <button
                 type="button"
                 onClick={handleSavePortfolio}
-                className="w-full h-12 bg-white border-2 border-primary text-primary rounded-xl text-sm font-bold hover:bg-primary hover:text-white transition-all"
+                disabled={isUploading}
+                className={`w-full h-12 border-2 rounded-xl text-sm font-bold transition-all ${isUploading ? 'bg-gray-100 border-gray-200 text-gray-400' : 'bg-white border-primary text-primary hover:bg-primary hover:text-white'}`}
               >
-                + Save to Portfolio
+                {isUploading ? "Uploading..." : "+ Save to Portfolio"}
               </button>
             </div>
           </div>
         ) : (
           <div className="p-6 bg-green-50 border border-green-200 rounded-2xl text-center">
-            <p className="text-sm text-green-700 font-bold">Maximum  limit reached (3/3 items). Remove an item to add a new one.</p>
+            <p className="text-sm text-green-700 font-bold">Maximum limit reached (3/3 items). Remove an item to add a new one.</p>
           </div>
         )}
       </form>

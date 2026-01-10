@@ -157,3 +157,90 @@ class VerifyPhoneOTPSerializer(serializers.Serializer):
     
 class RoleSwitchSerializer(serializers.Serializer):
     role = serializers.ChoiceField(choices=["client", "freelancer"])
+
+
+class FreelancerProfileManageSerializer(serializers.ModelSerializer):
+    skills = serializers.SerializerMethodField()
+    packages = serializers.SerializerMethodField()
+    portfolios = serializers.SerializerMethodField()
+    full_name = serializers.CharField(source="user.full_name", read_only=True)
+    profile_photo = serializers.URLField(source="user.profile_photo", read_only=True)
+    category = serializers.StringRelatedField()
+    
+    class Meta:
+        model = FreelancerProfile
+        fields = [
+            'full_name', 'profile_photo', 'tagline', 'bio', 'phone', 
+            'category', 'experience_level', 'availability', 
+            'skills', 'packages', 'portfolios','created_at',
+        ]
+
+    def get_skills(self, obj):
+        skills = obj.user.freelancer_skills.all()
+        return [s.custom_name for s in skills]
+
+    def get_packages(self, obj):
+        packages = obj.user.freelancer_packages.all()
+        return {pkg.package_type: {
+            "price": pkg.price,
+            "delivery_days": pkg.delivery_days,
+            "description": [item.strip() for item in pkg.description.split('\n') if item.strip()]
+        } for pkg in packages}
+
+    def get_portfolios(self, obj):
+        portfolios = obj.user.freelancer_portfolios.all()
+        return FreelancerPortfolioSerializer(portfolios, many=True).data
+    
+
+class FreelancerProfileUpdateSerializer(serializers.ModelSerializer):
+    full_name = serializers.CharField(required=False)
+    profile_photo = serializers.URLField(required=False, allow_null=True)
+    
+    skills = serializers.ListField(child=serializers.CharField(), required=False)
+    packages = serializers.DictField(required=False)
+    portfolios = serializers.ListField(required=False)
+
+    class Meta:
+        model = FreelancerProfile
+        fields = [
+            "tagline", "bio", "category", "experience_level", 
+            "availability", "full_name", "profile_photo",
+            "skills", "packages", "portfolios"
+        ]
+
+    def update(self, instance, validated_data):
+        user = instance.user
+        
+        if "full_name" in validated_data:
+            user.full_name = validated_data.pop("full_name")
+        if "profile_photo" in validated_data:
+            user.profile_photo = validated_data.pop("profile_photo")
+        user.save()
+
+        skills_data = validated_data.pop("skills", None)
+        packages_data = validated_data.pop("packages", None)
+        portfolios_data = validated_data.pop("portfolios", None)
+
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+
+        if skills_data is not None:
+            user.freelancer_skills.all().delete()
+            from .models import FreelancerSkill 
+            for skill_name in skills_data:
+                FreelancerSkill.objects.create(user=user, custom_name=skill_name)
+
+        if packages_data is not None:
+            user.freelancer_packages.all().delete()
+            from .models import FreelancerPackage
+            for pkg_type, pkg in packages_data.items():
+                FreelancerPackage.objects.create(
+                    user=user,
+                    package_type=pkg_type,
+                    price=pkg["price"],
+                    delivery_days=pkg["delivery_days"],
+                    description=pkg["description"]
+                )
+
+        return instance

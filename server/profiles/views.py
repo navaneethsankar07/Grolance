@@ -4,7 +4,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 from .models import ClientProfile,FreelancerProfile,FreelancerBankDetails,FreelancerPackage,FreelancerPortfolio,FreelancerSkill
-from .serializers import ClientProfileOverviewSerializer,ClientProfileUpdateSerializer, FreelancerOnboardingSerializer, SendPhoneOTPSerializer, VerifyPhoneOTPSerializer, FreelancerProfileSerializer, RoleSwitchSerializer
+from .serializers import ClientProfileOverviewSerializer,ClientProfileUpdateSerializer, FreelancerOnboardingSerializer, SendPhoneOTPSerializer, VerifyPhoneOTPSerializer, FreelancerProfileSerializer, RoleSwitchSerializer, FreelancerProfileManageSerializer
 from .services import send_phone_otp, verify_phone_otp
 
 
@@ -60,19 +60,28 @@ class FreelancerOnboardingAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
+        print("DEBUG: Incoming Data ->", request.data)
+        
         serializer = FreelancerOnboardingSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        data = serializer.validated_data
+        
+        if not serializer.is_valid():
+            print("DEBUG: Serializer Errors ->", serializer.errors)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+        data = serializer.validated_data
         user = request.user
 
-        freelancer_profile, _ = FreelancerProfile.objects.get_or_create(user=user)
+        try:
+            freelancer_profile, _ = FreelancerProfile.objects.get_or_create(user=user)
 
-        if not freelancer_profile.is_phone_verified:
-            return Response(
-                {"detail": "Phone number not verified"},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            if not freelancer_profile.is_phone_verified:
+                print("DEBUG: Phone not verified for user", user.email)
+                return Response({"detail": "Phone number not verified"}, status=status.HTTP_400_BAD_REQUEST)
+
+            
+        except Exception as e:
+            print("DEBUG: Unexpected Error ->", str(e))
+            return Response({"error": str(e)}, status=500)
 
         freelancer_profile.tagline = data["tagline"]
         freelancer_profile.bio = data["bio"]
@@ -237,3 +246,55 @@ class SwitchRoleAPIView(APIView):
             },
             status=status.HTTP_200_OK
         )
+    
+class FreelancerProfileManageAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        profile, _ = FreelancerProfile.objects.get_or_create(user=request.user)
+        serializer = FreelancerProfileManageSerializer(profile)
+        return Response(serializer.data)
+
+    def patch(self, request):
+        user = request.user
+        profile = FreelancerProfile.objects.get(user=user)
+        data = request.data
+
+        profile.tagline = data.get('tagline', profile.tagline)
+        profile.bio = data.get('bio', profile.bio)
+        profile.category_id = data.get('category', profile.category_id)
+        profile.experience_level = data.get('experience_level', profile.experience_level)
+        profile.availability = data.get('availability', profile.availability)
+        profile.save()
+
+        if 'full_name' in data:
+            user.full_name = data['full_name']
+            user.save()
+
+        if 'skills' in data:
+            FreelancerSkill.objects.filter(user=user).delete()
+            for skill_name in data['skills']:
+                FreelancerSkill.objects.create(user=user, custom_name=skill_name)
+
+        if 'packages' in data:
+            FreelancerPackage.objects.filter(user=user).delete()
+            for pkg_type, pkg_info in data['packages'].items():
+                FreelancerPackage.objects.create(
+                    user=user,
+                    package_type=pkg_type,
+                    price=pkg_info['price'],
+                    delivery_days=pkg_info['delivery_days'],
+                    description=pkg_info['description']
+                )
+
+        if 'portfolios' in data:
+            FreelancerPortfolio.objects.filter(user=user).delete()
+            for item in data['portfolios']:
+                FreelancerPortfolio.objects.create(
+                    user=user,
+                    title=item['title'],
+                    description=item.get('description', ''),
+                    image_url=item['image_url']
+                )
+
+        return Response(FreelancerProfileManageSerializer(profile).data)

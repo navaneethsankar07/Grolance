@@ -18,9 +18,7 @@ export default function JobDetail() {
     <div className="min-h-screen bg-white py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-8">
         
-        {/* Left Column - Main Content */}
         <div className="w-full lg:w-2/3">
-          {/* Header Section */}
           <div className="mb-8">
             <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
               {data.title}
@@ -34,7 +32,6 @@ export default function JobDetail() {
             </div>
           </div>
 
-          {/* About Section */}
           <section className="mb-10">
             <h2 className="text-xl font-bold text-gray-900 mb-4">About This Project</h2>
             <div className="text-gray-600 leading-relaxed space-y-4">
@@ -42,7 +39,6 @@ export default function JobDetail() {
             </div>
           </section>
 
-          {/* Deliverables Section */}
           <section className="mb-10">
             <h2 className="text-xl font-bold text-gray-900 mb-4">What You'll Deliver</h2>
             <ul className="space-y-3">
@@ -55,7 +51,6 @@ export default function JobDetail() {
             </ul>
           </section>
 
-          {/* Requirements Section */}
           <section className="mb-10">
             <h2 className="text-xl font-bold text-gray-900 mb-4">Requirements</h2>
             <ul className="space-y-3">
@@ -69,10 +64,8 @@ export default function JobDetail() {
           </section>
         </div>
 
-        {/* Right Column - Sidebar */}
         <div className="w-full lg:w-1/3 flex flex-col gap-6">
           
-          {/* Job Info Card */}
           <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
             <h3 className="text-lg font-bold text-gray-900 mb-4">Job Info</h3>
             <div className="space-y-4">
@@ -102,7 +95,6 @@ export default function JobDetail() {
             </div>
           </div>
 
-          {/* Client Card */}
           <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
             <h3 className="text-lg font-bold text-gray-900 mb-4">Client</h3>
             <div className="flex items-center gap-4 mb-4">
@@ -131,7 +123,6 @@ export default function JobDetail() {
             </div>
           </div>
 
-          {/* Apply Button */}
           <button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl transition-colors shadow-lg shadow-blue-100">
             Apply to This Job
           </button>

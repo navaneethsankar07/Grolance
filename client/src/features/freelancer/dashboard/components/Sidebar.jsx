@@ -3,7 +3,7 @@ import { useSelector } from "react-redux";
 import { Link, useLocation } from "react-router-dom";
 
 const menuItems = [
-  { icon: Home, label: "Dashboard", path: "/freelancer/dashboard" }, // Updated path
+  { icon: Home, label: "Dashboard", path: "/freelancer" }, 
   { icon: Briefcase, label: "Find Jobs", path: "/freelancer/jobs" },
   { icon: FileText, label: "Contracts", path: "/contracts" },
   { icon: MessageSquare, label: "Proposals", path: "/proposals" },
@@ -52,7 +52,7 @@ export function Sidebar() {
       </nav>
 
       <div className="border-t border-[#E5E7EB] p-4 mb-20">
-        <Link to="/profile" className="flex items-center gap-3 w-full hover:bg-gray-50 p-2 rounded-xl transition-colors">
+        <Link to="/freelancer/profile" className="flex items-center gap-3 w-full hover:bg-gray-50 p-2 rounded-xl transition-colors">
           <img 
             src={user?.profile_photo} 
             alt="User" 

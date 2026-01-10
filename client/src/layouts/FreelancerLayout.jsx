@@ -10,7 +10,7 @@ export function FreelancerLayout() {
         <Header/>
       <div className="flex-1 flex  overflow-hidden">
       <Sidebar />
-        <main className="flex-1 mt-5 overflow-y-auto">
+        <main className="flex-1  overflow-y-auto">
           <Outlet/>
         </main>
       </div>

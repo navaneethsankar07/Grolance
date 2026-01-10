@@ -48,7 +48,7 @@ export default function FindJobs() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FCFCFD]">
+    <div className="min-h-screen mt-5 bg-[#FCFCFD]">
       <header className="bg-white border-b border-[#F3F4F6] py-12">
         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-8">
           <div className="text-left w-full">
@@ -57,7 +57,7 @@ export default function FindJobs() {
           </div>
 
           <form onSubmit={handleSearchSubmit} className="relative w-full max-w-md flex gap-2">
-            <div className="relative flex-grow">
+            <div className="relative grow">
               <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#9CA3AF]">
                 <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
                   <path d="M17.5 17.5L13.8834 13.8838M9.16667 15.8333C12.8486 15.8333 15.8333 12.8486 15.8333 9.16667C15.8333 5.48477 12.8486 2.5 9.16667 2.5C5.48477 2.5 2.5 5.48477 2.5 9.16667C2.5 12.8486 5.48477 15.8333 9.16667 15.8333Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -68,10 +68,10 @@ export default function FindJobs() {
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
                 placeholder="Search for jobs..."
-                className="w-full pl-12 pr-4 py-3 bg-[#F9FAFB] border border-[#E5E7EB] rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm transition-all"
+                className="w-full pl-12 pr-4 py-3 bg-[#F9FAFB] border border-[#E5E7EB] rounded-xl focus:ring-2 focus:ring-primary outline-none text-sm transition-all"
               />
             </div>
-            <button type="submit" className="bg-[#3B82F6] hover:bg-blue-600 text-white px-6 py-3 rounded-xl text-sm font-bold transition-colors shadow-sm">
+            <button type="submit" className="bg-primary hover:bg-blue-600 text-white px-6 py-3 rounded-xl text-sm font-bold transition-colors shadow-sm">
               Search
             </button>
           </form>
@@ -88,14 +88,14 @@ export default function FindJobs() {
                   setIsCategoryOpen(!isCategoryOpen);
                   setIsSkillsOpen(false);
                 }}
-                className={`flex items-center gap-2 px-4 py-2 border rounded-xl text-sm font-medium transition-colors ${selectedCategory ? 'border-blue-500 bg-blue-50 text-blue-700' : 'border-[#E5E7EB] text-[#374151] hover:bg-gray-50'}`}
+                className={`flex items-center gap-2 px-4 py-2 border rounded-xl text-sm font-medium transition-colors ${selectedCategory ? 'border-primary bg-blue-50 text-blue-700' : 'border-[#E5E7EB] text-[#374151] hover:bg-gray-50'}`}
               >
                 <span>{selectedCategory || "Category"}</span>
                 <svg className={`transition-transform ${isCategoryOpen ? 'rotate-180' : ''}`} width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M4 6L8 10L12 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
               </button>
               {isCategoryOpen && (
                 <div className="absolute mt-2 w-48 bg-white border border-[#E5E7EB] rounded-xl shadow-lg py-2 z-50 max-h-60 overflow-y-auto">
-                  <button onClick={() => { setSelectedCategory(""); setIsCategoryOpen(false); }} className="w-full text-left px-4 py-2 text-sm text-blue-600 font-medium hover:bg-gray-50 border-b border-gray-100">All Categories</button>
+                  <button onClick={() => { setSelectedCategory(""); setIsCategoryOpen(false); }} className="w-full text-left px-4 py-2 text-sm text-primary font-medium hover:bg-gray-50 border-b border-gray-100">All Categories</button>
                   {categories.map((cat) => (
                     <button key={cat.id} onClick={() => { setSelectedCategory(cat.name); setIsCategoryOpen(false); }} className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
                       {cat.name}
@@ -111,7 +111,7 @@ export default function FindJobs() {
                   setIsSkillsOpen(!isSkillsOpen);
                   setIsCategoryOpen(false);
                 }}
-                className={`flex items-center gap-2 px-4 py-2 border rounded-xl text-sm font-medium transition-colors ${selectedSkill ? 'border-blue-500 bg-blue-50 text-blue-700' : 'border-[#E5E7EB] text-[#374151] hover:bg-gray-50'}`}
+                className={`flex items-center gap-2 px-4 py-2 border rounded-xl text-sm font-medium transition-colors ${selectedSkill ? 'border-primary bg-blue-50 text-primary' : 'border-[#E5E7EB] text-[#374151] hover:bg-gray-50'}`}
               >
                 <span>{selectedSkill || "Skills"}</span>
                 {skillsLoading ? (
@@ -125,7 +125,7 @@ export default function FindJobs() {
 
               {isSkillsOpen && (
                 <div className="absolute mt-2 w-56 bg-white border border-[#E5E7EB] rounded-xl shadow-xl py-2 z-50 max-h-60 overflow-y-auto">
-                  <button onClick={() => { setSelectedSkill(""); setIsSkillsOpen(false); }} className="w-full text-left px-4 py-2 text-sm text-blue-600 font-medium hover:bg-blue-50 border-b border-gray-100">
+                  <button onClick={() => { setSelectedSkill(""); setIsSkillsOpen(false); }} className="w-full text-left px-4 py-2 text-sm text-primary font-medium hover:bg-blue-50 border-b border-gray-100">
                     All Skills
                   </button>
                   {skills.map((skill) => (
@@ -145,7 +145,7 @@ export default function FindJobs() {
             ))}
           </div>
 
-          <button className="flex items-center gap-2 text-[#3B82F6] font-semibold text-sm">
+          <button className="flex items-center gap-2 text-primary font-semibold text-sm">
             <span>Advanced Filters</span>
           </button>
         </div>
@@ -154,8 +154,8 @@ export default function FindJobs() {
       <main className="max-w-7xl mx-auto px-6 py-10">
         <p className="text-sm text-[#6B7280] mb-8 font-medium">
           <span className="text-[#111827] font-bold">{data?.count || 0}</span> jobs found
-          {selectedCategory && <span className="ml-2 bg-blue-100 text-blue-600 px-2 py-0.5 rounded text-xs">Category: {selectedCategory}</span>}
-          {selectedSkill && <span className="ml-2 bg-indigo-100 text-indigo-600 px-2 py-0.5 rounded text-xs">Skill: {selectedSkill}</span>}
+          {selectedCategory && <span className="ml-2 bg-blue-100 text-primary px-2 py-0.5 rounded text-xs">Category: {selectedCategory}</span>}
+          {selectedSkill && <span className="ml-2 bg-indigo-100 text-indigo-600 p-2  rounded-lg text-xs">Skill: {selectedSkill}</span>}
           {appliedSearch && <span className="ml-2 bg-gray-100 text-gray-600 px-2 py-0.5 rounded text-xs">Search: "{appliedSearch}"</span>}
         </p>
 

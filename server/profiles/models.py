@@ -1,6 +1,8 @@
 from django.db import models
 from django.conf import settings
 from categories.models import Category,Skill
+from django.db.models.signals import post_delete
+from django.dispatch import receiver
 
 class ClientProfile(models.Model):
     user = models.OneToOneField(
@@ -140,3 +142,18 @@ class FreelancerBankDetails(models.Model):
     branch_name = models.CharField(max_length=255)
 
     is_verified = models.BooleanField(default=False)
+
+
+@receiver(post_delete, sender=FreelancerProfile)
+def delete_freelancer_related_data(sender, instance, **kwargs):
+    user = instance.user
+
+    FreelancerSkill.objects.filter(user=user).delete()
+    FreelancerPackage.objects.filter(user=user).delete()
+    FreelancerPortfolio.objects.filter(user=user).delete()
+    FreelancerBankDetails.objects.filter(user=user).delete()
+    
+
+    user.is_freelancer = False
+    user.current_role = 'client'
+    user.save()
