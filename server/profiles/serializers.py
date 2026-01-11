@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from .models import ClientProfile
 from categories.models import Category
-from .models import FreelancerProfile,FreelancerBankDetails
+from .models import FreelancerProfile,FreelancerBankDetails,FreelancerPortfolio, FreelancerPackage, FreelancerSkill
 
 
 class ClientProfileOverviewSerializer(serializers.ModelSerializer):
@@ -192,10 +192,10 @@ class FreelancerProfileManageSerializer(serializers.ModelSerializer):
         return FreelancerPortfolioSerializer(portfolios, many=True).data
     
 
+
 class FreelancerProfileUpdateSerializer(serializers.ModelSerializer):
     full_name = serializers.CharField(required=False)
     profile_photo = serializers.URLField(required=False, allow_null=True)
-    
     skills = serializers.ListField(child=serializers.CharField(), required=False)
     packages = serializers.DictField(required=False)
     portfolios = serializers.ListField(required=False)
@@ -203,7 +203,7 @@ class FreelancerProfileUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = FreelancerProfile
         fields = [
-            "tagline", "bio", "category", "experience_level", 
+            "tagline", "bio", "experience_level", 
             "availability", "full_name", "profile_photo",
             "skills", "packages", "portfolios"
         ]
@@ -227,20 +227,34 @@ class FreelancerProfileUpdateSerializer(serializers.ModelSerializer):
 
         if skills_data is not None:
             user.freelancer_skills.all().delete()
-            from .models import FreelancerSkill 
             for skill_name in skills_data:
                 FreelancerSkill.objects.create(user=user, custom_name=skill_name)
 
         if packages_data is not None:
             user.freelancer_packages.all().delete()
-            from .models import FreelancerPackage
             for pkg_type, pkg in packages_data.items():
+                delivery_days = pkg.get("delivery_days") or pkg.get("deliveryTime") or 1
+                
+                description = pkg.get("description", "")
+                if isinstance(description, list):
+                    description = "\n".join(description)
+
                 FreelancerPackage.objects.create(
                     user=user,
                     package_type=pkg_type,
-                    price=pkg["price"],
-                    delivery_days=pkg["delivery_days"],
-                    description=pkg["description"]
+                    price=pkg.get("price", 0),
+                    delivery_days=delivery_days,
+                    description=description
+                )
+
+        if portfolios_data is not None:
+            user.freelancer_portfolios.all().delete()
+            for item in portfolios_data:
+                FreelancerPortfolio.objects.create(
+                    user=user,
+                    title=item.get('title', 'Untitled'),
+                    description=item.get('description', ''),
+                    image_url=item.get('image_url')
                 )
 
         return instance

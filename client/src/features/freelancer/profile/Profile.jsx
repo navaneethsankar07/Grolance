@@ -3,37 +3,11 @@ import { Star, Calendar, Briefcase, Clock, Check, Edit3, Eye } from "lucide-reac
 import { useFreelancerProfile } from "./profileQueries";
 import { useSelector } from "react-redux";
 import { formatDateDMY } from "../../../utils/date";
+import { Link } from "react-router-dom";
 
 export default function Profile() {
-  const portfolioItems = [
-    {
-      id: 1,
-      title: "E-commerce Dashboard",
-      description: "Modern admin panel with analytics",
-      image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=600&fit=crop"
-    },
-    {
-      id: 2,
-      title: "SaaS Landing Page",
-      description: "Conversion-focused design",
-      image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&h=600&fit=crop"
-    },
-    {
-      id: 3,
-      title: "Mobile Banking App",
-      description: "iOS & Android UI design",
-      image: "https://images.unsplash.com/photo-1563986768609-322da13575f3?w=800&h=600&fit=crop"
-    },
-    {
-      id: 4,
-      title: "Portfolio Website",
-      description: "Creative developer portfolio",
-      image: "https://images.unsplash.com/photo-1467232004584-a241de8bcf5d?w=800&h=600&fit=crop"
-    }
-  ];
-  const {data:profile, isLoading, isError,error} = useFreelancerProfile()
-  
-  
+  const { data: profile, isLoading, isError, error } = useFreelancerProfile();
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -41,7 +15,7 @@ export default function Profile() {
       </div>
     );
   }
-  
+
   if (isError) {
     return (
       <div className="min-h-screen flex items-center justify-center text-red-500">
@@ -49,9 +23,9 @@ export default function Profile() {
       </div>
     );
   }
-  
-  console.log(profile.portfolios);
+
   if (!profile) return null;
+
   const reviews = [
     {
       id: 1,
@@ -75,12 +49,22 @@ export default function Profile() {
       comment: "Great experience working with Sarah. She was responsive to feedback and delivered quality work on time."
     }
   ];
-  const date = formatDateDMY(profile.created_at)
-  
+
+  const date = formatDateDMY(profile.created_at);
+
+  const renderDescription = (desc) => {
+    if (!desc) return null;
+    const features = Array.isArray(desc) ? desc : desc.split("\n").filter(line => line.trim() !== "");
+    return features.map((feature, i) => (
+      <li key={i} className="flex items-center gap-2 text-sm text-gray-600">
+        <Check size={14} className="text-green-500 font-bold" /> {feature}
+      </li>
+    ));
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-5xl mx-auto space-y-6">
-        
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">My Profile</h1>
@@ -90,9 +74,9 @@ export default function Profile() {
             <button className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 font-medium text-sm transition-all shadow-sm">
               <Eye size={16} /> View Earnings
             </button>
-            <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium text-sm transition-all shadow-sm">
+            <Link to={'edit/'} className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium text-sm transition-all shadow-sm">
               <Edit3 size={16} /> Edit Profile
-            </button>
+            </Link>
           </div>
         </div>
 
@@ -100,7 +84,7 @@ export default function Profile() {
           <div className="flex flex-col md:flex-row gap-6 items-center md:items-start">
             <img 
               src={profile.profile_photo}
-              alt="Sarah Anderson" 
+              alt={profile.full_name} 
               className="w-24 h-24 md:w-32 md:h-32 rounded-full object-cover ring-4 ring-gray-50"
             />
             <div className="flex-1 text-center md:text-left">
@@ -136,7 +120,7 @@ export default function Profile() {
         <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
           <h3 className="text-lg font-bold text-gray-900 mb-4">Skills</h3>
           <div className="flex flex-wrap gap-2">
-            {profile.skills.map((skill, index) => (
+            {profile.skills?.map((skill, index) => (
               <span key={index} className="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-xs font-semibold border border-blue-100">
                 {skill}
               </span>
@@ -150,34 +134,26 @@ export default function Profile() {
             <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm hover:border-blue-300 transition-colors">
               <h4 className="font-bold text-gray-800 mb-2 text-lg">Starter Package</h4>
               <div className="flex items-baseline justify-between mb-4">
-                <div className="text-2xl font-bold text-gray-900">₹{profile.packages.starter.price}</div>
+                <div className="text-2xl font-bold text-gray-900">₹{profile.packages?.starter?.price || 0}</div>
                 <div className="flex items-center gap-1 text-gray-500 text-xs">
-                  <Clock size={14} /> {profile.packages.starter.delivery_days} days delivery
+                  <Clock size={14} /> {profile.packages?.starter?.delivery_days || 0} days delivery
                 </div>
               </div>
               <ul className="space-y-3">
-                {profile.packages?.starter?.description?.map((feature, i) => (
-                  <li key={i} className="flex items-center gap-2 text-sm text-gray-600">
-                    <Check size={14} className="text-green-500 font-bold" /> {feature}
-                  </li>
-                ))}
+                {renderDescription(profile.packages?.starter?.description)}
               </ul>
             </div>
 
             <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm hover:border-blue-300 transition-colors">
               <h4 className="font-bold text-gray-800 mb-2 text-lg">Pro Package</h4>
               <div className="flex items-baseline justify-between mb-4">
-                <div className="text-2xl font-bold text-gray-900">₹{profile.packages.pro.price}</div>
+                <div className="text-2xl font-bold text-gray-900">₹{profile.packages?.pro?.price || 0}</div>
                 <div className="flex items-center gap-1 text-gray-500 text-xs">
-                  <Clock size={14} /> {profile.packages.pro.delivery_days} days delivery
+                  <Clock size={14} /> {profile.packages?.pro?.delivery_days || 0} days delivery
                 </div>
               </div>
               <ul className="space-y-3">
-                {profile.packages.pro.description.map((feature, i) => (
-                  <li key={i} className="flex items-center gap-2 text-sm text-gray-600">
-                    <Check size={14} className="text-green-500 font-bold" /> {feature}
-                  </li>
-                ))}
+                {renderDescription(profile.packages?.pro?.description)}
               </ul>
             </div>
           </div>
@@ -186,33 +162,32 @@ export default function Profile() {
         <div className="space-y-4">
           <h3 className="text-lg font-bold text-gray-900">Portfolio</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-  {profile.portfolios?.length > 0 ? (
-    profile.portfolios.map((item) => (
-      <div key={item.id} className="group bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
-        <div className="relative h-48 overflow-hidden">
-          <img 
-            src={item.image_url} 
-            alt={item.title} 
-            className="w-full h-full object-cover transition-transform group-hover:scale-105" 
-          />
-        </div>
-        <div className="p-4 border-t border-gray-100">
-          <h4 className="font-bold text-gray-900">{item.title}</h4>
-          <p className="text-gray-500 text-xs mt-1">{item.description}</p>
-        </div>
-      </div>
-    ))
-  ) : (
-    <p className="text-gray-400 italic text-sm">No portfolio items added yet.</p>
-  )}
-</div>
+            {profile.portfolios?.length > 0 ? (
+              profile.portfolios.map((item) => (
+                <div key={item.id} className="group bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
+                  <div className="relative h-48 overflow-hidden">
+                    <img 
+                      src={item.image_url} 
+                      alt={item.title} 
+                      className="w-full h-full object-cover transition-transform group-hover:scale-105" 
+                    />
+                  </div>
+                  <div className="p-4 border-t border-gray-100">
+                    <h4 className="font-bold text-gray-900">{item.title}</h4>
+                    <p className="text-gray-500 text-xs mt-1">{item.description}</p>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <p className="text-gray-400 italic text-sm">No portfolio items added yet.</p>
+            )}
+          </div>
         </div>
 
         <div className="bg-white rounded-xl border border-gray-200 p-8 shadow-sm">
           <h3 className="text-lg font-bold text-gray-900 mb-4">About Me</h3>
           <div className="text-gray-600 text-sm leading-relaxed space-y-4">
-            <p>I'm a passionate full-stack developer and UI/UX designer with over 5 years of experience creating beautiful, functional web applications. I specialize in React, TypeScript, and modern web technologies, with a strong focus on user experience and clean code.</p>
-            <p>My approach combines technical expertise with creative design thinking to deliver solutions that not only work flawlessly but also delight users. I've worked with startups and established companies across various industries, helping them bring their digital visions to life.</p>
+            <p>{profile.bio || "No bio provided yet."}</p>
           </div>
         </div>
 
@@ -241,7 +216,6 @@ export default function Profile() {
             ))}
           </div>
         </div>
-
       </div>
     </div>
   );

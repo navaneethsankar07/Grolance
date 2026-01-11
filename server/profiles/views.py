@@ -1,12 +1,11 @@
-from rest_framework.generics import RetrieveAPIView, UpdateAPIView
+from rest_framework.generics import RetrieveAPIView, UpdateAPIView, RetrieveUpdateAPIView
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 from .models import ClientProfile,FreelancerProfile,FreelancerBankDetails,FreelancerPackage,FreelancerPortfolio,FreelancerSkill
-from .serializers import ClientProfileOverviewSerializer,ClientProfileUpdateSerializer, FreelancerOnboardingSerializer, SendPhoneOTPSerializer, VerifyPhoneOTPSerializer, FreelancerProfileSerializer, RoleSwitchSerializer, FreelancerProfileManageSerializer
+from .serializers import ClientProfileOverviewSerializer,ClientProfileUpdateSerializer, FreelancerOnboardingSerializer, SendPhoneOTPSerializer, VerifyPhoneOTPSerializer, FreelancerProfileSerializer, RoleSwitchSerializer, FreelancerProfileManageSerializer, FreelancerProfileUpdateSerializer
 from .services import send_phone_otp, verify_phone_otp
-
 
 class ClientProfileOverviewAPIView(RetrieveAPIView):
     permission_classes = [IsAuthenticated]
@@ -247,54 +246,36 @@ class SwitchRoleAPIView(APIView):
             status=status.HTTP_200_OK
         )
     
-class FreelancerProfileManageAPIView(APIView):
+class FreelancerProfileManageAPIView(RetrieveUpdateAPIView):
     permission_classes = [IsAuthenticated]
 
-    def get(self, request):
-        profile, _ = FreelancerProfile.objects.get_or_create(user=request.user)
-        serializer = FreelancerProfileManageSerializer(profile)
-        return Response(serializer.data)
+    def get_object(self):
+        """
+        Returns the profile of the logged-in user.
+        get_or_create ensures the profile exists even if they skip steps.
+        """
+        profile, _ = FreelancerProfile.objects.get_or_create(user=self.request.user)
+        return profile
 
-    def patch(self, request):
-        user = request.user
-        profile = FreelancerProfile.objects.get(user=user)
-        data = request.data
+    def get_serializer_class(self):
+        """
+        Dynamically switch serializers based on the request type.
+        """
+        if self.request.method in ["PATCH", "PUT"]:
+            return FreelancerProfileUpdateSerializer
+        return FreelancerProfileManageSerializer
 
-        profile.tagline = data.get('tagline', profile.tagline)
-        profile.bio = data.get('bio', profile.bio)
-        profile.category_id = data.get('category', profile.category_id)
-        profile.experience_level = data.get('experience_level', profile.experience_level)
-        profile.availability = data.get('availability', profile.availability)
-        profile.save()
+    def update(self, request, *args, **kwargs):
+        """
+        Overrides the update method to ensure that after saving, 
+        we return the data using the 'Manage' format (full nested data).
+        """
+        partial = kwargs.pop('partial', True)
+        instance = self.get_object()
+        
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
 
-        if 'full_name' in data:
-            user.full_name = data['full_name']
-            user.save()
-
-        if 'skills' in data:
-            FreelancerSkill.objects.filter(user=user).delete()
-            for skill_name in data['skills']:
-                FreelancerSkill.objects.create(user=user, custom_name=skill_name)
-
-        if 'packages' in data:
-            FreelancerPackage.objects.filter(user=user).delete()
-            for pkg_type, pkg_info in data['packages'].items():
-                FreelancerPackage.objects.create(
-                    user=user,
-                    package_type=pkg_type,
-                    price=pkg_info['price'],
-                    delivery_days=pkg_info['delivery_days'],
-                    description=pkg_info['description']
-                )
-
-        if 'portfolios' in data:
-            FreelancerPortfolio.objects.filter(user=user).delete()
-            for item in data['portfolios']:
-                FreelancerPortfolio.objects.create(
-                    user=user,
-                    title=item['title'],
-                    description=item.get('description', ''),
-                    image_url=item['image_url']
-                )
-
-        return Response(FreelancerProfileManageSerializer(profile).data)
+        read_serializer = FreelancerProfileManageSerializer(instance)
+        return Response(read_serializer.data)
