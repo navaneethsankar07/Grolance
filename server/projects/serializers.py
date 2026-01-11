@@ -1,7 +1,7 @@
 from rest_framework import serializers
-from .models import Project, ProjectSkill
+from .models import Project, ProjectSkill, Invitation
 from categories.models import Skill
-from profiles.models import ClientProfile
+from profiles.models import ClientProfile, FreelancerProfile, FreelancerPackage
 
 class ProjectCreateSerializer(serializers.ModelSerializer):
     skills = serializers.ListField(
@@ -278,3 +278,23 @@ class ProjectDetailSerializer(ProjectListSerializer):
         if client_profile:
             return ProjectClientSerializer(client_profile).data
         return None
+    
+
+class InvitationSerializer(serializers.ModelSerializer):
+    client_name = serializers.ReadOnlyField(source='client.full_name')
+    project_title = serializers.ReadOnlyField(source='project.title')
+    package_type = serializers.ReadOnlyField(source='package.package_type')
+
+    class Meta:
+        model = Invitation
+        fields = [
+            'id', 'client', 'freelancer', 'project', 
+            'package', 'message', 'status', 'created_at',
+            'client_name', 'project_title', 'package_type'
+        ]
+        read_only_fields = ['client', 'status', 'created_at']
+
+    def validate(self, data):
+        if self.context['request'].user == data['freelancer']:
+            raise serializers.ValidationError("You cannot invite yourself to a project.")
+        return data

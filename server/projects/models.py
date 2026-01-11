@@ -109,3 +109,34 @@ class ProjectSkill(models.Model):
 
     def __str__(self):
         return self.custom_name or self.skill.name
+
+
+
+class Invitation(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('accepted', 'Accepted'),
+        ('declined', 'Declined'),
+    ]
+
+    client = models.ForeignKey(
+        settings.AUTH_USER_MODEL, 
+        on_delete=models.CASCADE, 
+        related_name='sent_invitations'
+    )
+    freelancer = models.ForeignKey(
+        settings.AUTH_USER_MODEL, 
+        on_delete=models.CASCADE, 
+        related_name='received_invitations'
+    )
+    
+    project = models.ForeignKey('Project', on_delete=models.CASCADE)
+    
+    package = models.ForeignKey('profiles.FreelancerPackage', on_delete=models.CASCADE)
+    
+    message = models.TextField(blank=True, null=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Invite for {self.project.title} to {self.freelancer.email}"

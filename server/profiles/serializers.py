@@ -258,3 +258,26 @@ class FreelancerProfileUpdateSerializer(serializers.ModelSerializer):
                 )
 
         return instance
+
+
+class FreelancerListingSerializer(serializers.ModelSerializer):
+    full_name = serializers.CharField(source="user.full_name", read_only=True)
+    profile_photo = serializers.URLField(source="user.profile_photo", read_only=True)
+    category_name = serializers.CharField(source="category.name", read_only=True)
+    skills = serializers.SerializerMethodField()
+    starting_price = serializers.SerializerMethodField()
+
+    class Meta:
+        model = FreelancerProfile
+        fields = [
+            'id', 'full_name', 'profile_photo', 'tagline', 
+            'category_name', 'experience_level', 'skills', 
+            'starting_price', 'availability'
+        ]
+
+    def get_skills(self, obj):
+        return list(obj.user.freelancer_skills.values_list('custom_name', flat=True)[:3])
+
+    def get_starting_price(self, obj):
+        prices = obj.user.freelancer_packages.values_list('price', flat=True)
+        return min(prices) if prices else 0

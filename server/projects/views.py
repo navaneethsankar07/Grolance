@@ -1,10 +1,13 @@
 from rest_framework.generics import CreateAPIView,ListAPIView, RetrieveUpdateDestroyAPIView,RetrieveAPIView
 from rest_framework.permissions import IsAuthenticated
 from .permissions import IsClientUser, IsFreelancerUser
-from .models import Project
-from .serializers import ProjectCreateSerializer, ProjectListSerializer, ProjectUpdateSerializer, RecommendedProjectSerializer, ProjectDetailSerializer
+from .models import Project,Invitation
+from .serializers import ProjectCreateSerializer, ProjectListSerializer, ProjectUpdateSerializer, RecommendedProjectSerializer, ProjectDetailSerializer, InvitationSerializer
 from .recommendation import get_recommended_projects
 from django.db import models
+from rest_framework import viewsets
+from rest_framework.decorators import action
+from rest_framework.response import Response
 
 class ProjectCreateAPIView(CreateAPIView):
     serializer_class = ProjectCreateSerializer
@@ -101,3 +104,27 @@ class FreelancerProjectDetailView(RetrieveAPIView):
             .select_related('category', 'client__client_profile') # Optimization
             .prefetch_related('project_skills__skill')
         )
+    
+
+class InvitationViewSet(viewsets.ModelViewSet):
+    serializer_class = InvitationSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        return Invitation.objects.filter(
+            models.Q(client=user) | models.Q(freelancer=user)
+        ).order_by('-created_at')
+
+    def perform_create(self, serializer):
+        serializer.save(client=self.request.user)
+
+    @action(detail=False, methods=['get'])
+    def my_eligible_projects(self, request):
+        """
+        Returns projects owned by the client that are currently 'open'.
+        Used by the frontend Modal to populate the 'Select Project' dropdown.
+        """
+        projects = Project.objects.filter(client=request.user, status='open')
+        data = [{"id": p.id, "title": p.title} for p in projects]
+        return Response(data)

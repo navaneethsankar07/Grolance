@@ -7,7 +7,9 @@ from .views import (
     VerifyPhoneOTPAPIView,
     FreelancerProfileMeAPIView,
     SwitchRoleAPIView,
-    FreelancerProfileManageAPIView
+    FreelancerProfileManageAPIView,
+    FreelancerListAPIView,
+    FreelancerPublicProfileAPIView
 )
 from projects.views import RecommendedProjectsAPIView
 
@@ -20,7 +22,9 @@ urlpatterns = [
     path("freelancer/verify-phone-otp/", VerifyPhoneOTPAPIView.as_view()),
     path("freelancer/recommended-projects/",RecommendedProjectsAPIView.as_view(),),
     path("switch-role/", SwitchRoleAPIView.as_view()),
-    path('freelancer/profile/',FreelancerProfileManageAPIView.as_view(),name='freelancer-profile')
+    path('freelancer/profile/',FreelancerProfileManageAPIView.as_view(),name='freelancer-profile'),
+    path('freelancers-list/', FreelancerListAPIView.as_view(), name='freelancer-list'),
+    path('freelancer/profile/<int:id>/', FreelancerPublicProfileAPIView.as_view(), name='public-profile'),
 
 
 ]

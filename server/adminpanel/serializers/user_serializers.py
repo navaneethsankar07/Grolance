@@ -11,6 +11,7 @@ class AdminUserListSerializer(serializers.ModelSerializer):
             "profile_photo",
             "is_active",
             "is_deleted",
+            'is_freelancer',
             "is_admin",
             "current_role",
             "created_at",

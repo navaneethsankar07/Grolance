@@ -1,12 +1,13 @@
-from rest_framework.generics import RetrieveAPIView, UpdateAPIView, RetrieveUpdateAPIView
+from rest_framework.generics import RetrieveAPIView, UpdateAPIView, RetrieveUpdateAPIView, ListAPIView
 from rest_framework.views import APIView
+from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 from .models import ClientProfile,FreelancerProfile,FreelancerBankDetails,FreelancerPackage,FreelancerPortfolio,FreelancerSkill
-from .serializers import ClientProfileOverviewSerializer,ClientProfileUpdateSerializer, FreelancerOnboardingSerializer, SendPhoneOTPSerializer, VerifyPhoneOTPSerializer, FreelancerProfileSerializer, RoleSwitchSerializer, FreelancerProfileManageSerializer, FreelancerProfileUpdateSerializer
+from .serializers import ClientProfileOverviewSerializer,ClientProfileUpdateSerializer, FreelancerOnboardingSerializer, SendPhoneOTPSerializer, VerifyPhoneOTPSerializer, FreelancerProfileSerializer, RoleSwitchSerializer, FreelancerProfileManageSerializer, FreelancerProfileUpdateSerializer, FreelancerListingSerializer
 from .services import send_phone_otp, verify_phone_otp
-
+from rest_framework.pagination import PageNumberPagination
 class ClientProfileOverviewAPIView(RetrieveAPIView):
     permission_classes = [IsAuthenticated]
 
@@ -279,3 +280,45 @@ class FreelancerProfileManageAPIView(RetrieveUpdateAPIView):
 
         read_serializer = FreelancerProfileManageSerializer(instance)
         return Response(read_serializer.data)
+    
+class StandardPagination(PageNumberPagination):
+    page_size = 10
+    page_size_query_param = 'page_size'
+    max_page_size = 100
+    
+class FreelancerListAPIView(ListAPIView):
+    serializer_class = FreelancerListingSerializer
+    pagination_class = StandardPagination
+    filter_backends = [SearchFilter, OrderingFilter]
+    search_fields = ['user__full_name', 'tagline', 'user__freelancer_skills__custom_name']
+    ordering_fields = ['created_at', 'experience_level']
+
+    def get_queryset(self):
+        queryset = FreelancerProfile.objects.filter(
+            is_active=True, 
+            availability=True
+        ).select_related('user', 'category').prefetch_related(
+            'user__freelancer_skills', 
+            'user__freelancer_packages'
+        )
+
+        category = self.request.query_params.get('category')
+        min_price = self.request.query_params.get('minPrice')
+        max_price = self.request.query_params.get('maxPrice')
+
+        if category:
+            queryset = queryset.filter(category__name__icontains=category)
+
+        if min_price:
+            queryset = queryset.filter(user__freelancer_packages__price__gte=min_price)
+
+        if max_price:
+            queryset = queryset.filter(user__freelancer_packages__price__lte=max_price)
+
+        return queryset.distinct().order_by('-created_at')
+
+class FreelancerPublicProfileAPIView(RetrieveAPIView):
+    permission_classes = [IsAuthenticated] 
+    serializer_class = FreelancerProfileManageSerializer
+    queryset = FreelancerProfile.objects.all()
+    lookup_field = 'id'
