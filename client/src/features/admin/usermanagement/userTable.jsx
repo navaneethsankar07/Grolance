@@ -31,6 +31,10 @@ const handleSuspendClick = (u) => {
     onConfirm: () => toggleMutation.mutate(u.id)
   });
 };
+users.map((u)=>{
+  console.log(u.is_freelancer);
+  
+});
 
   return (
     <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
@@ -47,6 +51,7 @@ const handleSuspendClick = (u) => {
 
         <tbody className="divide-y gap-1 divide-gray-100">
           {users.map((u) => (
+            
             <tr key={u.id} className="hover:bg-gray-50/50 transition-colors group">
               <td className="px-6 py-4">
                 <div className="flex items-center gap-3">
@@ -79,8 +84,8 @@ const handleSuspendClick = (u) => {
                 )}
               </td>
               <td className="px-3 py-4">
-                <span className={`px-2.5 py-0.5 rounded-lg text-[11px] font-bold uppercase tracking-wider border ${getRoleStyle(u.current_role)}`}>
-                  {u.current_role}
+                <span className={`px-2.5 py-0.5 rounded-lg text-[11px] font-bold uppercase whitespace-pre-line tracking-wider border ${getRoleStyle(u.is_freelancer?'freelancer':'client')}`}>
+                  {u.is_freelancer?"both" : u.current_role}
                 </span>
               </td>
 

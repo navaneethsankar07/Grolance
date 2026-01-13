@@ -27,9 +27,9 @@ export default function ClientHeader() {
           <Link to="/" className="text-lg font-bold text-primary">
             Dashboard
           </Link>
-          <button className="text-sm font-medium text-[#111318]">
+          <Link to={'/find-talents'} className="text-sm font-medium text-[#111318]">
             Find Talent
-          </button>
+          </Link>
           <button className="text-sm font-medium text-[#111318]">
             How It Works
           </button>

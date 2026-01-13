@@ -14,6 +14,8 @@ import ProfileEdit from "../features/client/profile/EditProfile";
 import StepOne from "../features/client/onboarding/step1/StepOne";
 import { OnBoardingProvider } from "../features/client/onboarding/OnBoardingContext";
 import OnboardingManager from "../features/client/onboarding/OnboardingManager";
+import FindTalent from "../features/client/findtalent/FindTalent";
+import FreelancerProfile from "../features/client/freelancerprofile/FreelancerProfile";
 
 export default function ClientRoutes() {
   const { user,loading } = useSelector(state => state.auth);
@@ -25,6 +27,8 @@ export default function ClientRoutes() {
       
         <Route element={<ClientLayout />}>
           <Route path="/" element={<ClientHomepage />} />
+          <Route path="/find-talents" element={<FindTalent/>}/>
+          <Route path="/find-talents/:id" element={<FreelancerProfile/>}/>
           <Route path="/create-project" element={<AddProject/>}/>
           <Route path="/my-projects" element={<MyProjects/>}/>
           <Route path="/my-projects/:id/edit" element={<EditProject/>}/>

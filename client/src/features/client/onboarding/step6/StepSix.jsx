@@ -48,8 +48,8 @@ const payload = {
 
     try {
       await mutateAsync(payload);
-      toast.success("Profile completed successfully 🎉");
-      navigate("/freelancer/dashboard");
+      toast.success("Profile completed successfully");
+      navigate("/freelancer");
     } catch (err) {
       toast.error("Failed to complete onboarding");
     }

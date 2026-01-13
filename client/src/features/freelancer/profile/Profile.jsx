@@ -8,6 +8,8 @@ import { Link } from "react-router-dom";
 export default function Profile() {
   const { data: profile, isLoading, isError, error } = useFreelancerProfile();
 
+  console.log(profile);
+  
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">

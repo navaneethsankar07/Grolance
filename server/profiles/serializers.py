@@ -166,13 +166,14 @@ class FreelancerProfileManageSerializer(serializers.ModelSerializer):
     full_name = serializers.CharField(source="user.full_name", read_only=True)
     profile_photo = serializers.URLField(source="user.profile_photo", read_only=True)
     category = serializers.StringRelatedField()
+    bank_details = serializers.SerializerMethodField()
     
     class Meta:
         model = FreelancerProfile
         fields = [
             'full_name', 'profile_photo', 'tagline', 'bio', 'phone', 
             'category', 'experience_level', 'availability', 
-            'skills', 'packages', 'portfolios','created_at',
+            'skills', 'packages', 'portfolios','bank_details','created_at'
         ]
 
     def get_skills(self, obj):
@@ -182,6 +183,7 @@ class FreelancerProfileManageSerializer(serializers.ModelSerializer):
     def get_packages(self, obj):
         packages = obj.user.freelancer_packages.all()
         return {pkg.package_type: {
+            "id": pkg.id,
             "price": pkg.price,
             "delivery_days": pkg.delivery_days,
             "description": [item.strip() for item in pkg.description.split('\n') if item.strip()]
@@ -191,7 +193,13 @@ class FreelancerProfileManageSerializer(serializers.ModelSerializer):
         portfolios = obj.user.freelancer_portfolios.all()
         return FreelancerPortfolioSerializer(portfolios, many=True).data
     
-
+    def get_bank_details(self, obj):
+        try:
+            bank = obj.user.freelancer_bank 
+            return FreelancerBankDetailsSerializer(bank).data
+        except FreelancerBankDetails.DoesNotExist:
+            return None
+    
 
 class FreelancerProfileUpdateSerializer(serializers.ModelSerializer):
     full_name = serializers.CharField(required=False)
@@ -205,7 +213,7 @@ class FreelancerProfileUpdateSerializer(serializers.ModelSerializer):
         fields = [
             "tagline", "bio", "experience_level", 
             "availability", "full_name", "profile_photo",
-            "skills", "packages", "portfolios"
+            "skills", "packages", "portfolios", 'bank_details'
         ]
 
     def update(self, instance, validated_data):
@@ -220,6 +228,7 @@ class FreelancerProfileUpdateSerializer(serializers.ModelSerializer):
         skills_data = validated_data.pop("skills", None)
         packages_data = validated_data.pop("packages", None)
         portfolios_data = validated_data.pop("portfolios", None)
+        bank_data = validated_data.pop("bank_details", None)
 
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
@@ -256,6 +265,18 @@ class FreelancerProfileUpdateSerializer(serializers.ModelSerializer):
                     description=item.get('description', ''),
                     image_url=item.get('image_url')
                 )
+        
+        if bank_data is not None:
+            FreelancerBankDetails.objects.update_or_create(
+                user=user,
+                defaults={
+                    "account_number": bank_data.get("account_number"),
+                    "ifsc": bank_data.get("ifsc"),
+                    "account_holder_name": bank_data.get("account_holder_name"),
+                    "bank_name": bank_data.get("bank_name"),
+                    "branch_name": bank_data.get("branch_name"),
+                }
+            )
 
         return instance
 

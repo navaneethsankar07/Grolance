@@ -251,26 +251,15 @@ class FreelancerProfileManageAPIView(RetrieveUpdateAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_object(self):
-        """
-        Returns the profile of the logged-in user.
-        get_or_create ensures the profile exists even if they skip steps.
-        """
         profile, _ = FreelancerProfile.objects.get_or_create(user=self.request.user)
         return profile
 
     def get_serializer_class(self):
-        """
-        Dynamically switch serializers based on the request type.
-        """
         if self.request.method in ["PATCH", "PUT"]:
             return FreelancerProfileUpdateSerializer
         return FreelancerProfileManageSerializer
 
     def update(self, request, *args, **kwargs):
-        """
-        Overrides the update method to ensure that after saving, 
-        we return the data using the 'Manage' format (full nested data).
-        """
         partial = kwargs.pop('partial', True)
         instance = self.get_object()
         
@@ -301,6 +290,8 @@ class FreelancerListAPIView(ListAPIView):
             'user__freelancer_skills', 
             'user__freelancer_packages'
         )
+        if self.request.user.is_authenticated:
+            queryset = queryset.exclude(user=self.request.user)
 
         category = self.request.query_params.get('category')
         min_price = self.request.query_params.get('minPrice')

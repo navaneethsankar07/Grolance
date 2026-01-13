@@ -284,17 +284,24 @@ class InvitationSerializer(serializers.ModelSerializer):
     client_name = serializers.ReadOnlyField(source='client.full_name')
     project_title = serializers.ReadOnlyField(source='project.title')
     package_type = serializers.ReadOnlyField(source='package.package_type')
+    
+    freelancer_name = serializers.ReadOnlyField(source='freelancer.full_name')
+    freelancer_image = serializers.ReadOnlyField(source='freelancer.profile_photo')
+    
+    freelancer_tagline = serializers.ReadOnlyField(source='freelancer.freelancer_profile.tagline')
 
     class Meta:
         model = Invitation
         fields = [
             'id', 'client', 'freelancer', 'project', 
             'package', 'message', 'status', 'created_at',
-            'client_name', 'project_title', 'package_type'
+            'client_name', 'project_title', 'package_type',
+            'freelancer_name', 'freelancer_image', 'freelancer_tagline'
         ]
         read_only_fields = ['client', 'status', 'created_at']
 
     def validate(self, data):
-        if self.context['request'].user == data['freelancer']:
+        request = self.context.get('request')
+        if request and request.user == data['freelancer']:
             raise serializers.ValidationError("You cannot invite yourself to a project.")
         return data

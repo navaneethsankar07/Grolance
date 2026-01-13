@@ -8,8 +8,12 @@ const rootReducer = combineReducers({
 });
 
 const resettableRootReducer = (state, action) => {
-    if (action.type === 'auth/logout') {
-        storage.removeItem('persist:auth');
+    if (action.type === 'auth/logout' || action.type === 'auth/logout/fulfilled') {
+        Object.keys(storage).forEach((key) => {
+             if (key.includes('persist:auth')) {
+                 storage.removeItem(key);
+             }
+        });
         state = undefined;
     }
     return rootReducer(state, action);
@@ -18,7 +22,7 @@ const resettableRootReducer = (state, action) => {
 const authPersistConfig = {
     key: "auth",
     storage,
-    whitelist: ["user"] 
+    whitelist: ["user",'accessToken'] 
 }
 
 const persistedReducer = persistReducer(authPersistConfig, resettableRootReducer)

@@ -7,7 +7,7 @@ const menuItems = [
   { icon: Briefcase, label: "Find Jobs", path: "/freelancer/jobs" },
   { icon: FileText, label: "Contracts", path: "/contracts" },
   { icon: MessageSquare, label: "Proposals", path: "/proposals" },
-  { icon: CheckSquare, label: "Invitations", path: "/invitations" },
+  { icon: CheckSquare, label: "Invitations", path: "/freelancer/invitations" },
 ];
 
 export function Sidebar() {
