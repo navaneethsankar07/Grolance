@@ -13,6 +13,7 @@ export default function JobDetail() {
     if (!text) return [];
     return text.split('\n').filter(item => item.trim() !== "");
   };
+console.log(data);
 
   return (
     <div className="min-h-screen bg-white py-8 px-4 sm:px-6 lg:px-8">
@@ -99,7 +100,7 @@ export default function JobDetail() {
             <h3 className="text-lg font-bold text-gray-900 mb-4">Client</h3>
             <div className="flex items-center gap-4 mb-4">
               <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold text-xl overflow-hidden">
-                {data.client_info?.profile_photo ? (
+                {data.profile_photo ? (
                   <img src={data.client_info.profile_photo} alt="" className="w-full h-full object-cover" />
                 ) : (
                   data.client_info?.full_name?.charAt(0) || "C"

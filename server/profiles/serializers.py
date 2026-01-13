@@ -2,7 +2,7 @@ from rest_framework import serializers
 from .models import ClientProfile
 from categories.models import Category
 from .models import FreelancerProfile,FreelancerBankDetails,FreelancerPortfolio, FreelancerPackage, FreelancerSkill
-
+import re
 
 class ClientProfileOverviewSerializer(serializers.ModelSerializer):
     full_name = serializers.CharField(source="user.full_name", read_only=True)
@@ -107,25 +107,77 @@ class FreelancerBankDetailsSerializer(serializers.ModelSerializer):
             "branch_name",
         ]
 
+
+
+class PackageTierSerializer(serializers.Serializer):
+    price = serializers.IntegerField(min_value=100, max_value=500000)
+    deliveryTime = serializers.IntegerField(min_value=1, max_value=100)
+    description = serializers.CharField(min_length=20, max_length=400)
+
+class PortfolioItemSerializer(serializers.Serializer):
+    title = serializers.CharField(min_length=10, max_length=50)
+    description = serializers.CharField(min_length=10, max_length=300)
+    image_url = serializers.URLField(required=True) 
+
+class BankDetailsSerializer(serializers.Serializer):
+    fullName = serializers.CharField(min_length=5)
+    accountNumber = serializers.CharField(min_length=9, max_length=18)
+    confirmAccountNumber = serializers.CharField()
+    ifscCode = serializers.CharField()
+    bankName = serializers.CharField(min_length=2)
+
+    def validate_fullName(self, value):
+        if not re.match(r'^[a-zA-Z\s]+$', value):
+            raise serializers.ValidationError("Name should only contain letters")
+        return value
+
+    def validate_ifscCode(self, value):
+        if not re.match(r'^[A-Z]{4}0[A-Z0-9]{6}$', value):
+            raise serializers.ValidationError("Invalid IFSC format")
+        return value
+
+    def validate(self, data):
+        if data['accountNumber'] != data['confirmAccountNumber']:
+            raise serializers.ValidationError({"confirmAccountNumber": "Account numbers do not match"})
+        return data
+
 class FreelancerOnboardingSerializer(serializers.Serializer):
-    tagline = serializers.CharField()
-    bio = serializers.CharField()
+    tagline = serializers.CharField(min_length=10, max_length=80)
+    bio = serializers.CharField(min_length=50, max_length=500)
     phone = serializers.CharField(max_length=10)
-
+    
+    experience_level = serializers.ChoiceField(choices=["beginner", "intermediate", "expert"])
     primary_category = serializers.IntegerField()
-    skills = serializers.ListField(child=serializers.CharField())
-
-    experience_level = serializers.ChoiceField(
-        choices=["beginner", "intermediate", "expert"]
+    
+    skills = serializers.ListField(
+        child=serializers.CharField(min_length=2),
+        min_length=3,
+        max_length=15
     )
 
-    packages = serializers.DictField()
-    portfolios = serializers.ListField(required=False)
-    bank_details = serializers.DictField()
+    packages = serializers.DictField() 
+    portfolios = serializers.ListField(child=PortfolioItemSerializer(), min_length=1, max_length=3)
+    bank_details = BankDetailsSerializer()
 
     def validate_phone(self, value):
-        if not value.isdigit() or len(value) != 10:
-            raise serializers.ValidationError("Invalid Indian mobile number")
+        if not re.match(r'^[6-9]\d{9}$', value):
+            raise serializers.ValidationError("Enter a valid 10-digit Indian mobile number starting with 6-9")
+        return value
+
+    def validate_skills(self, value):
+        for skill in value:
+            if skill.isdigit():
+                raise serializers.ValidationError(f"Skill '{skill}' cannot be only numbers")
+        return value
+
+    def validate_packages(self, value):
+        if 'starter' not in value or 'pro' not in value:
+            raise serializers.ValidationError("Both starter and pro packages are required")
+        
+        for tier in ['starter', 'pro']:
+            serializer = PackageTierSerializer(data=value[tier])
+            if not serializer.is_valid():
+                raise serializers.ValidationError({tier: serializer.errors})
         return value
 
 

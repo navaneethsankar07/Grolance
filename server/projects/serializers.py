@@ -255,10 +255,7 @@ class ProjectClientSerializer(serializers.ModelSerializer):
         return obj.user.created_at.strftime("%b %Y") 
 
     def get_total_jobs_posted(self, obj):
-        try:
-            return obj.user.projects.count()
-        except AttributeError:
-            return obj.user.project_set.count()
+        return Project.objects.filter(client=obj.user).count()
     
 
 class ProjectDetailSerializer(ProjectListSerializer):
@@ -274,11 +271,8 @@ class ProjectDetailSerializer(ProjectListSerializer):
         ]
 
     def get_client_info(self, obj):
-        client_profile = ClientProfile.objects.filter(user=obj.client).first()
-        if client_profile:
-            return ProjectClientSerializer(client_profile).data
-        return None
-    
+        profile, created = ClientProfile.objects.get_or_create(user=obj.client)
+        return ProjectClientSerializer(profile).data
 
 class InvitationSerializer(serializers.ModelSerializer):
     client_name = serializers.ReadOnlyField(source='client.full_name')

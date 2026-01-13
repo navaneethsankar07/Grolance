@@ -103,11 +103,31 @@ class FreelancerProjectListAPIView(ListAPIView):
                 models.Q(project_skills__custom_name__iexact=skill)
             ).distinct()
 
+        min_price = self.request.query_params.get('min_price')
+        max_price = self.request.query_params.get('max_price')
+
+        if min_price:
+            queryset = queryset.filter(
+                models.Q(fixed_price__gte=min_price) | 
+                models.Q(min_budget__gte=min_price)
+            )
+
+        if max_price:
+            queryset = queryset.filter(
+                models.Q(fixed_price__lte=max_price) | 
+                models.Q(max_budget__lte=max_price)
+            )
+
+        delivery_days = self.request.query_params.get('delivery_days')
+        if delivery_days:
+            queryset = queryset.filter(delivery_days__lte=delivery_days)
+
         return (
             queryset
             .select_related("category")
             .prefetch_related("project_skills__skill")
             .order_by("-created_at")
+            .distinct()
         )
     
 
