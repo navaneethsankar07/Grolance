@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { getSentInvitations } from "./proposalsApi";
+import { getProposals, getSentInvitations } from "./proposalsApi";
 
 export const useSentInvitations = (projectId) => {
   return useQuery({
@@ -9,3 +9,11 @@ export const useSentInvitations = (projectId) => {
     enabled: !!projectId, 
   });
 };
+
+export const useProposals = (projectId) => {
+  return useQuery({
+    queryKey:['proposals',projectId],
+    queryFn:()=>getProposals(projectId),
+    staleTime:1000 * 60 * 5
+  })
+}

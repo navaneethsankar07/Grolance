@@ -22,6 +22,7 @@ import DeleteAccountModal from "../features/client/account/components/DeleteModa
 import ProjectDeleteModal from "../features/client/projectManagement/components/ProjectDeleteModal";
 import PhoneOtpModal from "../features/client/onboarding/step1/PhoneOtpModal";
 import InviteFreelancerModal from "../features/client/findtalent/components/InvitationModal";
+import { ProposalModal } from "../features/freelancer/proposals/components/ProposalModal";
 export default function RootLayout() {
   const { modal, modalProps, closeModal } = useModal();
 const { loading, initialized, accessToken } = useSelector((s) => s.auth);
@@ -61,6 +62,7 @@ useEffect(() => {
       {modal === 'delete-project' && <ProjectDeleteModal projectId={modalProps.projectId} onClose={closeModal} />}
       {modal === 'phone-otp' && <PhoneOtpModal phone={modalProps.phone} />}
       {modal === 'job-invitation' && <InviteFreelancerModal isOpen onClose={closeModal} modalProps={modalProps} />}
+      {modal === 'job-proposal' && <ProposalModal onClose={closeModal} projectId={modalProps}/>}
     </>
   );
 }

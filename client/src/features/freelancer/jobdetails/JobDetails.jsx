@@ -1,19 +1,20 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { useProjectDetails } from './jobDetailsQueries';
+import { useModal } from '../../../hooks/modal/useModalStore';
 
 export default function JobDetail() {
   const { id } = useParams();
   const { data, isLoading, isError, error } = useProjectDetails(id);
-
+  const {openModal} = useModal()
   if (isLoading) return <div className="flex justify-center items-center h-screen text-gray-600">Loading Project details...</div>;
   if (isError) return <div className="flex justify-center items-center h-screen text-red-500">Error: {error.message}</div>;
 
   const formatList = (text) => {
     if (!text) return [];
     return text.split('\n').filter(item => item.trim() !== "");
-  };
-console.log(data);
+  }; 
+
 
   return (
     <div className="min-h-screen bg-white py-8 px-4 sm:px-6 lg:px-8">
@@ -124,7 +125,7 @@ console.log(data);
             </div>
           </div>
 
-          <button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl transition-colors shadow-lg shadow-blue-100">
+          <button onClick={()=>openModal('job-proposal',id)} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl transition-colors shadow-lg shadow-blue-100">
             Apply to This Job
           </button>
         </div>

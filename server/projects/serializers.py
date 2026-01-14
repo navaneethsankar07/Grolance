@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Project, ProjectSkill, Invitation
+from .models import Project, ProjectSkill, Invitation, Proposal
 from categories.models import Skill
 from profiles.models import ClientProfile, FreelancerProfile, FreelancerPackage
 
@@ -299,3 +299,62 @@ class InvitationSerializer(serializers.ModelSerializer):
         if request and request.user == data['freelancer']:
             raise serializers.ValidationError("You cannot invite yourself to a project.")
         return data
+    
+
+class ProposalsSerializer(serializers.ModelSerializer):
+    bid_amount = serializers.DecimalField(max_digits=10,decimal_places=2, read_only=True )
+    delivery_days = serializers.IntegerField(read_only=True)
+
+    class Meta:
+        model = Proposal
+        fields = ['id', 'project', 'package', 'cover_letter', 'bid_amount', 'delivery_days', 'status']
+        read_only_fields = ['status', 'freelancer']
+
+    def validate(self, data):
+        user = self.context['request'].user
+        project = data.get('project')
+        package = data.get('package')
+
+        try:
+            freelancer_profile = user.freelancer_profile
+        except AttributeError:
+            raise serializers.ValidationError("Freelancer profile not found.")
+        if Proposal.objects.filter(project=project, freelancer=freelancer_profile).exists():
+            raise serializers.ValidationError("You have already submitted a proposal for this project.")
+        if project.status != 'open':
+            raise serializers.ValidationError("This project is no longer accepting bids.")
+
+        if project.client == user:
+            raise serializers.ValidationError("You cannot bid on your own project.")
+
+        if package.user != user:
+            raise serializers.ValidationError("You must use one of your own packages to bid.")
+
+        return data
+
+    def create(self, validated_data):
+        package = validated_data['package']
+        user = self.context['request'].user
+    
+        try:
+            freelancer_profile = user.freelancer_profile
+        except AttributeError:
+            raise serializers.ValidationError({"error": "Freelancer profile not found."})
+    
+        validated_data['freelancer'] = freelancer_profile
+        validated_data['bid_amount'] = package.price
+        validated_data['delivery_days'] = package.delivery_days 
+    
+        return super().create(validated_data)
+    
+class ProposalsListSerializer(serializers.ModelSerializer):
+    freelancer_name = serializers.CharField(source='freelancer.user.full_name')
+    freelancer_photo = serializers.CharField(source='freelancer.user.profile_photo', read_only=True)
+    freelancer_tagline = serializers.CharField(source='freelancer.tagline', read_only=True)
+
+    class Meta:
+        model = Proposal
+        fields = [
+            'id', 'freelancer_name', 'freelancer_photo', 'freelancer_tagline',
+            'cover_letter', 'bid_amount', 'delivery_days', 'status', 'created_at'
+        ]
