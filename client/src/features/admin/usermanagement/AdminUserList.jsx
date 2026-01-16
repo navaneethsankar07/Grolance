@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Search, Filter, ChevronDown } from "lucide-react";
 import { useAdminUsers } from "./usersQueries";
 import UserTable from "./userTable";
+
 export default function AdminUserList() {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
@@ -18,7 +19,6 @@ export default function AdminUserList() {
             Overview of all accounts, permissions, and platform activity.
           </p>
         </div>
-        
       </div>
 
       <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-wrap items-center gap-4 mb-6">
@@ -26,7 +26,10 @@ export default function AdminUserList() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
           <input
             value={search}
-            onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setPage(1);
+            }}
             placeholder="Search by name or email..."
             className="w-full h-11 pl-10 pr-4 bg-gray-50 border-none rounded-lg text-sm focus:ring-2 focus:ring-primary transition-all"
           />
@@ -36,7 +39,10 @@ export default function AdminUserList() {
           <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
           <select
             value={role}
-            onChange={(e) => { setRole(e.target.value); setPage(1); }}
+            onChange={(e) => {
+              setRole(e.target.value);
+              setPage(1);
+            }}
             className="h-11 pl-10 pr-10 bg-gray-50 border-none rounded-lg text-sm focus:ring-2 focus:ring-blue-500 appearance-none cursor-pointer font-medium text-gray-700"
           >
             <option value="">All Roles</option>
@@ -50,8 +56,8 @@ export default function AdminUserList() {
 
       {isLoading ? (
         <div className="flex flex-col items-center justify-center py-20 bg-white rounded-xl border border-dashed border-gray-300">
-           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-4"></div>
-           <p className="text-sm text-gray-500 font-medium">Fetching users...</p>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-4"></div>
+          <p className="text-sm text-gray-500 font-medium">Fetching users...</p>
         </div>
       ) : isError ? (
         <div className="p-10 text-center bg-red-50 rounded-xl border border-red-100">

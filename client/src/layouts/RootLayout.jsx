@@ -23,6 +23,7 @@ import ProjectDeleteModal from "../features/client/projectManagement/components/
 import PhoneOtpModal from "../features/client/onboarding/step1/PhoneOtpModal";
 import InviteFreelancerModal from "../features/client/findtalent/components/InvitationModal";
 import { ProposalModal } from "../features/freelancer/proposals/components/ProposalModal";
+import ViewUserModal from "../features/admin/usermanagement/components/ViewUserModal";
 export default function RootLayout() {
   const { modal, modalProps, closeModal } = useModal();
 const { loading, initialized, accessToken } = useSelector((s) => s.auth);
@@ -43,7 +44,7 @@ useEffect(() => {
   return (
     <>
       <Outlet />   
-
+      {modal === "view-user" && (<ViewUserModal isOpen  onClose={closeModal} user={modalProps.user} />)}
       {modal === "signup" && <SignupModal isOpen onClose={closeModal} />}
       {modal === "otp" && <OtpModal isOpen email={modalProps.email} />}
       {modal === "signin" && <SignInModal isOpen onClose={closeModal} />}
