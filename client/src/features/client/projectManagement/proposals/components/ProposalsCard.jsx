@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { X } from 'lucide-react'; // Assuming you use lucide-react for icons
+import { X } from 'lucide-react'; 
+import { useModal } from '../../../../../hooks/modal/useModalStore';
 
 const StarIcon = () => (
   <svg width="16" height="20" viewBox="0 0 16 20" fill="none">
@@ -10,16 +11,20 @@ const StarIcon = () => (
 export default function ProposalCard({ freelancer, proposal, isInvitation = false, invitationStatus = 'pending' }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const MAX_LENGTH = 180; 
-
+  const {openModal} = useModal()
+  console.log(freelancer.id);
+  
   const isLongMessage = proposal.description?.length > MAX_LENGTH;
   const displayDescription = isLongMessage 
     ? `${proposal.description.substring(0, MAX_LENGTH)}...` 
     : proposal.description;
-
+  const handleHire = ()=>{
+    openModal('contract-offer',{projectName:proposal.title,freelancerName:freelancer.name,amount:proposal.bidAmount, projectId:proposal.projectId,freelancerId:freelancer.id})
+  }
   const Modal = () => (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
       <div className="w-full max-w-2xl rounded-2xl bg-white shadow-2xl overflow-hidden">
-        <div className="flex items-center justify-between border-b px-6 py-4">
+        <div className="flex items-cen8ter justify-between border-b px-6 py-4">
           <h3 className="text-lg font-bold text-gray-900">Full Proposal</h3>
           <button onClick={() => setIsModalOpen(false)} className="rounded-full p-1 hover:bg-gray-100 transition">
             <X className="h-6 w-6 text-gray-500" />
@@ -99,7 +104,7 @@ export default function ProposalCard({ freelancer, proposal, isInvitation = fals
 
         <div className="flex flex-1 flex-col gap-4">
           <div className="flex flex-col lg:flex-row lg:justify-between gap-2">
-            <h4 className="text-base font-semibold text-gray-900">{proposal.title}</h4>
+            <h4 className="text-base font-semibold text-gray-900">Proposal Details</h4>
             <div className="flex gap-4">
               <div className="lg:text-right">
                 <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Bid Amount</p>
@@ -123,7 +128,7 @@ export default function ProposalCard({ freelancer, proposal, isInvitation = fals
       </div>
 
       <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end border-t pt-6">
-        <button className="rounded-lg bg-blue-500 px-6 py-2 text-sm font-medium text-white hover:bg-blue-600 transition">
+        <button onClick={handleHire} className="rounded-lg bg-blue-500 px-6 py-2 text-sm font-medium text-white hover:bg-blue-600 transition">
           Hire Freelancer
         </button>
       </div>

@@ -355,6 +355,6 @@ class ProposalsListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Proposal
         fields = [
-            'id', 'freelancer_name', 'freelancer_photo', 'freelancer_tagline',
+            'id','freelancer_id' ,'freelancer_name', 'freelancer_photo', 'freelancer_tagline',
             'cover_letter', 'bid_amount', 'delivery_days', 'status', 'created_at'
         ]

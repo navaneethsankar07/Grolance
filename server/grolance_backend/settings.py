@@ -57,7 +57,8 @@ INSTALLED_APPS = [
     'profiles',
     'rest_framework_simplejwt.token_blacklist',
     'cloudinary',
-    'cloudinary_storage'
+    'cloudinary_storage',
+    'contracts'
     
 ]
 SIMPLE_JWT = {

@@ -5,6 +5,7 @@ import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import { useParams } from "react-router-dom";
 import { useProjectDetails } from "../projectQueries";
 import { useProposals, useSentInvitations } from "./proposalsQueries";
+import { useModal } from "../../../../hooks/modal/useModalStore";
 
 export default function ProposalsIndex() {
   const { id } = useParams();
@@ -12,7 +13,6 @@ export default function ProposalsIndex() {
   const { data: project, isLoading: isProjectLoading } = useProjectDetails(id);
   const { data: invitationsData, isLoading: isInvitesLoading } = useSentInvitations(id);
   const { data: proposals, isLoading: isProposalsLoading } = useProposals(id);
-
   if (isProjectLoading || isInvitesLoading || isProposalsLoading) {
     return <div className="p-10 text-center font-inter text-gray-600">Loading data...</div>;
   }
@@ -23,7 +23,10 @@ export default function ProposalsIndex() {
   const displayBudget = project?.pricing_type === "fixed" 
     ? `₹${Number(project.fixed_price).toLocaleString()}` 
     : `₹${Number(project.min_budget).toLocaleString()} - ₹${Number(project.max_budget).toLocaleString()}`;
-  return (
+  
+console.log(actualProposals);
+
+    return (
     <div className="min-h-screen bg-gray-50">
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         
@@ -48,6 +51,7 @@ export default function ProposalsIndex() {
                   key={inv.id}
                   isInvitation={true}
                   freelancer={{
+                    id:inv.freelancer_id,
                     name: inv.freelancer_name, 
                     title: inv.freelancer_tagline || "Invited Talent",
                     image: inv.freelancer_image || "https://via.placeholder.com/150",
@@ -76,16 +80,20 @@ export default function ProposalsIndex() {
               <ProposalCard
                 key={prop.id}
                 isInvitation={false}
+                
                 freelancer={{
+                  id:prop.freelancer_id,
                   name: prop.freelancer_name,
                   title: prop.freelancer_tagline || "Freelancer",
                   image: prop.freelancer_photo || "https://via.placeholder.com/150",
                   rating: 4.8, 
                 }}
                 proposal={{
-                  title: "Proposal Details", 
+                  title: project.title,
+                  projectId:id,
+                  freelancerId:prop.freelancer ,
                   description: prop.cover_letter,
-                  bidAmount: `₹${Number(prop.bid_amount).toLocaleString()}`,
+                  bidAmount: prop.bid_amount,
                   deliveryDays: prop.delivery_days
                 }}
               />
