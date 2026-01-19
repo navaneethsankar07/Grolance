@@ -2,7 +2,7 @@ from rest_framework.generics import CreateAPIView,ListAPIView, RetrieveUpdateDes
 from rest_framework.permissions import IsAuthenticated
 from .permissions import IsClientUser, IsFreelancerUser
 from .models import Project,Invitation, Proposal
-from .serializers import ProjectCreateSerializer, ProjectListSerializer, ProjectUpdateSerializer, RecommendedProjectSerializer, ProjectDetailSerializer, InvitationSerializer, ProposalsSerializer, ProposalsListSerializer
+from .serializers import ProjectCreateSerializer, ProjectListSerializer, ProjectUpdateSerializer, RecommendedProjectSerializer, ProjectDetailSerializer, InvitationSerializer, ProposalsSerializer, ProposalsListSerializer, FreelancerProposalSerializer
 from .recommendation import get_recommended_projects
 from rest_framework.exceptions import ValidationError 
 from django.db import models
@@ -244,3 +244,12 @@ class ProposalsListView(ListAPIView):
     def get_queryset(self):
         project_id = self.kwargs.get('project_id')
         return Proposal.objects.filter(project_id = project_id).order_by('-created_at')
+    
+class FreelancerProposalsListView(ListAPIView):
+    serializer_class = FreelancerProposalSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Proposal.objects.filter(
+            freelancer__user=self.request.user
+        ).order_by('-created_at')

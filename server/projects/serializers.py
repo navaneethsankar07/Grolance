@@ -351,10 +351,48 @@ class ProposalsListSerializer(serializers.ModelSerializer):
     freelancer_name = serializers.CharField(source='freelancer.user.full_name')
     freelancer_photo = serializers.CharField(source='freelancer.user.profile_photo', read_only=True)
     freelancer_tagline = serializers.CharField(source='freelancer.tagline', read_only=True)
+    contract_info = serializers.SerializerMethodField()
 
     class Meta:
         model = Proposal
         fields = [
             'id','freelancer_id' ,'freelancer_name', 'freelancer_photo', 'freelancer_tagline',
-            'cover_letter', 'bid_amount', 'delivery_days', 'status', 'created_at'
+            'cover_letter', 'bid_amount', 'delivery_days', 'status', 'created_at','contract_info'
         ]
+    def get_contract_info(self, obj):
+        from contracts.models import Contract
+        contract = Contract.objects.filter(project=obj.project).first()
+        if contract:
+            return {
+                "id": contract.id,
+                "status": contract.status,
+                "is_this_freelancer": contract.freelancer.id == obj.freelancer.user.id
+            }
+        return None
+    
+
+class FreelancerProposalSerializer(serializers.ModelSerializer):
+    project_title = serializers.CharField(source='project.title', read_only=True)
+    client_name = serializers.CharField(source='project.client.full_name', read_only=True)
+    contract_info = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Proposal
+        fields = [
+            'id', 'project_id', 'project_title', 'client_name', 
+            'cover_letter', 'bid_amount', 'delivery_days', 
+            'status', 'created_at', 'contract_info'
+        ]
+
+    def get_contract_info(self, obj):
+        from contracts.models import Contract
+        contract = Contract.objects.filter(
+            project=obj.project, 
+            freelancer=obj.freelancer.user
+        ).first()
+        if contract:
+            return {
+                "id": contract.id,
+                "status": contract.status
+            }
+        return None

@@ -13,20 +13,27 @@ export default function ProposalsIndex() {
   const { data: project, isLoading: isProjectLoading } = useProjectDetails(id);
   const { data: invitationsData, isLoading: isInvitesLoading } = useSentInvitations(id);
   const { data: proposals, isLoading: isProposalsLoading } = useProposals(id);
+
   if (isProjectLoading || isInvitesLoading || isProposalsLoading) {
     return <div className="p-10 text-center font-inter text-gray-600">Loading data...</div>;
   }
 
   const invitations = invitationsData?.results || (Array.isArray(invitationsData) ? invitationsData : []);
   const actualProposals = proposals?.results || (Array.isArray(proposals) ? proposals : []);
+  
+  const sortedProposals = [...actualProposals].sort((a, b) => {
+    if (a.contract_info?.is_this_freelancer) return -1;
+    if (b.contract_info?.is_this_freelancer) return 1;
+    return 0;
+  });
+
+  const anyOfferMade = actualProposals.some(p => p.contract_info !== null);
 
   const displayBudget = project?.pricing_type === "fixed" 
     ? `₹${Number(project.fixed_price).toLocaleString()}` 
     : `₹${Number(project.min_budget).toLocaleString()} - ₹${Number(project.max_budget).toLocaleString()}`;
-  
-console.log(actualProposals);
 
-    return (
+  return (
     <div className="min-h-screen bg-gray-50">
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         
@@ -50,8 +57,9 @@ console.log(actualProposals);
                 <ProposalCard
                   key={inv.id}
                   isInvitation={true}
+                  anyOfferMade={anyOfferMade}
                   freelancer={{
-                    id:inv.freelancer_id,
+                    id: inv.freelancer_id,
                     name: inv.freelancer_name, 
                     title: inv.freelancer_tagline || "Invited Talent",
                     image: inv.freelancer_image || "https://via.placeholder.com/150",
@@ -75,26 +83,27 @@ console.log(actualProposals);
         </div>
 
         <div className="mb-8 space-y-6">
-          {actualProposals.length > 0 ? (
-            actualProposals.map((prop) => (
+          {sortedProposals.length > 0 ? (
+            sortedProposals.map((prop) => (
               <ProposalCard
                 key={prop.id}
                 isInvitation={false}
-                
+                anyOfferMade={anyOfferMade}
                 freelancer={{
-                  id:prop.freelancer_id,
+                  id: prop.freelancer_id,
                   name: prop.freelancer_name,
                   title: prop.freelancer_tagline || "Freelancer",
                   image: prop.freelancer_photo || "https://via.placeholder.com/150",
                   rating: 4.8, 
                 }}
                 proposal={{
-                  title: project.title,
-                  projectId:id,
-                  freelancerId:prop.freelancer ,
+                  title: project?.title,
+                  projectId: id,
+                  freelancerId: prop.freelancer,
                   description: prop.cover_letter,
                   bidAmount: prop.bid_amount,
-                  deliveryDays: prop.delivery_days
+                  deliveryDays: prop.delivery_days,
+                  contract_info: prop.contract_info
                 }}
               />
             ))

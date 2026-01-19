@@ -3,6 +3,7 @@ import { X, CreditCard } from "lucide-react";
 import { useCreateContract } from "../contractMutations";
 import SignatureCanvas from 'react-signature-canvas'; 
 import { useModal } from "../../../../hooks/modal/useModalStore";
+import { toast } from "react-toastify";
 
 export default function ContractOfferModal() {
   const { closeModal, modalProps } = useModal();
@@ -89,15 +90,24 @@ export default function ContractOfferModal() {
         closeModal();
       },
       onError: (error) => {
-       const serverErrors = error.response?.data;
-    console.error("SERVER VALIDATION ERROR:", serverErrors);
-    
-    const errorString = JSON.stringify(serverErrors, null, 2);
-    alert(`Failed to create contract:\n${errorString}`);
-      }
+  const serverErrors = error.response?.data;
+  console.error("SERVER VALIDATION ERROR:", serverErrors);
+
+  if (serverErrors && typeof serverErrors === 'object') {
+    const firstKey = Object.keys(serverErrors)[0];
+    const firstMessage = serverErrors[firstKey];
+
+    if (Array.isArray(firstMessage)) {
+      toast.error(firstMessage[0]);
+    } else {
+      toast.error(String(firstMessage));
+    }
+  } else {
+    toast.error("An unexpected error occurred. Please try again.");
+  }
+}
     });
   };
-console.log(modalProps.freelancerId);
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 overflow-y-auto">
