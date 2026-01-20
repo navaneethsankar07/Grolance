@@ -6,7 +6,7 @@ export const createProposal = async (proposalData) => {
 };
 
 
-export const fetchProposals = async () =>{
-  const response = await axiosInstance.get('/projects/my-proposals/')
+export const fetchProposals = async ({page,status}) =>{
+  const response = await axiosInstance.get('/projects/my-proposals/',{params:{page,status:status}})
   return response.data;
 }

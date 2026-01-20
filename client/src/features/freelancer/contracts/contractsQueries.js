@@ -1,10 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
 import { fetchAllContracts, fetchContractDetail } from "./contractsApi";
 
-export const useMyContracts = () => {
+export const useMyContracts = (filters) => {
   return useQuery({
-    queryKey: ["contracts"],
-    queryFn: fetchAllContracts,
+    queryKey: ["contracts", filters],
+    queryFn: () => fetchAllContracts(filters),
+    keepPreviousData: true,
   });
 };
 
@@ -12,6 +13,6 @@ export const useContractDetail = (id) => {
   return useQuery({
     queryKey: ["contract", id],
     queryFn: () => fetchContractDetail(id),
-    enabled: !!id, // Only fetch if ID is provided
+    enabled: !!id, 
   });
 };

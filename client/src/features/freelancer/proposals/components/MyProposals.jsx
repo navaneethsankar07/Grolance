@@ -1,11 +1,13 @@
-import React from "react";
+import React, { useState } from "react";
 import { ChevronDown, ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
 import { ProposalCard } from "./ProposalsCard";
 import { useMyProposals } from "./proposalsQueries";
 
 export default function MyProposals() {
-  const { data, isLoading, isError } = useMyProposals();
-
+  const [status, setStatus] = useState('')
+  const [page, setPage] = useState(1)
+  const { data, isLoading, isError } = useMyProposals({page,status});
+  
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -23,6 +25,14 @@ export default function MyProposals() {
   }
 
   const proposals = data?.results || data || [];
+  const totalCount = data?.count || 0;
+  const hasNext = !!data?.next;
+  const hasPrev = !!data?.previous;
+
+  const handleStatusChange = (e)=>{
+    setStatus(e.target.value);
+    setPage(1);
+  }
 
   return (
     <div className="min-h-screen bg-white">
@@ -38,12 +48,19 @@ export default function MyProposals() {
 
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 sm:mb-8">
           <div className="flex items-center gap-3 sm:gap-4 flex-wrap">
-            <button className="flex items-center justify-between gap-4 sm:gap-6 h-[42px] px-4 sm:px-[17px] rounded-xl border border-gray-200 bg-white hover:bg-gray-50 transition-colors">
-              <span className="text-sm font-medium text-gray-700">
-                All Status
-              </span>
-              <ChevronDown className="w-4 h-4 text-gray-400" />
-            </button>
+            <div className="relative">
+              <select 
+                value={status} 
+                onChange={handleStatusChange}
+                className="appearance-none h-[42px] pl-4 pr-10 rounded-xl border border-gray-200 bg-white text-sm font-medium text-gray-700 outline-none hover:bg-gray-50 cursor-pointer"
+              >
+                <option value="">All Status</option>
+                <option value="pending">Pending</option>
+                <option value="accepted">Accepted</option>
+                <option value="rejected">Rejected</option>
+              </select>
+              <ChevronDown className="w-4 h-4 text-gray-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+            </div>
 
             <button className="flex items-center justify-between gap-4 sm:gap-6 h-[42px] px-4 sm:px-[17px] rounded-xl border border-gray-200 bg-white hover:bg-gray-50 transition-colors">
               <span className="text-sm font-medium text-gray-700">
@@ -58,7 +75,10 @@ export default function MyProposals() {
             <span> {proposals.length === 1 ? 'proposal' : 'proposals'}</span>
           </div>
         </div>
-
+<div className="text-xs text-gray-500 mb-5 font-medium">
+            <span>Showing {proposals.length} of {totalCount} proposals</span>
+          </div>
+        
         <div className="space-y-4">
           {proposals.length > 0 ? (
             proposals.map((proposal) => (
@@ -71,22 +91,27 @@ export default function MyProposals() {
           )}
         </div>
 
-        {proposals.length > 0 && (
+        {totalCount > 0 && (
           <div className="flex items-center justify-center mt-8">
             <div className="flex items-center rounded-md border border-gray-300 overflow-hidden shadow-sm">
               <button
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={!hasPrev}
                 className="h-9 w-9 flex items-center justify-center border-r border-gray-300 bg-white hover:bg-gray-50 disabled:opacity-50"
-                disabled
               >
-                <ChevronLeft className="w-5 h-5 text-gray-400" />
+                <ChevronLeft className="w-5 h-5" />
               </button>
 
-              <button className="h-9 px-4 flex items-center justify-center bg-blue-500 text-white font-semibold text-sm border-r border-gray-300">
-                1
-              </button>
+              <div className="h-9 px-4 flex items-center justify-center bg-blue-500 text-white font-semibold text-sm">
+                {page}
+              </div>
 
-              <button className="h-9 w-9 flex items-center justify-center bg-white hover:bg-gray-50 disabled:opacity-50" disabled>
-                <ChevronRight className="w-5 h-5 text-gray-400" />
+              <button
+                onClick={() => setPage((p) => p + 1)}
+                disabled={!hasNext}
+                className="h-9 w-9 flex items-center justify-center bg-white hover:bg-gray-50 disabled:opacity-50"
+              >
+                <ChevronRight className="w-5 h-5" />
               </button>
             </div>
           </div>

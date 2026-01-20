@@ -101,9 +101,16 @@ class ProjectListSerializer(serializers.ModelSerializer):
         read_only = True
     )
     skills = serializers.SerializerMethodField()
+    contract_id = serializers.SerializerMethodField()
+    proposals_count = serializers.SerializerMethodField()
     class Meta:
         model = Project
-        fields = ['id','title','description','category_name', 'pricing_type', 'fixed_price', 'min_budget', 'max_budget', 'delivery_days', 'status', 'created_at', 'skills']
+        fields = [
+            'id', 'title', 'description', 'category_name', 
+            'pricing_type', 'fixed_price', 'min_budget', 
+            'max_budget', 'delivery_days', 'status', 
+            'created_at', 'skills', 'contract_id', 'proposals_count'
+        ]
 
     def get_skills(self, obj):
         skills = []
@@ -113,6 +120,15 @@ class ProjectListSerializer(serializers.ModelSerializer):
             elif ps.custom_name:
                 skills.append(ps.custom_name)
         return skills
+    
+    def get_contract_id(self, obj):
+        try:
+            return obj.contract.id
+        except Exception:
+            return None
+
+    def get_proposals_count(self, obj):
+        return obj.proposals.count()
 
 
 
@@ -123,7 +139,7 @@ class ProjectUpdateSerializer(serializers.ModelSerializer):
         write_only = True
     )
     skills_display = serializers.SerializerMethodField(read_only=True)
-
+    
     class Meta:
         model = Project
         fields = [
@@ -246,10 +262,10 @@ class ProjectClientSerializer(serializers.ModelSerializer):
     profile_photo = serializers.URLField(source="user.profile_photo", read_only=True)
     member_since = serializers.SerializerMethodField()
     total_jobs_posted = serializers.SerializerMethodField()
-
+    contract_id = serializers.SerializerMethodField()
     class Meta:
         model = ClientProfile
-        fields = ["full_name", "profile_photo", "member_since", "total_jobs_posted"]
+        fields = ["full_name", "profile_photo", "member_since", "total_jobs_posted", 'contract_id']
 
     def get_member_since(self, obj):
         return obj.user.created_at.strftime("%b %Y") 
@@ -257,6 +273,11 @@ class ProjectClientSerializer(serializers.ModelSerializer):
     def get_total_jobs_posted(self, obj):
         return Project.objects.filter(client=obj.user).count()
     
+    def get_contract_id(self, obj):
+        try:
+            return obj.contract.id
+        except Exception:
+            return None
 
 class ProjectDetailSerializer(ProjectListSerializer):
     requirements = serializers.CharField()
@@ -269,7 +290,7 @@ class ProjectDetailSerializer(ProjectListSerializer):
             'expected_deliverables', 
             'client_info'
         ]
-
+    
     def get_client_info(self, obj):
         profile, created = ClientProfile.objects.get_or_create(user=obj.client)
         return ProjectClientSerializer(profile).data

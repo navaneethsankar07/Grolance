@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { useMyContracts } from './contractsQueries';
 import { 
   MessageSquare, 
   ExternalLink, 
@@ -10,8 +9,9 @@ import {
   ChevronRight 
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useMyContracts } from '../../freelancer/contracts/contractsQueries';
 
-export default function Contracts() {
+export default function ClientContracts() {
   const [activeTab, setActiveTab] = useState('All');
   const [page, setPage] = useState(1);
   const navigate = useNavigate();
@@ -19,7 +19,7 @@ export default function Contracts() {
   const { data, isLoading } = useMyContracts({ 
     status: activeTab, 
     page: page,
-    role: 'freelancer' 
+    role: 'client' 
   });
 
   const tabs = ['All', 'In Progress', 'Submitted', 'Completed', 'Disputed'];
@@ -34,7 +34,6 @@ export default function Contracts() {
     setActiveTab(tab);
     setPage(1);
   };
-console.log(data);
 
   return (
     <div className="min-h-screen bg-[#f3f4f6] p-4 sm:p-8 font-sans">
@@ -71,7 +70,7 @@ console.log(data);
                     <div>
                       <h2 className="text-lg font-bold text-[#1e293b] mb-1">{contract.project_title}</h2>
                       <p className="text-xs text-gray-500">
-                        Client: <span className="text-blue-600 font-medium">{contract.client_name}</span>
+                        Freelancer: <span className="text-blue-600 font-medium">{contract.freelancer_name}</span>
                       </p>
                     </div>
                     <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
@@ -117,7 +116,7 @@ console.log(data);
 
                   <div className="flex gap-3">
                     <button 
-                      onClick={() => navigate(`/freelancer/contracts/${contract.id}`)}
+                      onClick={() => navigate(`/contracts/${contract.id}`)}
                       className="flex items-center gap-2 bg-[#3b82f6] text-white px-5 py-2 rounded-lg text-xs font-bold hover:bg-blue-600 transition-colors"
                     >
                       <ExternalLink className="w-3.5 h-3.5" />
@@ -125,7 +124,7 @@ console.log(data);
                     </button>
                     <button className="flex items-center gap-2 bg-white border border-gray-200 text-gray-600 px-5 py-2 rounded-lg text-xs font-bold hover:bg-gray-50 transition-colors">
                       <MessageSquare className="w-3.5 h-3.5" />
-                      Message Client
+                      Message Freelancer
                     </button>
                   </div>
                 </div>

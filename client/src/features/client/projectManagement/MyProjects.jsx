@@ -2,6 +2,7 @@ import React, { useRef, useState } from "react";
 import ProjectCard from "./components/ProjectCard";
 import { useMyProjects } from "./projectQueries";
 import { Briefcase, CircleCheck, Hourglass , Search, ChevronRight, ChevronLeft, FolderOpen} from "lucide-react";
+
 export default function MyProjects() {
   const [activeTab, setActiveTab] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
@@ -15,14 +16,18 @@ export default function MyProjects() {
 
   const jobs = data?.results ?? [];
   const totalCount = data?.count ?? 0;
+
   const handleSearch = () => {
     const value = searchInputRef.current.value;
     setSearchQuery(value);
     setPage(1);
   }
+console.log(data);
+
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') handleSearch();
   }
+
   const TabButton = ({ id, label, Icon, count }) => (
     <button
       onClick={() => { setActiveTab(id); setPage(1); }}
@@ -30,7 +35,7 @@ export default function MyProjects() {
         activeTab === id ? "border-blue-500 text-blue-600" : "border-transparent text-gray-500 hover:text-gray-700"
       }`}
     >
-      <Icon className="material-icons text-xl"/>
+      <Icon className="w-5 h-5"/>
       <span className="text-sm font-medium">{label}</span>
       <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
         activeTab === id ? "bg-blue-100 text-blue-600" : "bg-gray-100 text-gray-600"
@@ -51,25 +56,24 @@ export default function MyProjects() {
           </div>
 
           <div className="relative flex w-full lg:w-[414px] items-center">
-      <div className="relative flex-1">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
-        <input
-          type="text"
-          ref={searchInputRef}
-          onKeyDown={handleKeyDown}
-          placeholder="Search Jobs..."
-          className="w-full h-[46px] pl-11 pr-4 border border-gray-300 rounded-l-md text-base focus:ring-2 focus:ring-blue-500 outline-none"
-        />
-      </div>
-      
-      <button
-        onClick={handleSearch} // 5. Trigger on click
-        className="h-[46px] px-5 bg-primary hover:bg-primary/90 text-white rounded-r-md flex items-center justify-center transition-colors"
-      >
-        <Search className="w-5 h-5" />
-      </button>
-    </div>
-    </div>
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <input
+                type="text"
+                ref={searchInputRef}
+                onKeyDown={handleKeyDown}
+                placeholder="Search Jobs..."
+                className="w-full h-[46px] pl-11 pr-4 border border-gray-300 rounded-l-md text-base focus:ring-2 focus:ring-blue-500 outline-none"
+              />
+            </div>
+            <button
+              onClick={handleSearch}
+              className="h-[46px] px-5 bg-blue-600 hover:bg-blue-700 text-white rounded-r-md flex items-center justify-center transition-colors"
+            >
+              <Search className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
 
         <div className="border-b border-gray-200 mb-6">
           <nav className="flex gap-6">
@@ -85,9 +89,8 @@ export default function MyProjects() {
           ) : jobs.length > 0 ? (
             jobs.map((job) => <ProjectCard key={job.id} job={job} />)
           ) : (
-
-            <div className="bg-white flex p-20 pl-150 gap-3 text-center rounded-lg border text-gray-400">
-              <FolderOpen className=" tmaterial-icons text-5xl mb-2"/>
+            <div className="bg-white flex flex-col items-center justify-center p-20 gap-3 text-center rounded-lg border text-gray-400">
+              <FolderOpen className="w-12 h-12 mb-2"/>
               <p>No projects found in this category.</p>
             </div>
           )}
@@ -101,7 +104,7 @@ export default function MyProjects() {
               onClick={() => setPage(p => p - 1)}
               className="h-9 w-9 flex items-center justify-center border border-gray-300 rounded-l-md hover:bg-gray-50 disabled:opacity-50"
             >
-              <ChevronLeft className="material-icons text-gray-400 text-xl"/>
+              <ChevronLeft className="text-gray-400 w-5 h-5"/>
             </button>
             <div className="h-9 px-4 bg-blue-500 text-white text-sm font-semibold flex items-center border-t border-b border-blue-500">
               {page}
@@ -111,7 +114,7 @@ export default function MyProjects() {
               onClick={() => setPage(p => p + 1)}
               className="h-9 w-9 flex items-center justify-center border border-gray-300 rounded-r-md hover:bg-gray-50 disabled:opacity-50"
             >
-              <ChevronRight className="material-icons text-gray-400 text-xl"/>
+              <ChevronRight className="text-gray-400 w-5 h-5"/>
             </button>
           </nav>
         </div>

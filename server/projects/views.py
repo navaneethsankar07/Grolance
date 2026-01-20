@@ -56,6 +56,11 @@ class ProjectUpdateAPIView(RetrieveUpdateDestroyAPIView):
     def get_queryset(self):
         return Project.objects.filter(client=self.request.user)
     
+    def get_serializer_class(self):
+        if self.request.method == 'GET':
+            return ProjectDetailSerializer
+        return ProjectUpdateSerializer
+    
     def perform_update(self, serializer):
         try:
             instance = serializer.save()
@@ -250,6 +255,12 @@ class FreelancerProposalsListView(ListAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        return Proposal.objects.filter(
+        queryset = Proposal.objects.filter(
             freelancer__user=self.request.user
         ).order_by('-created_at')
+
+        status = self.request.query_params.get('status')
+        if status:
+            queryset= queryset.filter(status=status)
+
+        return queryset

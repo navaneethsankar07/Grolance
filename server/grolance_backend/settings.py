@@ -15,6 +15,7 @@ import environ
 import os
 from datetime import timedelta
 import cloudinary
+import cloudinary.uploader
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -208,18 +209,26 @@ DATABASES = {
 }
 
 
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': env("CLOUDINARY_NAME"),
+    'API_KEY': env("CLOUDINARY_API_KEY"),
+    'API_SECRET': env("CLOUDINARY_API_SECRET"),
+}
+
 cloudinary.config(
-    cloud_name=env("CLOUDINARY_NAME"),
-    api_key=env("CLOUDINARY_API_KEY"),
-    api_secret=env("CLOUDINARY_API_SECRET"),
+    cloud_name=CLOUDINARY_STORAGE['CLOUD_NAME'],
+    api_key=CLOUDINARY_STORAGE['API_KEY'],
+    api_secret=CLOUDINARY_STORAGE['API_SECRET'],
+    secure=True
 )
+CLOUDINARY_UPLOAD_PRESET = env("CLOUDINARY_UPLOAD_PRESET")
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
-    "PAGE_SIZE": 5,
+    "PAGE_SIZE": 10,
 }
 
 

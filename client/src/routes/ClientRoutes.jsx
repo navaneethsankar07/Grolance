@@ -16,6 +16,9 @@ import { OnBoardingProvider } from "../features/client/onboarding/OnBoardingCont
 import OnboardingManager from "../features/client/onboarding/OnboardingManager";
 import FindTalent from "../features/client/findtalent/FindTalent";
 import FreelancerProfile from "../features/client/freelancerprofile/FreelancerProfile";
+import ClientContracts from "../features/client/contract/ClientContracts";
+import ClientContractDetail from "../features/client/contract/ContractDetail";
+import ClientJobDetail from "../features/client/projectManagement/ProjectDetails";
 
 export default function ClientRoutes() {
   const { user,loading } = useSelector(state => state.auth);
@@ -31,6 +34,7 @@ export default function ClientRoutes() {
           <Route path="/find-talents/:id" element={<FreelancerProfile/>}/>
           <Route path="/create-project" element={<AddProject/>}/>
           <Route path="/my-projects" element={<MyProjects/>}/>
+          <Route path="/my-projects/:id" element={<ClientJobDetail/>}/>
           <Route path="/my-projects/:id/edit" element={<EditProject/>}/>
           <Route path="/my-projects/:id/proposals" element={<ProposalsIndex/>}/>
           <Route element={<ClientProfileLayout/>}>
@@ -40,6 +44,8 @@ export default function ClientRoutes() {
           <Route path="/profile/edit" element={<ProfileEdit/>}/>
           </Route>
           <Route path="/onboarding" element={ <OnBoardingProvider><OnboardingManager /></OnBoardingProvider>} />
+          <Route path="/contracts" element={<ClientContracts/>}/>
+          <Route path="/contracts/:id" element={<ClientContractDetail/>}/>
         </Route>
           
     </Routes>
