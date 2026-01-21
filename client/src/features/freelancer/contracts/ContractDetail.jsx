@@ -4,19 +4,24 @@ import { useContractDetail } from "./contractsQueries";
 import { 
   FileText, Package, Clock, Calendar, Briefcase, Tag, 
   Upload, MessageSquare, ShieldAlert, CheckCircle2, IndianRupee,
-  X, Link2, ExternalLink, Download
+  X, Link2, ExternalLink, Download, AlertCircle, History
 } from "lucide-react";
-import { useSubmitWork } from "./contractMutation";
+import { useSubmitWork, useRevisionAction } from "./contractMutation";
 
 export default function ContractDetail() {
   const { id } = useParams();
   const { data: contract, isLoading, isError } = useContractDetail(id);
   const submitWorkMutation = useSubmitWork();
+  const revisionActionMutation = useRevisionAction();
 
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, percentage: 0 });
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
   const [subType, setSubType] = useState('file');
   const [formData, setFormData] = useState({ title: '', file: null, link_url: '', notes: '' });
+  
+  const [activeRevisionId, setActiveRevisionId] = useState(null);
+  const [rejectionNote, setRejectionNote] = useState("");
 
   useEffect(() => {
     if (contract?.freelancer_signed_at && contract?.delivery_days) {
@@ -44,7 +49,36 @@ export default function ContractDetail() {
     }
   }, [contract]);
 
-const handleWorkSubmission = async () => {
+  const handleRevisionDecision = (revisionId, action) => {
+    if (action === 'reject') {
+      setActiveRevisionId(revisionId);
+      setIsRejectModalOpen(true);
+      return;
+    }
+
+    revisionActionMutation.mutate({ revisionId, action }, {
+      onSuccess: () => alert("Revision accepted. Status updated to Active."),
+      onError: (err) => alert(err.response?.data?.error || "Error updating revision")
+    });
+  };
+
+  const confirmRejection = () => {
+    if (!rejectionNote.trim()) return alert("Please provide a reason for rejection");
+
+    revisionActionMutation.mutate({ 
+      revisionId: activeRevisionId, 
+      action: 'reject', 
+      message: rejectionNote 
+    }, {
+      onSuccess: () => {
+        setIsRejectModalOpen(false);
+        setRejectionNote("");
+        setActiveRevisionId(null);
+      }
+    });
+  };
+
+  const handleWorkSubmission = async () => {
     const data = new FormData();
     data.append('deliverable_type', subType); 
     data.append('title', formData.title);
@@ -62,10 +96,6 @@ const handleWorkSubmission = async () => {
       onSuccess: () => {
         setIsModalOpen(false);
         setFormData({ title: '', file: null, link_url: '', notes: '' });
-      },
-      onError: (err) => {
-        console.log("Server Error:", err.response?.data);
-        alert(JSON.stringify(err.response?.data));
       }
     });
   };
@@ -76,7 +106,7 @@ const handleWorkSubmission = async () => {
   const dueDate = contract?.freelancer_signed_at ? new Date(new Date(contract.freelancer_signed_at).getTime() + (contract.delivery_days * 24 * 60 * 60 * 1000)) : null;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 pb-20">
       <div className="max-w-[1085px] mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-16">
         <div className="mb-8">
           <h1 className="text-[26px] font-bold text-gray-900 leading-9 mb-2">Order Details</h1>
@@ -86,7 +116,9 @@ const handleWorkSubmission = async () => {
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-8 mb-6">
           <div className="flex items-center justify-between mb-10">
             <h2 className="text-xl font-bold text-[#111827]">Order Summary</h2>
-            <span className="px-4 py-1.5 bg-blue-50 text-blue-600 text-xs font-semibold rounded-full border border-blue-100 uppercase">
+            <span className={`px-4 py-1.5 text-xs font-semibold rounded-full border uppercase ${
+              contract.status === 'active' ? 'bg-blue-50 text-blue-600 border-blue-100' : 'bg-green-50 text-green-600 border-green-100'
+            }`}>
               {contract.status === 'active' ? 'In Progress' : contract.status}
             </span>
           </div>
@@ -166,28 +198,73 @@ const handleWorkSubmission = async () => {
               <Clock className="w-5 h-5 text-blue-600" />
               <h2 className="text-[17px] font-bold text-gray-900">Delivery Countdown</h2>
             </div>
-            <p className="text-xs font-medium text-gray-400 uppercase tracking-wider">
-              Due: {dueDate ? dueDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : ''}
-            </p>
           </div>
-          
           <div className="flex items-baseline gap-2 mb-4">
             <span className="text-3xl font-bold text-gray-900">{timeLeft.days}</span>
             <span className="text-sm font-semibold text-gray-500 mr-2">days</span>
             <span className="text-3xl font-bold text-gray-900">{timeLeft.hours}</span>
             <span className="text-sm font-semibold text-gray-500">hours remaining</span>
           </div>
-
           <div className="relative w-full h-2.5 bg-gray-100 rounded-full overflow-hidden">
-            <div 
-              className="absolute left-0 top-0 h-full bg-blue-600 transition-all duration-1000 ease-linear rounded-full"
-              style={{ width: `${timeLeft.percentage}%` }}
-            />
+            <div className="absolute left-0 top-0 h-full bg-blue-600 transition-all duration-1000 ease-linear rounded-full" style={{ width: `${timeLeft.percentage}%` }} />
           </div>
-          <p className="mt-3 text-[11px] font-bold text-gray-400 uppercase tracking-widest">
-            {Math.round(timeLeft.percentage)}% of delivery time elapsed
-          </p>
         </div>
+
+        {contract.revisions?.length > 0 && (
+          <div className="bg-white rounded-xl border border-red-100 shadow-sm overflow-hidden mb-6">
+            <div className="bg-red-50/50 p-6 border-b border-red-50 flex items-center gap-2">
+              <History className="w-5 h-5 text-red-600" />
+              <h2 className="text-[15px] font-bold text-gray-900">Revision Requests</h2>
+            </div>
+            <div className="p-6 space-y-4">
+              {contract.revisions.map((rev, index) => (
+                <div key={rev.id} className="p-5 rounded-xl bg-white border border-red-100 space-y-4">
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center gap-3">
+                      <div className="w-7 h-7 rounded-full bg-red-100 flex items-center justify-center text-red-600 font-bold text-[10px]">
+                        {index + 1}
+                      </div>
+                      <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded ${
+                        rev.status === 'pending' ? 'bg-amber-100 text-amber-700' : 
+                        rev.status === 'rejected' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'
+                      }`}>
+                        {rev.status}
+                      </span>
+                    </div>
+                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{new Date(rev.created_at).toLocaleDateString()}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-700 leading-relaxed font-medium">"{rev.reason}"</p>
+                  </div>
+                  {rev.status === 'pending' && (
+                    <div className="flex gap-3 pt-2">
+                      <button 
+                        disabled={revisionActionMutation.isPending}
+                        onClick={() => handleRevisionDecision(rev.id, 'accept')}
+                        className="flex-1 py-2 bg-blue-600 text-white text-xs font-bold rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                      >
+                        Accept Revision
+                      </button>
+                      <button 
+                        disabled={revisionActionMutation.isPending}
+                        onClick={() => handleRevisionDecision(rev.id, 'reject')}
+                        className="flex-1 py-2 bg-white border border-red-200 text-red-600 text-xs font-bold rounded-lg hover:bg-red-50 disabled:opacity-50"
+                      >
+                        Reject
+                      </button>
+                    </div>
+                  )}
+                  {rev.status === 'rejected' && rev.rejection_message && (
+                    <div className="p-3 bg-red-50 rounded-lg border border-red-100">
+                      <p className="text-[10px] font-bold text-red-700 uppercase mb-1">Rejection Reason:</p>
+                      <p className="text-xs text-red-600 italic">"{rev.rejection_message}"</p>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-8 mb-6">
           <h2 className="text-[17px] font-semibold text-gray-900 mb-6">Project Description</h2>
@@ -198,32 +275,6 @@ const handleWorkSubmission = async () => {
                 <p>{contract.project_description}</p>
               </div>
             </div>
-            <div className="border-t border-gray-100 pt-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center shrink-0">
-                    <Briefcase className="w-5 h-5 text-blue-600" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500 mb-2">Service Type</p>
-                    <p className="text-sm font-medium text-gray-900">{contract.project_category}</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center shrink-0">
-                    <Tag className="w-5 h-5 text-blue-600" />
-                  </div>
-                  <div className="w-full">
-                    <p className="text-xs text-gray-500 mb-2">Skills Involved</p>
-                    <div className="flex flex-wrap gap-2">
-                      {contract.skills?.map((skill, index) => (
-                        <span key={index} className="px-3 py-1.5 bg-blue-50 border border-blue-200 text-blue-700 text-xs font-medium rounded-full">{skill}</span>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
 
@@ -231,14 +282,16 @@ const handleWorkSubmission = async () => {
           <div className="border-b border-gray-50 p-6 flex justify-between items-center">
             <div>
               <h2 className="text-[15px] font-semibold text-gray-900 mb-1">Deliverables</h2>
-              <p className="text-xs text-gray-500">Upload your work files here for client review.</p>
+              <p className="text-xs text-gray-500">Files and links submitted to the client.</p>
             </div>
-            <button 
-              onClick={() => setIsModalOpen(true)}
-              className="px-4 py-2 bg-blue-600 text-white text-xs font-bold rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              Add Deliverable
-            </button>
+            {contract.status === 'active' && (
+              <button 
+                onClick={() => setIsModalOpen(true)}
+                className="px-4 py-2 bg-blue-600 text-white text-xs font-bold rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Add Deliverable
+              </button>
+            )}
           </div>
           <div className="p-6 space-y-3">
             {contract.deliverables?.length > 0 ? (
@@ -252,7 +305,7 @@ const handleWorkSubmission = async () => {
                     </div>
                   </div>
                   <a href={item.file_url} target="_blank" rel="noreferrer" className="p-2 hover:bg-white rounded-lg transition-colors text-gray-400 hover:text-blue-600">
-                    {item.deliverable_type === 'link' ? <ExternalLink className="w-4 h-4" /> : <Download className="w-4 h-4" />}
+                    <Download className="w-4 h-4" />
                   </a>
                 </div>
               ))
@@ -276,6 +329,46 @@ const handleWorkSubmission = async () => {
         </div>
       </div>
 
+      {/* REJECTION MODAL */}
+      {isRejectModalOpen && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[60] p-4">
+          <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+              <h3 className="font-bold text-gray-900">Reject Revision Request</h3>
+              <X className="w-5 h-5 cursor-pointer text-gray-400" onClick={() => setIsRejectModalOpen(false)} />
+            </div>
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Reason for Rejection</label>
+                <textarea 
+                  rows="4"
+                  placeholder="Explain why you cannot accept this revision (e.g., out of scope, revisions exhausted)..."
+                  className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 ring-red-500/20 resize-none"
+                  value={rejectionNote}
+                  onChange={(e) => setRejectionNote(e.target.value)}
+                />
+              </div>
+              <div className="flex gap-3">
+                <button 
+                  onClick={() => setIsRejectModalOpen(false)}
+                  className="flex-1 py-3 border border-gray-200 text-gray-600 text-sm font-bold rounded-xl hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={confirmRejection}
+                  disabled={revisionActionMutation.isPending}
+                  className="flex-1 py-3 bg-red-600 text-white text-sm font-bold rounded-xl hover:bg-red-700 shadow-lg shadow-red-500/20 disabled:opacity-50"
+                >
+                  {revisionActionMutation.isPending ? "Submitting..." : "Confirm Rejection"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* SUBMISSION MODAL */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
@@ -283,30 +376,15 @@ const handleWorkSubmission = async () => {
               <h3 className="font-bold text-gray-900">Submit Deliverable</h3>
               <X className="w-5 h-5 cursor-pointer text-gray-400" onClick={() => setIsModalOpen(false)} />
             </div>
-            
             <div className="p-6 space-y-5">
               <div className="flex bg-gray-100 p-1 rounded-xl">
-                <button 
-                  className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${subType === 'file' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500'}`}
-                  onClick={() => setSubType('file')}
-                >File Upload</button>
-                <button 
-                  className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${subType === 'link' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500'}`}
-                  onClick={() => setSubType('link')}
-                >Paste Link</button>
+                <button className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${subType === 'file' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500'}`} onClick={() => setSubType('file')}>File Upload</button>
+                <button className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${subType === 'link' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500'}`} onClick={() => setSubType('link')}>Paste Link</button>
               </div>
-
               <div>
                 <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Display Title</label>
-                <input 
-                  type="text" 
-                  placeholder="e.g. Final Source Code"
-                  className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 ring-blue-500/20"
-                  value={formData.title}
-                  onChange={(e) => setFormData({...formData, title: e.target.value})}
-                />
+                <input type="text" placeholder="e.g. Final Source Code" className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 ring-blue-500/20" value={formData.title} onChange={(e) => setFormData({...formData, title: e.target.value})} />
               </div>
-
               {subType === 'file' ? (
                 <div className="border-2 border-dashed border-gray-200 rounded-2xl p-10 text-center hover:border-blue-300 transition-colors">
                   <input type="file" id="dropzone-file" className="hidden" onChange={(e) => setFormData({...formData, file: e.target.files[0]})} />
@@ -319,21 +397,10 @@ const handleWorkSubmission = async () => {
               ) : (
                 <div>
                   <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 block">URL</label>
-                  <input 
-                    type="text" 
-                    placeholder="https://github.com/..."
-                    className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 ring-blue-500/20"
-                    value={formData.link_url}
-                    onChange={(e) => setFormData({...formData, link_url: e.target.value})}
-                  />
+                  <input type="text" placeholder="https://github.com/..." className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 ring-blue-500/20" value={formData.link_url} onChange={(e) => setFormData({...formData, link_url: e.target.value})} />
                 </div>
               )}
-
-              <button 
-                onClick={handleWorkSubmission}
-                disabled={submitWorkMutation.isPending}
-                className="w-full py-4 bg-blue-600 text-white text-sm font-bold rounded-xl hover:bg-blue-700 disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-blue-500/30"
-              >
+              <button onClick={handleWorkSubmission} disabled={submitWorkMutation.isPending} className="w-full py-4 bg-blue-600 text-white text-sm font-bold rounded-xl hover:bg-blue-700 disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-blue-500/30">
                 {submitWorkMutation.isPending ? "Uploading..." : "Submit Deliverable"}
               </button>
             </div>

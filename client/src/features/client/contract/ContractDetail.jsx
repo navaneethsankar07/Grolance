@@ -1,15 +1,21 @@
 import React, { useState, useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useContractDetail } from "../../freelancer/contracts/contractsQueries";
+import { useRequestRevision, useUpdateContractStatus } from "./contractMutations";
 import { 
-  FileText, Package, Clock, Calendar, Briefcase, Tag, 
-  Download, MessageSquare, ShieldAlert, CheckCircle2, IndianRupee, User, ExternalLink
+  FileText, Clock, Download, MessageSquare, ShieldAlert, 
+  ExternalLink, X, AlertCircle, History, CheckCircle2
 } from "lucide-react";
 
 export default function ClientContractDetail() {
   const { id } = useParams();
   const { data: contract, isLoading, isError } = useContractDetail(id);
+  const requestRevisionMutation = useRequestRevision();
+  const updateStatusMutation = useUpdateContractStatus();
+
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, percentage: 0 });
+  const [isRevisionModalOpen, setIsRevisionModalOpen] = useState(false);
+  const [revisionReason, setRevisionReason] = useState("");
 
   useEffect(() => {
     if (contract?.freelancer_signed_at && contract?.delivery_days) {
@@ -18,7 +24,6 @@ export default function ClientContractDetail() {
         const durationMs = contract.delivery_days * 24 * 60 * 60 * 1000;
         const end = start + durationMs;
         const now = new Date().getTime();
-        
         const difference = end - now;
         const totalDuration = end - start;
         
@@ -27,23 +32,45 @@ export default function ClientContractDetail() {
           const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
           const elapsed = now - start;
           const percentage = Math.min(Math.max((elapsed / totalDuration) * 100, 0), 100);
-          
           setTimeLeft({ days, hours, percentage });
         } else {
           setTimeLeft({ days: 0, hours: 0, percentage: 100 });
         }
       };
-
       calculateTime();
       const timer = setInterval(calculateTime, 60000);
       return () => clearInterval(timer);
     }
   }, [contract]);
 
+  const handleRevisionSubmit = () => {
+    if (revisionReason.length < 10) {
+      alert("Please provide a more detailed reason (at least 10 characters).");
+      return;
+    }
+    requestRevisionMutation.mutate(
+      { contractId: id, reason: revisionReason },
+      {
+        onSuccess: () => {
+          setIsRevisionModalOpen(false);
+          setRevisionReason("");
+        }
+      }
+    );
+  };
+
+  const handleApproveOrder = () => {
+    if (window.confirm("Are you sure? This will release the payment to the freelancer.")) {
+      updateStatusMutation.mutate({ contractId: id, status: 'completed' });
+    }
+  };
+
   if (isLoading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
   if (isError) return <div className="min-h-screen flex items-center justify-center text-red-500">Error loading contract details.</div>;
 
   const dueDate = new Date(new Date(contract.freelancer_signed_at).getTime() + (contract.delivery_days * 24 * 60 * 60 * 1000));
+  const pendingRevision = contract.revisions?.find(r => r.status === 'pending');
+  const acceptedRevision = contract.revisions?.find(r => r.status === 'accepted');
 
   return (
     <div className="min-h-screen bg-[#f9fafb]">
@@ -81,7 +108,28 @@ export default function ClientContractDetail() {
           </div>
         </div>
 
-        {/* PROJECT DESCRIPTION */}
+        {contract.revisions?.some(r => r.status === 'rejected') && (
+          <div className="mb-6 p-4 bg-red-50 border border-red-100 rounded-2xl flex gap-4">
+            <AlertCircle className="w-6 h-6 text-red-600 shrink-0" />
+            <div>
+              <p className="text-sm font-bold text-red-900">Revision Rejected by Freelancer</p>
+              <p className="text-xs text-red-700 mt-1">
+                {contract.revisions.find(r => r.status === 'rejected')?.rejection_message}
+              </p>
+            </div>
+          </div>
+        )}
+
+        {acceptedRevision && (
+          <div className="mb-6 p-4 bg-green-50 border border-green-100 rounded-2xl flex gap-4">
+            <CheckCircle2 className="w-6 h-6 text-green-600 shrink-0" />
+            <div>
+              <p className="text-sm font-bold text-green-900">Revision Accepted</p>
+              <p className="text-xs text-green-700 mt-1">The freelancer has accepted your request and is working on the changes.</p>
+            </div>
+          </div>
+        )}
+
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-8 mb-6">
           <h2 className="text-lg font-bold text-gray-900 mb-6">Project Description</h2>
           <div className="mb-8">
@@ -109,37 +157,64 @@ export default function ClientContractDetail() {
           </div>
         </div>
 
-        {/* DELIVERY STATUS / SUBMISSION VIEW */}
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm mb-6">
-          <div className="p-6 border-b border-gray-50">
+          <div className="p-6 border-b border-gray-50 flex justify-between items-center">
             <h2 className="text-lg font-bold text-gray-900">Delivery Status</h2>
+            {contract.status === 'active' && (
+              <span className="text-xs bg-blue-50 text-blue-600 px-3 py-1 rounded-full font-bold">WORK IN PROGRESS</span>
+            )}
           </div>
           <div className="p-8">
-            {contract.status === 'submitted' || contract.status === 'completed' ? (
+            {contract.deliverables && contract.deliverables.length > 0 ? (
               <div className="space-y-6">
-                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-100">
-                  <div className="flex items-center gap-4">
-                    <div className="p-2 bg-blue-100 rounded-lg">
-                      <FileText className="w-5 h-5 text-blue-600" />
+                {contract.deliverables.map((item, index) => (
+                  <div key={item.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-100">
+                    <div className="flex items-center gap-4">
+                      <div className="p-2 bg-blue-100 rounded-lg">
+                        <FileText className="w-5 h-5 text-blue-600" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-bold text-gray-900">{item.title || `Submission #${index + 1}`}</p>
+                        <p className="text-xs text-gray-500 uppercase">{item.deliverable_type} • Submitted on {new Date(item.created_at).toLocaleDateString()}</p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-sm font-bold text-gray-900">Final Submission</p>
-                      <p className="text-xs text-gray-500">2.4 MB • Submitted on {new Date().toLocaleDateString()}</p>
-                    </div>
+                    <a 
+                      href={item.file_url} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-xs font-bold rounded-lg hover:bg-blue-700"
+                    >
+                      <Download className="w-4 h-4" /> Download
+                    </a>
                   </div>
-                  <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-xs font-bold rounded-lg hover:bg-blue-700">
-                    <Download className="w-4 h-4" /> Download
-                  </button>
-                </div>
+                ))}
                 
-                <div className="flex flex-wrap gap-3">
-                  <button className="px-6 py-2.5 bg-green-600 text-white text-sm font-bold rounded-lg hover:bg-green-700">
-                    Approve & Mark Completed
-                  </button>
-                  <button className="px-6 py-2.5 bg-white border border-red-200 text-red-600 text-sm font-bold rounded-lg hover:bg-red-50">
-                    Request Revision
-                  </button>
-                </div>
+                {contract.status === 'submitted' && (
+                  <div className="flex flex-wrap gap-3 pt-4">
+                    <button 
+                      onClick={handleApproveOrder}
+                      disabled={updateStatusMutation.isPending}
+                      className="px-6 py-2.5 bg-green-600 text-white text-sm font-bold rounded-lg hover:bg-green-700 flex items-center gap-2"
+                    >
+                      <CheckCircle2 className="w-4 h-4" />
+                      Approve & Mark Completed
+                    </button>
+                    
+                    {pendingRevision ? (
+                      <div className="flex items-center gap-2 px-4 py-2.5 bg-amber-50 text-amber-700 border border-amber-200 rounded-lg text-sm font-bold">
+                        <Clock className="w-4 h-4" />
+                        Revision Request Pending
+                      </div>
+                    ) : (
+                      <button 
+                        onClick={() => setIsRevisionModalOpen(true)}
+                        className="px-6 py-2.5 bg-white border border-red-200 text-red-600 text-sm font-bold rounded-lg hover:bg-red-50"
+                      >
+                        Request Revision
+                      </button>
+                    )}
+                  </div>
+                )}
               </div>
             ) : (
               <div className="text-center py-10">
@@ -151,7 +226,6 @@ export default function ClientContractDetail() {
           </div>
         </div>
 
-        {/* PAYMENT SUMMARY */}
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-8 mb-8">
           <h2 className="text-lg font-bold text-gray-900 mb-6 uppercase tracking-tight">Payment Summary</h2>
           <div className="space-y-4">
@@ -170,7 +244,6 @@ export default function ClientContractDetail() {
           </div>
         </div>
 
-        {/* ACTION BUTTONS */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <button className="flex items-center justify-center gap-2 px-6 py-4 bg-white border border-gray-200 text-gray-700 text-sm font-bold rounded-xl hover:bg-gray-50 shadow-sm transition-all">
             <MessageSquare className="w-5 h-5" strokeWidth={2.5}/>
@@ -182,6 +255,48 @@ export default function ClientContractDetail() {
           </button>
         </div>
       </div>
+
+      {isRevisionModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div className="p-6 border-b border-gray-100 flex justify-between items-center">
+              <h3 className="text-lg font-bold text-gray-900">Request a Revision</h3>
+              <button onClick={() => setIsRevisionModalOpen(false)} className="text-gray-400 hover:text-gray-600">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-6">
+              <div className="mb-4 p-3 bg-amber-50 rounded-lg flex gap-3">
+                <AlertCircle className="w-5 h-5 text-amber-600 shrink-0" />
+                <p className="text-xs text-amber-800 leading-relaxed">
+                  Explain clearly what needs to be changed. This will move the project back to <strong>Active</strong>.
+                </p>
+              </div>
+              <textarea 
+                className="w-full h-32 p-4 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none resize-none"
+                placeholder="What should the freelancer change?"
+                value={revisionReason}
+                onChange={(e) => setRevisionReason(e.target.value)}
+              />
+            </div>
+            <div className="p-6 bg-gray-50 flex gap-3">
+              <button 
+                onClick={() => setIsRevisionModalOpen(false)}
+                className="flex-1 px-4 py-2 bg-white border border-gray-200 text-gray-600 text-sm font-bold rounded-lg"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={handleRevisionSubmit}
+                disabled={requestRevisionMutation.isPending || revisionReason.length < 10}
+                className="flex-1 px-4 py-2 bg-red-600 text-white text-sm font-bold rounded-lg hover:bg-red-700 disabled:opacity-50"
+              >
+                {requestRevisionMutation.isPending ? "Sending..." : "Submit"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

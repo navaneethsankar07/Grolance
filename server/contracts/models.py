@@ -50,3 +50,21 @@ class ContractDeliverable(models.Model):
 
     def __str__(self):
         return f"{self.title} - {self.contract.id}"
+    
+
+class ContractRevision(models.Model):
+    REVISION_STATUS = [
+        ('pending', 'Pending'),
+        ('accepted', 'Accepted'),
+        ('rejected', 'Rejected'),
+    ]
+    contract = models.ForeignKey(Contract, on_delete=models.CASCADE, related_name='revisions')
+    requested_by = models.ForeignKey(User, on_delete=models.CASCADE)
+    reason = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=10, choices=REVISION_STATUS, default='pending')
+    rejection_message = models.TextField(null=True, blank=True) # New field
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Revision for Contract {self.contract.id} at {self.created_at}"

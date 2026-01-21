@@ -79,7 +79,7 @@ console.log(data);
           <nav className="flex gap-6">
             <TabButton id="all" label="All Posts" Icon={Briefcase} count={activeTab === 'all' ? totalCount : null} />
             <TabButton id="completed" label="Completed" Icon={CircleCheck} />
-            <TabButton id="in-progress" label="In Progress" Icon={Hourglass} />
+            <TabButton id="in_progress" label="In Progress" Icon={Hourglass} count={activeTab === 'in_progress'?totalCount:null} />
           </nav>
         </div>
 

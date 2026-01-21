@@ -5,7 +5,13 @@ export const fetchAllContracts = async (params) => {
   return data;
 };
 
-;
+export const postRevisionAction = async ({ revisionId, action, message }) => {
+  const response = await axiosInstance.post(`/contracts/revisions/${revisionId}/action/`, {
+    action,
+    message,
+  });
+  return response.data;
+};
 
 export const fetchContractDetail = async (id) => {
   const { data } = await axiosInstance.get(`/contracts/${id}/`);
