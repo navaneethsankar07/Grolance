@@ -5,6 +5,7 @@ import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import { useParams } from "react-router-dom";
 import { useProjectDetails } from "../projectQueries";
 import { useProposals, useSentInvitations } from "./proposalsQueries";
+import { useModal } from "../../../../hooks/modal/useModalStore";
 
 export default function ProposalsIndex() {
   const { id } = useParams();
@@ -19,10 +20,19 @@ export default function ProposalsIndex() {
 
   const invitations = invitationsData?.results || (Array.isArray(invitationsData) ? invitationsData : []);
   const actualProposals = proposals?.results || (Array.isArray(proposals) ? proposals : []);
+  
+  const sortedProposals = [...actualProposals].sort((a, b) => {
+    if (a.contract_info?.is_this_freelancer) return -1;
+    if (b.contract_info?.is_this_freelancer) return 1;
+    return 0;
+  });
+
+  const anyOfferMade = actualProposals.some(p => p.contract_info !== null);
 
   const displayBudget = project?.pricing_type === "fixed" 
     ? `₹${Number(project.fixed_price).toLocaleString()}` 
     : `₹${Number(project.min_budget).toLocaleString()} - ₹${Number(project.max_budget).toLocaleString()}`;
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
@@ -47,7 +57,9 @@ export default function ProposalsIndex() {
                 <ProposalCard
                   key={inv.id}
                   isInvitation={true}
+                  anyOfferMade={anyOfferMade}
                   freelancer={{
+                    id: inv.freelancer_id,
                     name: inv.freelancer_name, 
                     title: inv.freelancer_tagline || "Invited Talent",
                     image: inv.freelancer_image || "https://via.placeholder.com/150",
@@ -71,22 +83,27 @@ export default function ProposalsIndex() {
         </div>
 
         <div className="mb-8 space-y-6">
-          {actualProposals.length > 0 ? (
-            actualProposals.map((prop) => (
+          {sortedProposals.length > 0 ? (
+            sortedProposals.map((prop) => (
               <ProposalCard
                 key={prop.id}
                 isInvitation={false}
+                anyOfferMade={anyOfferMade}
                 freelancer={{
+                  id: prop.freelancer_id,
                   name: prop.freelancer_name,
                   title: prop.freelancer_tagline || "Freelancer",
                   image: prop.freelancer_photo || "https://via.placeholder.com/150",
                   rating: 4.8, 
                 }}
                 proposal={{
-                  title: "Proposal Details", 
+                  title: project?.title,
+                  projectId: id,
+                  freelancerId: prop.freelancer,
                   description: prop.cover_letter,
-                  bidAmount: `₹${Number(prop.bid_amount).toLocaleString()}`,
-                  deliveryDays: prop.delivery_days
+                  bidAmount: prop.bid_amount,
+                  deliveryDays: prop.delivery_days,
+                  contract_info: prop.contract_info
                 }}
               />
             ))

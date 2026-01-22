@@ -24,6 +24,9 @@ import PhoneOtpModal from "../features/client/onboarding/step1/PhoneOtpModal";
 import InviteFreelancerModal from "../features/client/findtalent/components/InvitationModal";
 import { ProposalModal } from "../features/freelancer/proposals/components/ProposalModal";
 import ViewUserModal from "../features/admin/usermanagement/components/ViewUserModal";
+import ContractOfferModal from "../features/client/contract/components/ContractOfferModal";
+import ProposalDetailModal from "../features/freelancer/proposals/components/ProposalDetailModal";
+import OfferModal from "../features/freelancer/offers/OfferModal";
 export default function RootLayout() {
   const { modal, modalProps, closeModal } = useModal();
 const { loading, initialized, accessToken } = useSelector((s) => s.auth);
@@ -64,6 +67,9 @@ useEffect(() => {
       {modal === 'phone-otp' && <PhoneOtpModal phone={modalProps.phone} />}
       {modal === 'job-invitation' && <InviteFreelancerModal isOpen onClose={closeModal} modalProps={modalProps} />}
       {modal === 'job-proposal' && <ProposalModal onClose={closeModal} projectId={modalProps}/>}
+      {modal === 'contract-offer' && <ContractOfferModal modalProps={modalProps} />}
+      {modal === 'my-proposal-details' && <ProposalDetailModal isOpen onClose={closeModal} proposal={modalProps.proposal} />}
+      {modal === 'offer-modal' && <OfferModal/>}
     </>
   );
 }

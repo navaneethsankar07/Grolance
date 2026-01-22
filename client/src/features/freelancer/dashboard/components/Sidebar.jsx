@@ -1,13 +1,14 @@
-import { Home, Briefcase, FileText, MessageSquare, CheckSquare, Settings } from "lucide-react";
+import { Home, Briefcase, FileText, MessageSquare, CheckSquare, Settings, Tag } from "lucide-react";
 import { useSelector } from "react-redux";
 import { Link, useLocation } from "react-router-dom";
 
 const menuItems = [
   { icon: Home, label: "Dashboard", path: "/freelancer" }, 
   { icon: Briefcase, label: "Find Jobs", path: "/freelancer/jobs" },
-  { icon: FileText, label: "Contracts", path: "/contracts" },
-  { icon: MessageSquare, label: "Proposals", path: "/proposals" },
+  { icon: FileText, label: "Contracts", path: "/freelancer/contracts" },
+  { icon: MessageSquare, label: "Proposals", path: "/freelancer/my-proposals" },
   { icon: CheckSquare, label: "Invitations", path: "/freelancer/invitations" },
+  { icon: Tag, label: "Offers", path: "/freelancer/offers" },
 ];
 
 export function Sidebar() {
