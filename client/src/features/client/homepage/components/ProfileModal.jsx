@@ -82,11 +82,11 @@ export default function ProfileModal({ isOpen, onClose }) {
       </div>
 
       <div className="px-4 pb-4">
-        <button
+        <Link to={'/onboarding'}
           className="flex w-full items-center justify-center gap-2 rounded-lg bg-blue-500 px-4 py-3 text-white hover:bg-blue-600"
         >
           Switch to Freelancer
-        </button>
+        </Link>
       </div>
 
       <div className="px-4 pb-4">

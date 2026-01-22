@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from .models import ClientProfile
 from categories.models import Category
-
+from .models import FreelancerProfile,FreelancerBankDetails
 
 
 class ClientProfileOverviewSerializer(serializers.ModelSerializer):
@@ -63,3 +63,88 @@ class ClientProfileUpdateSerializer(serializers.ModelSerializer):
 
         instance.save()
         return instance
+
+class FreelancerProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FreelancerProfile
+        fields = [
+            'tagline',
+            'bio',
+            'phone',
+            'category',
+            'experience_level',
+            'availability',
+        ]
+
+class FreelancerSkillSerializer(serializers.Serializer):
+    name = serializers.CharField()
+
+    def validate(self,value):
+        return value.strip().title()
+    
+
+
+class FreelancerPackageSerializer(serializers.Serializer):
+    price = serializers.DecimalField(max_digits=10, decimal_places=2)
+    delivery_days = serializers.IntegerField(min_value=1, max_value=100)
+    description = serializers.CharField()
+
+class FreelancerPortfolioSerializer(serializers.Serializer):
+    title = serializers.CharField(max_length=255)
+    description = serializers.CharField(required=False, allow_blank=True)
+    image_url = serializers.URLField()
+
+
+class FreelancerBankDetailsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FreelancerBankDetails
+        fields = [
+            "account_number",
+            "ifsc",
+            "account_holder_name",
+            "bank_name",
+            "branch_name",
+        ]
+
+class FreelancerOnboardingSerializer(serializers.Serializer):
+    tagline = serializers.CharField()
+    bio = serializers.CharField()
+    phone = serializers.CharField(max_length=10)
+
+    primary_category = serializers.IntegerField()
+    skills = serializers.ListField(child=serializers.CharField())
+
+    experience_level = serializers.ChoiceField(
+        choices=["beginner", "intermediate", "expert"]
+    )
+
+    packages = serializers.DictField()
+    portfolios = serializers.ListField(required=False)
+    bank_details = serializers.DictField()
+
+    def validate_phone(self, value):
+        if not value.isdigit() or len(value) != 10:
+            raise serializers.ValidationError("Invalid Indian mobile number")
+        return value
+
+
+class SendPhoneOTPSerializer(serializers.Serializer):
+    phone = serializers.CharField(max_length=10)
+
+    def validate_phone(self, phone):
+        if not phone.isdigit() or len(phone) != 10:
+            raise serializers.ValidationError("Enter a valid 10-digit mobile number")
+
+        if FreelancerProfile.objects.filter(phone=phone, is_phone_verified=True).exists():
+            raise serializers.ValidationError("This phone number is already verified")
+
+        return phone
+    
+class VerifyPhoneOTPSerializer(serializers.Serializer):
+    phone = serializers.CharField(max_length=10)
+    otp = serializers.CharField(max_length=6)
+
+    def validate_phone(self, phone):
+        if not phone.isdigit() or len(phone) != 10:
+            raise serializers.ValidationError("Invalid phone number")
+        return phone

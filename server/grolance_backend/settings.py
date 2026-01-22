@@ -72,6 +72,9 @@ SIMPLE_JWT = {
     'AUTH_HEADER_TYPES': ('Bearer',),
 }
 
+TWILIO_ACCOUNT_SID = env("TWILIO_ACCOUNT_SID")
+TWILIO_AUTH_TOKEN = env("TWILIO_AUTH_TOKEN")
+TWILIO_PHONE_NUMBER = env("TWILIO_PHONE_NUMBER")
 
 AUTH_USER_MODEL = 'accounts.User'
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"

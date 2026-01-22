@@ -11,6 +11,9 @@ import ProfileOverview from "../features/client/profile/ProfileOverview";
 import AccountSettings from "../features/client/profile/AccountSettings";
 import Interests from "../features/client/profile/Interests";
 import ProfileEdit from "../features/client/profile/EditProfile";
+import StepOne from "../features/client/onboarding/step1/StepOne";
+import { OnBoardingProvider } from "../features/client/onboarding/OnBoardingContext";
+import OnboardingManager from "../features/client/onboarding/OnboardingManager";
 
 export default function ClientRoutes() {
   const { user,loading } = useSelector(state => state.auth);
@@ -32,6 +35,7 @@ export default function ClientRoutes() {
           <Route path="/profile/interests" element={<Interests/>}/>
           <Route path="/profile/edit" element={<ProfileEdit/>}/>
           </Route>
+          <Route path="/onboarding" element={ <OnBoardingProvider><OnboardingManager /></OnBoardingProvider>} />
         </Route>
           
     </Routes>
