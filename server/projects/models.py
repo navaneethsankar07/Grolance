@@ -2,7 +2,7 @@ from django.db import models
 from django.conf import settings
 from categories.models import Skill
 from categories.models import Category
-
+from django.core.validators import MinValueValidator
 # Project Model
 
 class Project(models.Model):
@@ -39,7 +39,6 @@ class Project(models.Model):
         default="fixed"
     )
 
-    # pricing fields
     fixed_price = models.DecimalField(
         max_digits=10,
         decimal_places=2,
@@ -110,3 +109,63 @@ class ProjectSkill(models.Model):
 
     def __str__(self):
         return self.custom_name or self.skill.name
+
+
+
+class Invitation(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('accepted', 'Accepted'),
+        ('declined', 'Declined'),
+    ]
+
+    client = models.ForeignKey(
+        settings.AUTH_USER_MODEL, 
+        on_delete=models.CASCADE, 
+        related_name='sent_invitations'
+    )
+    freelancer = models.ForeignKey(
+        settings.AUTH_USER_MODEL, 
+        on_delete=models.CASCADE, 
+        related_name='received_invitations'
+    )
+    
+    project = models.ForeignKey('Project', on_delete=models.CASCADE)
+    
+    package = models.ForeignKey('profiles.FreelancerPackage', on_delete=models.CASCADE)
+    
+    message = models.TextField(blank=True, null=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Invite for {self.project.title} to {self.freelancer.email}"
+    
+
+
+class Proposal(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('accepted', 'Accepted'),
+        ('rejected', 'Rejected'),
+    ]
+
+    project = models.ForeignKey('projects.Project', on_delete=models.CASCADE, related_name='proposals')
+    freelancer = models.ForeignKey(
+        'profiles.FreelancerProfile', 
+        on_delete=models.CASCADE, 
+        related_name='proposals'
+    )    
+    package = models.ForeignKey('profiles.FreelancerPackage', on_delete=models.SET_NULL, null=True)
+    cover_letter = models.TextField()
+    bid_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    delivery_days = models.IntegerField(validators=[MinValueValidator(1)])
+    
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('project', 'freelancer') 
+
+    def __str__(self):
+        return f"{self.freelancer.user.full_name} - {self.project.title}"

@@ -8,3 +8,11 @@ class IsClientUser(BasePermission):
             request.user.is_authenticated
             and request.user.current_role == "client"
         )
+    
+class IsFreelancerUser(BasePermission):
+    def has_permission(self, request, view):
+        return bool(
+            request.user
+            and request.user.is_authenticated
+            and request.user.is_freelancer
+        )

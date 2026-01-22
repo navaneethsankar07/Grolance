@@ -20,15 +20,20 @@ export default function SignInForm() {
   const onSubmit = async ({ email, password }) => {
     try {
       setLoginError(null);
-      await dispatch(loginThunk({ email, password })).unwrap();
-      navigate("/");
+      const result = await dispatch(loginThunk({ email, password })).unwrap();
       closeModal();
-      toast.success('Login Successfull')
-    } catch (err) {
-      setLoginError(err?.error || "Invalid email or password");
-      toast.error('Login failed try again')
+    toast.success('Login Successful');
+    
+    if (result.user.current_role === 'freelancer') {
+      navigate("/freelancer");
+    } else {
+      navigate("/");
     }
-  };
+  } catch (err) {
+    setLoginError(err?.error || "Invalid email or password");
+    toast.error('Login failed. Please try again.');
+  }
+};
 
 useEffect(() => {
     initGoogleButton("google-signup-btn", async (response) => {

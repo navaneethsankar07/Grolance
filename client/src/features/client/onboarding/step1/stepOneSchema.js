@@ -4,7 +4,7 @@ export const stepOneSchema = z.object({
   tagline: z
     .string()
     .min(10, "Tagline must be at least 10 characters")
-    .max(100, "Tagline is too long"),
+    .max(80, "Tagline is too long"),
   bio: z
     .string()
     .min(50, "Bio should be at least 50 characters to attract clients")

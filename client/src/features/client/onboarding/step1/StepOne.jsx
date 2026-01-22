@@ -6,6 +6,7 @@ import { useOnBoarding } from "../OnBoardingContext";
 import { useFreelancerProfile } from "../onBoardingQueries";
 import { useSendPhoneOtp } from "../onBoardingMutations";
 import { useModal } from "../../../../hooks/modal/useModalStore";
+import { toast } from "react-toastify";
 
 export default function StepOne() {
   const { formData, updateFormData, nextStep } = useOnBoarding();
@@ -14,7 +15,7 @@ export default function StepOne() {
   const { data: freelancerProfile } = useFreelancerProfile();
   const { mutateAsync: sendOtp, isPending } = useSendPhoneOtp();
 
-  const phoneVerified = freelancerProfile?.phone_verified === true;
+
 
   const {
     register,
@@ -23,23 +24,32 @@ export default function StepOne() {
     formState: { errors },
   } = useForm({
     resolver: zodResolver(stepOneSchema),
-    defaultValues: formData,
+    defaultValues: {
+      ...formData,
+      phone:freelancerProfile?.phone
+    },
   });
 
   const phoneValue = watch("phone");
 
+   const phoneVerified =
+    freelancerProfile?.is_phone_verified === true &&
+    freelancerProfile?.phone === phoneValue;
 const handleVerify = async () => {
-  console.log("VERIFY CLICKED", phoneValue);
-
   if (!phoneValue) return;
 
-  await sendOtp({ phone: phoneValue });
-  openModal("phone-otp", { phone: phoneValue });
+ try {
+    await sendOtp({ phone: phoneValue });
+    openModal("phone-otp", { phone: phoneValue });
+  } catch (err) {
+    toast.error("Failed to send OTP. Try again.");
+  }
 };
+
 
 const onSubmit = (data) => {
   if (!phoneVerified) {
-    alert("Please verify your phone number before continuing.");
+    toast.warn("Please verify your phone number before continuing.");
     return;
   }
 
@@ -107,7 +117,6 @@ const onSubmit = (data) => {
             <input
               {...register("phone")}
               type="tel"
-              disabled={phoneVerified}
               placeholder="+1 (555) 000-0000"
               className={`h-[54px] px-5 rounded-xl border transition-all text-base flex-1 focus:outline-none focus:ring-2 focus:ring-primary/20 ${
                 errors.phone
@@ -129,8 +138,8 @@ const onSubmit = (data) => {
           </div>
 
           {phoneVerified && (
-            <p className="text-green-600 text-xs font-semibold mt-1">
-              ✔ Phone number verified
+            <p className="text-green-600 text-xs font-semibold ml-1 mt-1">
+                Phone number verified
             </p>
           )}
 

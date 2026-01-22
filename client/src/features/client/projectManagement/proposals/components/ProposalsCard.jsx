@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { X } from 'lucide-react'; // Assuming you use lucide-react for icons
 
 const StarIcon = () => (
   <svg width="16" height="20" viewBox="0 0 16 20" fill="none">
@@ -6,39 +7,86 @@ const StarIcon = () => (
   </svg>
 );
 
-export default function ProposalCard({ freelancer, proposal, hasAcceptedInvitation = false }) {
-  // UI for Invitations
-  if (hasAcceptedInvitation) {
+export default function ProposalCard({ freelancer, proposal, isInvitation = false, invitationStatus = 'pending' }) {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const MAX_LENGTH = 180; 
+
+  const isLongMessage = proposal.description?.length > MAX_LENGTH;
+  const displayDescription = isLongMessage 
+    ? `${proposal.description.substring(0, MAX_LENGTH)}...` 
+    : proposal.description;
+
+  const Modal = () => (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+      <div className="w-full max-w-2xl rounded-2xl bg-white shadow-2xl overflow-hidden">
+        <div className="flex items-center justify-between border-b px-6 py-4">
+          <h3 className="text-lg font-bold text-gray-900">Full Proposal</h3>
+          <button onClick={() => setIsModalOpen(false)} className="rounded-full p-1 hover:bg-gray-100 transition">
+            <X className="h-6 w-6 text-gray-500" />
+          </button>
+        </div>
+        <div className="p-6 max-h-[70vh] overflow-y-auto">
+          <div className="flex items-center gap-4 mb-6">
+             <img src={freelancer.image} referrerPolicy="no-referrer" className="h-12 w-12 rounded-full object-cover" alt="" />
+             <div>
+                <p className="font-bold text-gray-900">{freelancer.name}</p>
+                <p className="text-sm text-gray-500">{freelancer.title}</p>
+             </div>
+          </div>
+          <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">{proposal.description}</p>
+        </div>
+        <div className="bg-gray-50 px-6 py-4 flex justify-end">
+          <button onClick={() => setIsModalOpen(false)} className="rounded-lg bg-primary px-6 py-2 text-sm font-medium text-white hover:bg-primary/90">
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
+  if (isInvitation) {
+    const statusConfig = {
+        pending: { bg: "bg-yellow-500", text: "Invitation Pending", showHire: false },
+        accepted: { bg: "bg-green-600", text: "Invitation Accepted", showHire: true },
+        declined: { bg: "bg-red-500", text: "Invitation Declined", showHire: false },
+      };
+    const currentStatus = statusConfig[invitationStatus] || statusConfig.pending;
+
     return (
       <div className="relative rounded-lg border border-gray-200 bg-white px-6 pb-6 pt-[25px] shadow-sm">
+        {isModalOpen && <Modal />}
         <div className="mb-4">
-          <span className="inline-flex items-center rounded-full bg-blue-500 px-3 py-1.5 text-xs font-medium text-white">
-            Accepted Invitation
+          <span className={`inline-flex items-center rounded-full ${currentStatus.bg} px-3 py-1.5 text-xs font-medium text-white`}>
+            {currentStatus.text}
           </span>
         </div>
         <div className="flex items-start gap-4">
           <div className="flex flex-1 gap-4">
-            <img src={freelancer.image} alt="" className="h-16 w-16 flex-shrink-0 rounded-full object-cover bg-gray-100" />
-            <div className="flex min-w-0 flex-col gap-2">
+            <img src={freelancer.image} alt="" referrerPolicy='no-referrer' className="h-16 w-16 shrink-0 rounded-full object-cover bg-gray-100" />
+            <div className="flex min-w-0 flex-col gap-1">
               <h3 className="text-[15px] font-semibold text-gray-900">{freelancer.name}</h3>
               <p className="text-xs font-medium text-gray-600">{freelancer.title}</p>
-              <p className="text-xs text-gray-700 line-clamp-2">{proposal.description}</p>
+              <div className="mt-1">
+                <p className="text-xs text-gray-500 italic inline">"{displayDescription}"</p>
+                {isLongMessage && (
+                  <button onClick={() => setIsModalOpen(true)} className="ml-1 text-xs font-semibold text-blue-600 hover:underline">
+                    Read more
+                  </button>
+                )}
+              </div>
             </div>
           </div>
-          <button className="hidden lg:block shrink-0 rounded-lg bg-blue-500 px-6 py-3 text-sm font-medium text-white hover:bg-blue-600 transition">
-            Hire Freelancer
-          </button>
         </div>
       </div>
     );
   }
 
-  // Standard Proposal UI
   return (
     <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+      {isModalOpen && <Modal />}
       <div className="flex flex-col gap-6 lg:flex-row">
         <div className="flex gap-4">
-          <img src={freelancer.image} alt="" className="h-[100px] w-[100px] flex-shrink-0 rounded-full object-cover bg-gray-100" />
+          <img src={freelancer.image} referrerPolicy="no-referrer" alt="" className="h-[100px] w-[100px] shrink-0 rounded-full object-cover bg-gray-100" />
           <div className="flex flex-col gap-1">
             <h3 className="text-lg font-bold text-gray-900">{freelancer.name}</h3>
             <p className="text-sm text-gray-500">{freelancer.title}</p>
@@ -46,7 +94,6 @@ export default function ProposalCard({ freelancer, proposal, hasAcceptedInvitati
               {[...Array(5)].map((_, i) => <StarIcon key={i} />)}
               <span className="ml-1 text-sm font-medium text-gray-700">{freelancer.rating}</span>
             </div>
-            <p className="text-sm text-gray-500">{freelancer.location}</p>
           </div>
         </div>
 
@@ -64,16 +111,20 @@ export default function ProposalCard({ freelancer, proposal, hasAcceptedInvitati
               </div>
             </div>
           </div>
-          <p className="text-sm text-gray-600 leading-relaxed">{proposal.description}</p>
+          <div>
+            <p className="text-sm text-gray-600 leading-relaxed inline">{displayDescription}</p>
+            {isLongMessage && (
+              <button onClick={() => setIsModalOpen(true)} className="ml-2 text-sm font-semibold text-blue-600 hover:text-blue-700 underline underline-offset-2">
+                View full proposal
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
       <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end border-t pt-6">
-        <button className="rounded-lg border border-gray-300 bg-white px-6 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition">
+        <button className="rounded-lg bg-blue-500 px-6 py-2 text-sm font-medium text-white hover:bg-blue-600 transition">
           Hire Freelancer
-        </button>
-        <button className="rounded-lg border border-blue-500 bg-transparent px-6 py-2 text-sm font-medium text-blue-500 hover:bg-blue-50 transition">
-          View Proposal
         </button>
       </div>
     </div>

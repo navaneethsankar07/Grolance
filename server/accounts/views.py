@@ -197,6 +197,7 @@ class LogoutView(APIView):
     def post(self, request):
         try:
             refresh_token = request.COOKIES.get("refresh")
+            
 
             if refresh_token:
                 token = RefreshToken(refresh_token)
@@ -207,7 +208,7 @@ class LogoutView(APIView):
                 status=status.HTTP_200_OK
             )
 
-            response.delete_cookie("refresh")
+            response.delete_cookie("refresh", path='/')
 
             return response
 

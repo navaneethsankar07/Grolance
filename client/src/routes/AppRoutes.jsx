@@ -8,6 +8,8 @@ import AdminProtectedRoute from './AdminProtectedRoutes'
 import AdminLogin from '../features/admin/auth/AdminLogin'
 import AdminLayout from '../layouts/AdminLayout'
 import Landingpage from '../features/client/landingPage/Landingpage'
+import FreelancerRoutes from './FreelancerRoutes'
+import FreelancerProtectedRoute from './FreelancerProtectedRoutes'
 
 
 function AppRoutes() {
@@ -16,6 +18,15 @@ function AppRoutes() {
       <Routes>
         <Route element={<RootLayout />}>
 
+          
+          <Route path='/freelancer/*' element={<FreelancerProtectedRoute><FreelancerRoutes/></FreelancerProtectedRoute> }/>
+          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route element={<AdminProtectedRoute />}>
+            <Route path="/admin/*" element={<AdminLayout />}>
+              <Route path="*" element={<AdminRoutes />} />
+            </Route>
+          </Route>
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route
             path="/*"
             element={
@@ -24,14 +35,6 @@ function AppRoutes() {
               </ProtectedRoute>
             }
           />
-          <Route path="/reset-password" element={<ResetPasswordPage />} />
-          <Route path="/admin/login" element={<AdminLogin />} />
-          <Route element={<AdminProtectedRoute />}>
-            <Route path="/admin/*" element={<AdminLayout />}>
-              <Route path="*" element={<AdminRoutes />} />
-            </Route>
-          </Route>
-
 
         </Route>
       </Routes>

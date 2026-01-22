@@ -1,8 +1,8 @@
 from rest_framework import serializers
 from .models import ClientProfile
 from categories.models import Category
-from .models import FreelancerProfile,FreelancerBankDetails
-
+from .models import FreelancerProfile,FreelancerBankDetails,FreelancerPortfolio, FreelancerPackage, FreelancerSkill
+import re
 
 class ClientProfileOverviewSerializer(serializers.ModelSerializer):
     full_name = serializers.CharField(source="user.full_name", read_only=True)
@@ -71,6 +71,7 @@ class FreelancerProfileSerializer(serializers.ModelSerializer):
             'tagline',
             'bio',
             'phone',
+            'is_phone_verified',
             'category',
             'experience_level',
             'availability',
@@ -106,25 +107,77 @@ class FreelancerBankDetailsSerializer(serializers.ModelSerializer):
             "branch_name",
         ]
 
+
+
+class PackageTierSerializer(serializers.Serializer):
+    price = serializers.IntegerField(min_value=100, max_value=500000)
+    deliveryTime = serializers.IntegerField(min_value=1, max_value=100)
+    description = serializers.CharField(min_length=20, max_length=400)
+
+class PortfolioItemSerializer(serializers.Serializer):
+    title = serializers.CharField(min_length=10, max_length=50)
+    description = serializers.CharField(min_length=10, max_length=300)
+    image_url = serializers.URLField(required=True) 
+
+class BankDetailsSerializer(serializers.Serializer):
+    fullName = serializers.CharField(min_length=5)
+    accountNumber = serializers.CharField(min_length=9, max_length=18)
+    confirmAccountNumber = serializers.CharField()
+    ifscCode = serializers.CharField()
+    bankName = serializers.CharField(min_length=2)
+
+    def validate_fullName(self, value):
+        if not re.match(r'^[a-zA-Z\s]+$', value):
+            raise serializers.ValidationError("Name should only contain letters")
+        return value
+
+    def validate_ifscCode(self, value):
+        if not re.match(r'^[A-Z]{4}0[A-Z0-9]{6}$', value):
+            raise serializers.ValidationError("Invalid IFSC format")
+        return value
+
+    def validate(self, data):
+        if data['accountNumber'] != data['confirmAccountNumber']:
+            raise serializers.ValidationError({"confirmAccountNumber": "Account numbers do not match"})
+        return data
+
 class FreelancerOnboardingSerializer(serializers.Serializer):
-    tagline = serializers.CharField()
-    bio = serializers.CharField()
+    tagline = serializers.CharField(min_length=10, max_length=80)
+    bio = serializers.CharField(min_length=50, max_length=500)
     phone = serializers.CharField(max_length=10)
-
+    
+    experience_level = serializers.ChoiceField(choices=["beginner", "intermediate", "expert"])
     primary_category = serializers.IntegerField()
-    skills = serializers.ListField(child=serializers.CharField())
-
-    experience_level = serializers.ChoiceField(
-        choices=["beginner", "intermediate", "expert"]
+    
+    skills = serializers.ListField(
+        child=serializers.CharField(min_length=2),
+        min_length=3,
+        max_length=15
     )
 
-    packages = serializers.DictField()
-    portfolios = serializers.ListField(required=False)
-    bank_details = serializers.DictField()
+    packages = serializers.DictField() 
+    portfolios = serializers.ListField(child=PortfolioItemSerializer(), min_length=1, max_length=3)
+    bank_details = BankDetailsSerializer()
 
     def validate_phone(self, value):
-        if not value.isdigit() or len(value) != 10:
-            raise serializers.ValidationError("Invalid Indian mobile number")
+        if not re.match(r'^[6-9]\d{9}$', value):
+            raise serializers.ValidationError("Enter a valid 10-digit Indian mobile number starting with 6-9")
+        return value
+
+    def validate_skills(self, value):
+        for skill in value:
+            if skill.isdigit():
+                raise serializers.ValidationError(f"Skill '{skill}' cannot be only numbers")
+        return value
+
+    def validate_packages(self, value):
+        if 'starter' not in value or 'pro' not in value:
+            raise serializers.ValidationError("Both starter and pro packages are required")
+        
+        for tier in ['starter', 'pro']:
+            serializer = PackageTierSerializer(data=value[tier])
+            if not serializer.is_valid():
+                raise serializers.ValidationError({tier: serializer.errors})
         return value
 
 
@@ -134,9 +187,14 @@ class SendPhoneOTPSerializer(serializers.Serializer):
     def validate_phone(self, phone):
         if not phone.isdigit() or len(phone) != 10:
             raise serializers.ValidationError("Enter a valid 10-digit mobile number")
+        user = self.context['request'].user
+        already_verified = FreelancerProfile.objects.filter(
+            phone=phone, 
+            is_phone_verified=True
+        ).exclude(user=user).exists()
 
-        if FreelancerProfile.objects.filter(phone=phone, is_phone_verified=True).exists():
-            raise serializers.ValidationError("This phone number is already verified")
+        if already_verified:
+            raise serializers.ValidationError("This phone number is already verified by another account")
 
         return phone
     
@@ -148,3 +206,151 @@ class VerifyPhoneOTPSerializer(serializers.Serializer):
         if not phone.isdigit() or len(phone) != 10:
             raise serializers.ValidationError("Invalid phone number")
         return phone
+    
+class RoleSwitchSerializer(serializers.Serializer):
+    role = serializers.ChoiceField(choices=["client", "freelancer"])
+
+
+class FreelancerProfileManageSerializer(serializers.ModelSerializer):
+    skills = serializers.SerializerMethodField()
+    packages = serializers.SerializerMethodField()
+    portfolios = serializers.SerializerMethodField()
+    full_name = serializers.CharField(source="user.full_name", read_only=True)
+    profile_photo = serializers.URLField(source="user.profile_photo", read_only=True)
+    category = serializers.StringRelatedField()
+    bank_details = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = FreelancerProfile
+        fields = [
+            'full_name', 'profile_photo', 'tagline', 'bio', 'phone', 
+            'category', 'experience_level', 'availability', 
+            'skills', 'packages', 'portfolios','bank_details','created_at'
+        ]
+
+    def get_skills(self, obj):
+        skills = obj.user.freelancer_skills.all()
+        return [s.custom_name for s in skills]
+
+    def get_packages(self, obj):
+        packages = obj.user.freelancer_packages.all()
+        return {pkg.package_type: {
+            "id": pkg.id,
+            "price": pkg.price,
+            "delivery_days": pkg.delivery_days,
+            "description": [item.strip() for item in pkg.description.split('\n') if item.strip()]
+        } for pkg in packages}
+
+    def get_portfolios(self, obj):
+        portfolios = obj.user.freelancer_portfolios.all()
+        return FreelancerPortfolioSerializer(portfolios, many=True).data
+    
+    def get_bank_details(self, obj):
+        try:
+            bank = obj.user.freelancer_bank 
+            return FreelancerBankDetailsSerializer(bank).data
+        except FreelancerBankDetails.DoesNotExist:
+            return None
+    
+
+class FreelancerProfileUpdateSerializer(serializers.ModelSerializer):
+    full_name = serializers.CharField(required=False)
+    profile_photo = serializers.URLField(required=False, allow_null=True)
+    skills = serializers.ListField(child=serializers.CharField(), required=False)
+    packages = serializers.DictField(required=False)
+    portfolios = serializers.ListField(required=False)
+
+    class Meta:
+        model = FreelancerProfile
+        fields = [
+            "tagline", "bio", "experience_level", 
+            "availability", "full_name", "profile_photo",
+            "skills", "packages", "portfolios", 'bank_details'
+        ]
+
+    def update(self, instance, validated_data):
+        user = instance.user
+        
+        if "full_name" in validated_data:
+            user.full_name = validated_data.pop("full_name")
+        if "profile_photo" in validated_data:
+            user.profile_photo = validated_data.pop("profile_photo")
+        user.save()
+
+        skills_data = validated_data.pop("skills", None)
+        packages_data = validated_data.pop("packages", None)
+        portfolios_data = validated_data.pop("portfolios", None)
+        bank_data = validated_data.pop("bank_details", None)
+
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+
+        if skills_data is not None:
+            user.freelancer_skills.all().delete()
+            for skill_name in skills_data:
+                FreelancerSkill.objects.create(user=user, custom_name=skill_name)
+
+        if packages_data is not None:
+            user.freelancer_packages.all().delete()
+            for pkg_type, pkg in packages_data.items():
+                delivery_days = pkg.get("delivery_days") or pkg.get("deliveryTime") or 1
+                
+                description = pkg.get("description", "")
+                if isinstance(description, list):
+                    description = "\n".join(description)
+
+                FreelancerPackage.objects.create(
+                    user=user,
+                    package_type=pkg_type,
+                    price=pkg.get("price", 0),
+                    delivery_days=delivery_days,
+                    description=description
+                )
+
+        if portfolios_data is not None:
+            user.freelancer_portfolios.all().delete()
+            for item in portfolios_data:
+                FreelancerPortfolio.objects.create(
+                    user=user,
+                    title=item.get('title', 'Untitled'),
+                    description=item.get('description', ''),
+                    image_url=item.get('image_url')
+                )
+        
+        if bank_data is not None:
+            FreelancerBankDetails.objects.update_or_create(
+                user=user,
+                defaults={
+                    "account_number": bank_data.get("account_number"),
+                    "ifsc": bank_data.get("ifsc"),
+                    "account_holder_name": bank_data.get("account_holder_name"),
+                    "bank_name": bank_data.get("bank_name"),
+                    "branch_name": bank_data.get("branch_name"),
+                }
+            )
+
+        return instance
+
+
+class FreelancerListingSerializer(serializers.ModelSerializer):
+    full_name = serializers.CharField(source="user.full_name", read_only=True)
+    profile_photo = serializers.URLField(source="user.profile_photo", read_only=True)
+    category_name = serializers.CharField(source="category.name", read_only=True)
+    skills = serializers.SerializerMethodField()
+    starting_price = serializers.SerializerMethodField()
+
+    class Meta:
+        model = FreelancerProfile
+        fields = [
+            'id', 'full_name', 'profile_photo', 'tagline', 
+            'category_name', 'experience_level', 'skills', 
+            'starting_price', 'availability'
+        ]
+
+    def get_skills(self, obj):
+        return list(obj.user.freelancer_skills.values_list('custom_name', flat=True)[:3])
+
+    def get_starting_price(self, obj):
+        prices = obj.user.freelancer_packages.values_list('price', flat=True)
+        return min(prices) if prices else 0
