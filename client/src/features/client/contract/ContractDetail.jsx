@@ -6,6 +6,7 @@ import {
   FileText, Clock, Download, MessageSquare, ShieldAlert, 
   ExternalLink, X, AlertCircle, History, CheckCircle2
 } from "lucide-react";
+import { toast } from "react-toastify";
 
 export default function ClientContractDetail() {
   const { id } = useParams();
@@ -45,7 +46,7 @@ export default function ClientContractDetail() {
 
   const handleRevisionSubmit = () => {
     if (revisionReason.length < 10) {
-      alert("Please provide a more detailed reason (at least 10 characters).");
+      toast.error("Please provide a more detailed reason (at least 10 characters).");
       return;
     }
     requestRevisionMutation.mutate(
@@ -54,6 +55,7 @@ export default function ClientContractDetail() {
         onSuccess: () => {
           setIsRevisionModalOpen(false);
           setRevisionReason("");
+          toast.success('Request submitted.')
         }
       }
     );
