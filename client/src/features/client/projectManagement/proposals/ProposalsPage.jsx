@@ -30,8 +30,8 @@ export default function ProposalsIndex() {
   const anyOfferMade = actualProposals.some(p => p.contract_info !== null);
 
   const displayBudget = project?.pricing_type === "fixed" 
-    ? `₹${Number(project.fixed_price).toLocaleString()}` 
-    : `₹${Number(project.min_budget).toLocaleString()} - ₹${Number(project.max_budget).toLocaleString()}`;
+    ? `$${Number(project.fixed_price).toLocaleString()}` 
+    : `$${Number(project.min_budget).toLocaleString()} - $${Number(project.max_budget).toLocaleString()}`;
 
   return (
     <div className="min-h-screen bg-gray-50">

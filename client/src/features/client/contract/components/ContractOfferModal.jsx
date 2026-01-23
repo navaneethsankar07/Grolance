@@ -1,23 +1,23 @@
 import React, { useState, useRef } from "react";
-import { X, CreditCard } from "lucide-react"; 
-import { useCreateContract } from "../contractMutations";
+import { X } from "lucide-react"; 
+import { useVerifyPayment } from "../contractMutations";
 import SignatureCanvas from 'react-signature-canvas'; 
 import { useModal } from "../../../../hooks/modal/useModalStore";
 import { toast } from "react-toastify";
+import { PayPalButtons } from "@paypal/react-paypal-js";
 
 export default function ContractOfferModal() {
   const { closeModal, modalProps } = useModal();
   const [agreed, setAgreed] = useState(false);
-  const [isPaid, setIsPaid] = useState(false);
   const [signatureMode, setSignatureMode] = useState("type");
   const [fullName, setFullName] = useState("");
   const sigCanvas = useRef(null);
 
-  const { mutate: createContract, isLoading } = useCreateContract();
+  const { mutate: verifyPayment, isLoading: isVerifying } = useVerifyPayment();
 
   const projectName = modalProps?.projectName || "E-commerce Website Redesign";
   const freelancerName = modalProps?.freelancerName || "Sarah Chen";
-  const amount = modalProps?.amount || 45000;
+  const amount = modalProps?.amount || 0;
 
   const agreementItems = [
     {
@@ -57,12 +57,12 @@ export default function ContractOfferModal() {
     },
   ];
 
-  const handleHire = () => {
-    let signatureFinal = "";
-
+  const getSignatureData = () => {
     if (signatureMode === "draw") {
-      signatureFinal = sigCanvas.current.getTrimmedCanvas().toDataURL('image/png');
+      if (sigCanvas.current.isEmpty()) return null;
+      return sigCanvas.current.getTrimmedCanvas().toDataURL('image/png');
     } else {
+      if (!fullName.trim()) return null;
       const canvas = document.createElement("canvas");
       canvas.width = 600;
       canvas.height = 200;
@@ -74,45 +74,13 @@ export default function ContractOfferModal() {
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       ctx.fillText(fullName, canvas.width / 2, canvas.height / 2);
-      signatureFinal = canvas.toDataURL('image/png');
+      return canvas.toDataURL('image/png');
     }
-
-    const payload = {
-      project: modalProps?.projectId,
-      freelancer: modalProps?.freelancerId,
-      total_amount: amount,
-      client_signature: signatureFinal,
-      client_signature_type: signatureMode,
-    };
-
-    createContract(payload, {
-      onSuccess: () => {
-        closeModal();
-      },
-      onError: (error) => {
-  const serverErrors = error.response?.data;
-  console.error("SERVER VALIDATION ERROR:", serverErrors);
-
-  if (serverErrors && typeof serverErrors === 'object') {
-    const firstKey = Object.keys(serverErrors)[0];
-    const firstMessage = serverErrors[firstKey];
-
-    if (Array.isArray(firstMessage)) {
-      toast.error(firstMessage[0]);
-    } else {
-      toast.error(String(firstMessage));
-    }
-  } else {
-    toast.error("An unexpected error occurred. Please try again.");
-  }
-}
-    });
   };
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 overflow-y-auto">
       <div className="w-full max-w-[672px] bg-white rounded-xl shadow-2xl overflow-hidden my-auto animate-in fade-in zoom-in duration-200">
-        
         <div className="flex items-start justify-between gap-4 px-6 py-6 border-b border-slate-100">
           <div className="flex-1 min-w-0">
             <h1 className="text-[17px] font-semibold text-slate-900 leading-7 mb-1">
@@ -151,28 +119,6 @@ export default function ContractOfferModal() {
                   </div>
                 </div>
               ))}
-            </div>
-          </div>
-
-          <div className="space-y-3">
-            <h2 className="text-xs font-semibold text-slate-500 leading-5 uppercase tracking-wide">
-              Payment Confirmation (Dummy)
-            </h2>
-            <div className={`rounded-lg border p-[17px] transition-colors ${isPaid ? 'border-green-200 bg-green-50/50' : 'border-amber-200 bg-amber-50/50'}`}>
-              <label className="flex gap-3 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={isPaid}
-                  onChange={(e) => setIsPaid(e.target.checked)}
-                  className="w-5 h-5 rounded border-slate-300 bg-white checked:bg-green-600 transition-colors mt-0.5"
-                />
-                <div className="flex-1">
-                  <span className="block text-xs font-bold text-slate-800">Confirm Deposit of ${amount}</span>
-                  <span className="text-[11px] text-slate-600 leading-4">
-                    By checking this, you simulate a successful bank transfer. Funds will be marked as "Funded" in the database.
-                  </span>
-                </div>
-              </label>
             </div>
           </div>
 
@@ -251,17 +197,56 @@ export default function ContractOfferModal() {
           </div>
         </div>
 
-        <div className="flex items-center justify-end gap-3 px-6 py-6 border-t bg-slate-50/50">
-          <button onClick={closeModal} className="px-6 py-2 text-sm font-medium text-slate-600 rounded-lg hover:bg-slate-100" disabled={isLoading}>
-            Cancel
-          </button>
-          <button
-            onClick={handleHire}
-            disabled={!agreed || !isPaid || (signatureMode === 'type' && !fullName.trim()) || isLoading}
-            className="px-8 py-2.5 text-sm font-bold text-white rounded-lg bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 shadow-sm transition-all flex items-center justify-center min-w-[160px]"
-          >
-            {isLoading ? "Processing..." : `Hire & Fund $${amount}`}
-          </button>
+        <div className="flex flex-col gap-3 px-6 py-6 border-t bg-slate-50/50">
+          {agreed && (signatureMode === "draw" || fullName.trim()) ? (
+            <PayPalButtons
+              style={{ layout: "horizontal", height: 45 }}
+              createOrder={(data, actions) => {
+                return actions.order.create({
+                  purchase_units: [{
+                    amount: {
+                      value: amount.toString(),
+                      currency_code: "USD"
+                    },
+                    description: `Contract for ${projectName}`
+                  }]
+                });
+              }}
+              onApprove={async (data, actions) => {
+                const details = await actions.order.capture();
+                const signatureFinal = getSignatureData();
+                
+                verifyPayment({
+                  paypal_order_id: details.id,
+                  project_id: modalProps?.projectId,
+                  freelancer_id: modalProps?.freelancerId,
+                  total_amount: amount,
+                  client_signature: signatureFinal,
+                  client_signature_type: signatureMode,
+                }, {
+                  onSuccess: () => {
+                    toast.success("Payment successful and Contract created!");
+                    closeModal();
+                  },
+                  onError: (error) => {
+                    toast.error(error.response?.data?.error || "Verification failed. Contact support.");
+                  }
+                });
+              }}
+            />
+          ) : (
+             <div className="flex items-center justify-end gap-3">
+                <button onClick={closeModal} className="px-6 py-2 text-sm font-medium text-slate-600 rounded-lg hover:bg-slate-100">
+                    Cancel
+                </button>
+                <button
+                    disabled={true}
+                    className="px-8 py-2.5 text-sm font-bold text-white rounded-lg bg-blue-300 shadow-sm min-w-[160px]"
+                >
+                    Complete Steps to Hire
+                </button>
+             </div>
+          )}
         </div>
       </div>
     </div>

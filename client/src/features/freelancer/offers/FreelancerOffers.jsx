@@ -39,7 +39,7 @@ export default function FreelancerOffers() {
 
                   <div className="text-right">
                     <p className="text-xs text-gray-500 mb-1">Total Budget</p>
-                    <p className="text-xl font-bold text-gray-900">₹{Number(offer.total_amount).toLocaleString()}</p>
+                    <p className="text-xl font-bold text-gray-900">${Number(offer.total_amount).toLocaleString()}</p>
                   </div>
                 </div>
 

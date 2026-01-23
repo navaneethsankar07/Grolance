@@ -92,7 +92,7 @@ console.log(proposal.status);
           <div className="flex flex-col">
             <span className="text-[10px] text-gray-500 mb-1">Bid Amount</span>
             <span className="text-sm font-semibold text-gray-900">
-              ₹{Number(proposal.bid_amount).toLocaleString()}
+              ${Number(proposal.bid_amount).toLocaleString()}
             </span>
           </div>
         </div>

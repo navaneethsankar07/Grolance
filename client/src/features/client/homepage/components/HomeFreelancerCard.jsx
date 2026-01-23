@@ -9,7 +9,7 @@ export default function HomeFreelancerCard() {
     skills: ["Google Ads", "Facebook Ads", "Copywriting"],
     rating: 5.0,
     reviews: 142,
-    price: "₹1200",
+    price: "$1200",
     image:
       "https://api.builder.io/api/v1/image/assets/TEMP/9911d41260a8c606e9de17865bfcefb2feaf82be?width=192",
   };

@@ -59,7 +59,8 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt.token_blacklist',
     'cloudinary',
     'cloudinary_storage',
-    'contracts'
+    'contracts',
+    'payments'
     
 ]
 SIMPLE_JWT = {
@@ -92,6 +93,9 @@ DEFAULT_FROM_EMAIL = "Grolance <grolance.noreply@gmail.com>"
 FRONTEND_URL = env("FRONTEND_URL")
 GOOGLE_CLIENT_ID = env("GOOGLE_CLIENT_ID")
 DEFAULT_FILE_STORAGE='cloudinary_storage.storage.MediaCloudinaryStorage'
+PAYPAL_CLIENT_ID=env('PAYPAL_CLIENT_ID')
+PAYPAL_SECRET=env('PAYPAL_KEY_SECRET')
+PAYPAL_MODE=env('PAYPAL_MODE')
 
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",

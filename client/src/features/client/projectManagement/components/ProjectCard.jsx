@@ -15,9 +15,9 @@ export default function ProjectCard({ job }) {
     const max = job.max_budget ? Number(job.max_budget).toLocaleString() : "0";
 
     if (job.pricing_type === "fixed") {
-      return <span className="text-sm text-gray-600 font-medium">₹{fixed}</span>;
+      return <span className="text-sm text-gray-600 font-medium">${fixed}</span>;
     } else {
-      return <span className="text-sm text-gray-600 font-medium">₹{min} - ₹{max}</span>;
+      return <span className="text-sm text-gray-600 font-medium">${min} - ${max}</span>;
     }
   };
 

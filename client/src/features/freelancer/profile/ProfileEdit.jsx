@@ -20,7 +20,7 @@ const PackageCard = ({ title, data, onChange }) => (
     <h3 className="text-sm font-semibold text-gray-900 leading-6">{title}</h3>
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-1.5">
-        <label className="text-xs font-medium text-gray-700">Price (₹)</label>
+        <label className="text-xs font-medium text-gray-700">Price ($)</label>
         <input
           type="number"
           value={data.price}

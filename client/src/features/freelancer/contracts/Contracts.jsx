@@ -111,7 +111,7 @@ console.log(data);
                       <div className="flex items-center gap-1.5 text-gray-400">
                         <span className="text-[10px] font-bold uppercase">Price</span>
                       </div>
-                      <p className="text-lg font-black text-gray-900">₹{Number(contract.total_amount).toLocaleString()}</p>
+                      <p className="text-lg font-black text-gray-900">${Number(contract.total_amount).toLocaleString()}</p>
                     </div>
                   </div>
 

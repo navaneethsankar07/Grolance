@@ -164,7 +164,7 @@ export default function ContractDetail() {
               </div>
               <div>
                 <p className="text-sm text-gray-400 font-medium mb-1">Budget</p>
-                <p className="text-lg font-bold text-gray-900">₹{Number(contract.total_amount).toLocaleString()}</p>
+                <p className="text-lg font-bold text-gray-900">${Number(contract.total_amount).toLocaleString()}</p>
               </div>
             </div>
 

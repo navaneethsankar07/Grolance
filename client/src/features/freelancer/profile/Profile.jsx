@@ -136,7 +136,7 @@ export default function Profile() {
             <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm hover:border-blue-300 transition-colors">
               <h4 className="font-bold text-gray-800 mb-2 text-lg">Starter Package</h4>
               <div className="flex items-baseline justify-between mb-4">
-                <div className="text-2xl font-bold text-gray-900">₹{profile.packages?.starter?.price || 0}</div>
+                <div className="text-2xl font-bold text-gray-900">${profile.packages?.starter?.price || 0}</div>
                 <div className="flex items-center gap-1 text-gray-500 text-xs">
                   <Clock size={14} /> {profile.packages?.starter?.delivery_days || 0} days delivery
                 </div>
@@ -149,7 +149,7 @@ export default function Profile() {
             <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm hover:border-blue-300 transition-colors">
               <h4 className="font-bold text-gray-800 mb-2 text-lg">Pro Package</h4>
               <div className="flex items-baseline justify-between mb-4">
-                <div className="text-2xl font-bold text-gray-900">₹{profile.packages?.pro?.price || 0}</div>
+                <div className="text-2xl font-bold text-gray-900">${profile.packages?.pro?.price || 0}</div>
                 <div className="flex items-center gap-1 text-gray-500 text-xs">
                   <Clock size={14} /> {profile.packages?.pro?.delivery_days || 0} days delivery
                 </div>

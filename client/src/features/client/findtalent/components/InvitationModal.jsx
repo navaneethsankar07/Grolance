@@ -108,7 +108,7 @@ const handleSendInvite = () => {
                     <h4 className="font-bold text-gray-900 capitalize">{pkg.package_type} Package</h4>
                     <p className="text-xs text-gray-500 mt-1">{pkg.delivery_days} Days Delivery</p>
                   </div>
-                  <span className="text-lg font-black text-blue-600">₹{pkg.price}</span>
+                  <span className="text-lg font-black text-blue-600">${pkg.price}</span>
                 </button>
               ))}
             </div>

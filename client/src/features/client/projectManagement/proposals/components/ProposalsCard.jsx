@@ -130,7 +130,7 @@ export default function ProposalCard({ freelancer, proposal, isInvitation = fals
             <div className="flex gap-4">
               <div className="lg:text-right">
                 <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Bid Amount</p>
-                <p className="text-base font-semibold text-gray-900">₹{proposal.bidAmount}</p>
+                <p className="text-base font-semibold text-gray-900">${proposal.bidAmount}</p>
               </div>
               <div className="lg:text-right">
                 <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Delivery</p>

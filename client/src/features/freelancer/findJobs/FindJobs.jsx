@@ -135,14 +135,14 @@ export default function FindJobs() {
 
             <div className="relative">
               <button onClick={() => { setIsBudgetOpen(!isBudgetOpen); setIsCategoryOpen(false); setIsSkillsOpen(false); setIsDeliveryOpen(false); }} className={`flex items-center gap-2 px-4 py-2 border rounded-xl text-sm font-medium transition-colors ${budgetRange.max ? 'border-primary bg-blue-50 text-primary' : 'border-[#E5E7EB] text-[#374151] hover:bg-gray-50'}`}>
-                <span>{budgetRange.max ? `Up to ₹${budgetRange.max}` : "Budget"}</span>
+                <span>{budgetRange.max ? `Up to $${budgetRange.max}` : "Budget"}</span>
                 <svg className={`transition-transform ${isBudgetOpen ? 'rotate-180' : ''}`} width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M4 6L8 10L12 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
               </button>
               {isBudgetOpen && (
                 <div className="absolute mt-2 w-48 bg-white border border-[#E5E7EB] rounded-xl shadow-xl py-2 z-50">
                   <button onClick={() => { setBudgetRange({ min: "", max: "" }); setIsBudgetOpen(false); setPage(1); }} className="w-full text-left px-4 py-2 text-sm text-primary font-medium hover:bg-gray-50 border-b border-gray-100">All Budgets</button>
                   {[500, 1000, 5000, 10000, 50000].map((amount) => (
-                    <button key={amount} onClick={() => { setBudgetRange({ min: "0", max: amount.toString() }); setIsBudgetOpen(false); setPage(1); }} className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Up to ₹{amount}</button>
+                    <button key={amount} onClick={() => { setBudgetRange({ min: "0", max: amount.toString() }); setIsBudgetOpen(false); setPage(1); }} className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Up to ${amount}</button>
                   ))}
                 </div>
               )}
@@ -171,7 +171,7 @@ export default function FindJobs() {
           <span className="text-[#111827] font-bold">{totalCount}</span> jobs found
           {selectedCategory && <span className="ml-2 bg-blue-100 text-primary px-2 py-0.5 rounded text-xs">Category: {selectedCategory}</span>}
           {selectedSkill && <span className="ml-2 bg-indigo-100 text-indigo-600 px-2 py-0.5 rounded text-xs">Skill: {selectedSkill}</span>}
-          {budgetRange.max && <span className="ml-2 bg-green-100 text-green-700 px-2 py-0.5 rounded text-xs">Max: ₹{budgetRange.max}</span>}
+          {budgetRange.max && <span className="ml-2 bg-green-100 text-green-700 px-2 py-0.5 rounded text-xs">Max: ${budgetRange.max}</span>}
           {maxDeliveryDays && <span className="ml-2 bg-orange-100 text-orange-700 px-2 py-0.5 rounded text-xs">{maxDeliveryDays} days</span>}
         </p>
 
@@ -188,7 +188,7 @@ export default function FindJobs() {
                       category={job.category_name}
                       title={job.title}
                       description={job.description}
-                      priceRange={job.pricing_type === 'fixed' ? `₹${job.fixed_price}` : `₹${job.min_budget}-₹${job.max_budget}`}
+                      priceRange={job.pricing_type === 'fixed' ? `$${job.fixed_price}` : `$${job.min_budget}-$${job.max_budget}`}
                       duration={`${job.delivery_days} days`}
                       skills={job.skills || []}
                     />

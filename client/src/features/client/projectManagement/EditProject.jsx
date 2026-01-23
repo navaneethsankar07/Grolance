@@ -205,7 +205,7 @@ useEffect(() => {
               {/* Budget Inputs */}
               {pricingType === "fixed" ? (
                 <div className="mb-8">
-                  <label className="block text-xs font-medium text-gray-700 mb-2">Fixed Budget (₹) *</label>
+                  <label className="block text-xs font-medium text-gray-700 mb-2">Fixed Budget ($) *</label>
                   <input type="number" {...register("fixed_price", { valueAsNumber: true })} className="w-full px-3 h-[50px] border-2 border-gray-300 rounded-lg" />
                 </div>
               ) : (

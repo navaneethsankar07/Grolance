@@ -51,23 +51,10 @@ class ContractViewSet(viewsets.ModelViewSet):
         ).order_by('-client_signed_at')
         serializer = self.get_serializer(offers, many=True)
         return Response(serializer.data)
-
-    def perform_create(self, serializer):
-        client_ip = self.request.META.get('REMOTE_ADDR')
-        project_id = self.request.data.get('project')
-        freelancer_id = self.request.data.get('freelancer')
-        
-        from projects.models import Proposal
-        proposal = Proposal.objects.filter(project_id=project_id, freelancer__user_id=freelancer_id).first()
-        
-        serializer.save(
-            client=self.request.user,
-            client_ip=client_ip,
-            is_funded=True, 
-            status='offered',
-            client_signed_at=timezone.now(),
-            package=proposal.package if proposal else None 
-        )
+    
+    def create(self, request, *args, **kwargs):
+        return Response({"error": "Use payment flow to create contracts"}, status=405)
+    
 
     @action(detail=True, methods=['post'])
     def accept(self, request, pk=None):

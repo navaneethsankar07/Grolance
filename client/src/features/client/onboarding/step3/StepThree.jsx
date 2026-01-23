@@ -62,7 +62,7 @@ function StepThree() {
                 <div>
                   <label className="text-sm font-bold text-gray-700 mb-2 block">Price</label>
                   <div className="relative">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-medium text-lg">₹</span>
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-medium text-lg">$</span>
                     <input
                       type="number"
                       {...register(`packages.${tier}.price`, { valueAsNumber: true })}

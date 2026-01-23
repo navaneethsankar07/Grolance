@@ -27,7 +27,7 @@ const PackageCard = ({ type, data, isSelected, onClick }) => {
           <span className="text-[11px]">{data.delivery_days} Days</span>
         </div>
       </div>
-      <div className="text-xl font-black text-slate-900 mb-3">₹{data.price.toLocaleString()}</div>
+      <div className="text-xl font-black text-slate-900 mb-3">${data.price.toLocaleString()}</div>
       
       <ul className="grid grid-cols-1 gap-y-1">
         {data.description.map((line, i) => (
@@ -128,16 +128,16 @@ export function ProposalModal({ onClose, projectId }) {
           <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-3">
             <div className="flex justify-between text-xs font-bold text-slate-500 uppercase">
               <span>Project Amount</span>
-              <span className="text-slate-900">₹{currentPkgData.price.toLocaleString()}</span>
+              <span className="text-slate-900">${currentPkgData.price.toLocaleString()}</span>
             </div>
             <div className="flex justify-between text-xs font-bold text-slate-500 uppercase">
               <span>Service Fee (10%)</span>
-              <span className="text-red-500">-₹{(currentPkgData.price * 0.1).toLocaleString()}</span>
+              <span className="text-red-500">-${(currentPkgData.price * 0.1).toLocaleString()}</span>
             </div>
             <div className="h-px bg-slate-100 my-2" />
             <div className="flex justify-between text-sm font-black text-slate-900 uppercase">
               <span>You'll Receive</span>
-              <span className="text-green-600 font-extrabold">₹{(currentPkgData.price * 0.9).toLocaleString()}</span>
+              <span className="text-green-600 font-extrabold">${(currentPkgData.price * 0.9).toLocaleString()}</span>
             </div>
           </div>
 

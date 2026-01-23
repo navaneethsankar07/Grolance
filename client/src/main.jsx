@@ -9,7 +9,14 @@ import {Provider} from 'react-redux'
 import './api/axiosInterceptors.js'
 import { PersistGate } from 'redux-persist/integration/react'
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { PayPalScriptProvider } from "@paypal/react-paypal-js";
 
+
+const initialOptions = {
+    "client-id": import.meta.env.VITE_PAYPAL_CLIENT_ID,
+    currency: "USD",
+    intent: "capture",
+};
 const queryClient = new QueryClient();
 
 createRoot(document.getElementById('root')).render(
@@ -22,7 +29,9 @@ createRoot(document.getElementById('root')).render(
   }}
 >    <ModalProvider>
     <QueryClientProvider client={queryClient}>
+    <PayPalScriptProvider options={initialOptions}>
     <App />
+</PayPalScriptProvider>
   </QueryClientProvider>
   </ModalProvider>
     </PersistGate>

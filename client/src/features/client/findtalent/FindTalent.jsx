@@ -119,7 +119,7 @@ const handleApplyFilters = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Budget Range (₹)</label>
+                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Budget Range ($)</label>
                   <div className="flex items-center gap-2">
                     <input
                       ref={minPriceRef}

@@ -27,7 +27,7 @@ export default function ProposalDetailModal({ isOpen, onClose, proposal }) {
                 <Banknote className="w-4 h-4" />
                 <span className="text-xs font-medium">Bid Amount</span>
               </div>
-              <p className="font-bold text-gray-900">₹{Number(proposal.bid_amount).toLocaleString()}</p>
+              <p className="font-bold text-gray-900">${Number(proposal.bid_amount).toLocaleString()}</p>
             </div>
             <div>
               <div className="flex items-center gap-2 text-gray-500 mb-1">

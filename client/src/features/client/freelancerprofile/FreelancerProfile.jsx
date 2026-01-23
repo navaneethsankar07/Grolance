@@ -14,7 +14,7 @@ function PackageOption({ title, price, features, isPopular = false }) {
       )}
       <h4 className="text-lg font-bold text-gray-900">{title}</h4>
       <div className="flex items-baseline gap-1 mt-4 mb-8">
-        <span className="text-3xl font-extrabold text-gray-900">₹{price}</span>
+        <span className="text-3xl font-extrabold text-gray-900">${price}</span>
         <span className="text-gray-500 text-sm">/ project</span>
       </div>
       <div className="space-y-4 flex-1">

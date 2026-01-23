@@ -1,17 +1,20 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import axiosInstance from '../../../api/axiosInstance';
-import { requestContractRevision, updateContractStatus } from './contractApi';
+import { requestContractRevision, updateContractStatus, verifyPayment } from './contractApi';
 
-export const useCreateContract = () => {
+export const useVerifyPayment = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (contractData) => {
-      const response = await axiosInstance.post('/contracts/', contractData);
-      return response.data;
-    },
-    onSuccess: () => {
+    mutationFn: verifyPayment,
+    onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['projects'] });
+      queryClient.invalidateQueries({ queryKey: ['contracts'] });
+      
+      if (variables.project_id) {
+        queryClient.invalidateQueries({ queryKey: ['proposals', variables.project_id] });
+      }
+      
+      queryClient.invalidateQueries({ queryKey: ['my_offers'] });
     },
   });
 };

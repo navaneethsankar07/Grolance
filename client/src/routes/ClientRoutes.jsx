@@ -11,7 +11,6 @@ import ProfileOverview from "../features/client/profile/ProfileOverview";
 import AccountSettings from "../features/client/profile/AccountSettings";
 import Interests from "../features/client/profile/Interests";
 import ProfileEdit from "../features/client/profile/EditProfile";
-import StepOne from "../features/client/onboarding/step1/StepOne";
 import { OnBoardingProvider } from "../features/client/onboarding/OnBoardingContext";
 import OnboardingManager from "../features/client/onboarding/OnboardingManager";
 import FindTalent from "../features/client/findtalent/FindTalent";

@@ -85,7 +85,7 @@ function StepFive() {
                   <div className="flex justify-between items-start mb-4">
                     <div>
                       <h3 className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">{tier} Plan</h3>
-                      <p className="text-xl font-black text-gray-900">₹{formData.packages[tier].price}</p>
+                      <p className="text-xl font-black text-gray-900">${formData.packages[tier].price}</p>
                     </div>
                     <div className="p-2 bg-gray-50 rounded-lg group-hover:bg-primary/5 transition-colors">
                        <svg className="w-5 h-5 text-gray-400 group-hover:text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>

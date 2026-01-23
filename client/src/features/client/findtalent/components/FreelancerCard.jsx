@@ -14,7 +14,7 @@ export function FreelancerCard({
   skills = [],
   rating = 5.0,
   price,
-  currency = "₹",
+  currency = "$",
   packages = []
 }) {
   const navigate = useNavigate();

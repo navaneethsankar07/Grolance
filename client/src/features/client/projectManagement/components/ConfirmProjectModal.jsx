@@ -69,11 +69,11 @@ function ConfirmProjectModal({ isPending, onConfirm }) {
 
                 {data.pricing_type === "fixed" ? (
                   <p className="font-semibold text-gray-700">
-                    ₹{data.fixed_price.toLocaleString()}
+                    ${data.fixed_price.toLocaleString()}
                   </p>
                 ) : (
                   <p className="font-semibold text-gray-700">
-                    ₹{data.min_budget.toLocaleString()} – ₹{data.max_budget.toLocaleString()}
+                    ${data.min_budget.toLocaleString()} – ${data.max_budget.toLocaleString()}
                   </p>
                 )}
               </div>
