@@ -8,3 +8,8 @@ class PaymentVerificationSerializer(serializers.Serializer):
     total_amount = serializers.DecimalField(max_digits=10, decimal_places=2)
     client_signature = serializers.CharField(required=False, allow_blank=True)
     client_signature_type = serializers.CharField(required=False)
+
+
+class ReleasePaymentSerializer(serializers.Serializer):
+    contract_id = serializers.IntegerField()
+    platform_paypal_email = serializers.EmailField()

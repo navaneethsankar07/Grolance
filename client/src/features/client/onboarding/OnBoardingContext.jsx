@@ -1,7 +1,6 @@
 import { Children, createContext, useContext, useState } from "react";
 import { Outlet } from "react-router-dom";
 
-
 const OnBoardingContext = createContext();
 
 export const OnBoardingProvider = ({children}) => {
@@ -17,21 +16,11 @@ export const OnBoardingProvider = ({children}) => {
             starter:{price:'',deliveryTime:'',description:''},
             pro:{price:'',deliveryTime:'',description:''}
         },
-         portfolios:[],
-        
-        bankDetails: {
-            fullName: '',
-            accountNumber: '',
-            ifscCode: '',
-            bankName: '',
-            branchName: '',
+        portfolios:[],
+        paymentDetails: {
+            paypalEmail: '',
             isConfirmed: false
         }
-
-
-        
-
-
     })
     const [currentStep, setCurrentStep] = useState(1);
     const totalSteps = 6;
@@ -42,7 +31,6 @@ export const OnBoardingProvider = ({children}) => {
     const updateFormData = (newData) => {
         setFormData((prev)=>({...prev,...newData}))
     }
- 
 
     return (
         <OnBoardingContext.Provider value={{

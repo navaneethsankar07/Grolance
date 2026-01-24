@@ -8,7 +8,7 @@ export default function ClientJobDetail() {
   const navigate = useNavigate();
   const { data, isLoading, isError, error } = useProjectDetails(id);
 
-  const isProjectInProgress = data?.status === "in_progress" || data?.status === "in-progress";
+  const isProjectInProgress = data?.status === "in_progress" || data?.status === "in-progress" || data?.status === 'completed';
 
   if (isLoading) return <div className="flex justify-center items-center h-screen text-gray-600">Loading Project details...</div>;
   if (isError) return <div className="flex justify-center items-center h-screen text-red-500">Error: {error.message}</div>;

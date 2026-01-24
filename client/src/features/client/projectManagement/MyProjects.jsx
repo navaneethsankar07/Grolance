@@ -78,8 +78,8 @@ console.log(data);
         <div className="border-b border-gray-200 mb-6">
           <nav className="flex gap-6">
             <TabButton id="all" label="All Posts" Icon={Briefcase} count={activeTab === 'all' ? totalCount : null} />
-            <TabButton id="completed" label="Completed" Icon={CircleCheck} />
-            <TabButton id="in_progress" label="In Progress" Icon={Hourglass} count={activeTab === 'in_progress'?totalCount:null} />
+            <TabButton id="completed" label="completed" Icon={CircleCheck} count={activeTab === 'completed'? totalCount:null}  />
+            <TabButton id="in_progress" label="In Progress" Icon={Hourglass} count={activeTab === 'in_progress'?totalCount:null } />
           </nav>
         </div>
 

@@ -9,6 +9,11 @@ export const fetchSkills = async () => {
   const res = await axiosInstance.get("/categories/skills/");
   return res.data;
 };
+export const fetchAllSkills = async () => {
+  const res = await axiosInstance.get("/categories/skills/",{params: {no_pagination: 'true'}});
+  return res.data;
+};
+
 
 export const createProject = async (data) => {
   const res = await axiosInstance.post("/projects/create/", data);

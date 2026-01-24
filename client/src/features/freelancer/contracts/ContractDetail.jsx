@@ -24,10 +24,15 @@ export default function ContractDetail() {
   const [rejectionNote, setRejectionNote] = useState("");
 
   useEffect(() => {
+
+    console.log(contract);
     if (contract?.freelancer_signed_at && contract?.delivery_days) {
       const calculateTime = () => {
+        
         const start = new Date(contract.freelancer_signed_at).getTime();
         const durationMs = contract.delivery_days * 24 * 60 * 60 * 1000;
+        console.log(contract.deliverable_days);
+        
         const end = start + durationMs;
         const now = new Date().getTime();
         const difference = end - now;

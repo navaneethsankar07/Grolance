@@ -7,6 +7,7 @@ import {
   ExternalLink, X, AlertCircle, History, CheckCircle2
 } from "lucide-react";
 import { toast } from "react-toastify";
+import { useModal } from "../../../hooks/modal/useModalStore";
 
 export default function ClientContractDetail() {
   const { id } = useParams();
@@ -17,7 +18,7 @@ export default function ClientContractDetail() {
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, percentage: 0 });
   const [isRevisionModalOpen, setIsRevisionModalOpen] = useState(false);
   const [revisionReason, setRevisionReason] = useState("");
-
+  const {openModal} = useModal()
   useEffect(() => {
     if (contract?.freelancer_signed_at && contract?.delivery_days) {
       const calculateTime = () => {
@@ -61,11 +62,19 @@ export default function ClientContractDetail() {
     );
   };
 
-  const handleApproveOrder = () => {
-    if (window.confirm("Are you sure? This will release the payment to the freelancer.")) {
-      updateStatusMutation.mutate({ contractId: id, status: 'completed' });
+const handleApproveOrder = () => {
+  openModal("approve-contract", {
+    projectName: contract.project_title,
+    freelancerName: contract.freelancer_name,
+    amount: contract.total_amount,
+    onApprove: () => {
+      updateStatusMutation.mutate({ 
+        contractId: contract.id, 
+        status: 'completed' 
+      });
     }
-  };
+  });
+};
 
   if (isLoading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
   if (isError) return <div className="min-h-screen flex items-center justify-center text-red-500">Error loading contract details.</div>;

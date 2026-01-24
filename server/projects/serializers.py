@@ -300,10 +300,10 @@ class InvitationSerializer(serializers.ModelSerializer):
     project_title = serializers.ReadOnlyField(source='project.title')
     package_type = serializers.ReadOnlyField(source='package.package_type')
     
-    freelancer_name = serializers.ReadOnlyField(source='freelancer.full_name')
-    freelancer_image = serializers.ReadOnlyField(source='freelancer.profile_photo')
+    freelancer_name = serializers.ReadOnlyField(source='freelancer.user.full_name')
+    freelancer_image = serializers.ReadOnlyField(source='freelancer.user.profile_photo')
     
-    freelancer_tagline = serializers.ReadOnlyField(source='freelancer.freelancer_profile.tagline')
+    freelancer_tagline = serializers.ReadOnlyField(source='freelancer.user.freelancer_profile.tagline')
 
     class Meta:
         model = Invitation

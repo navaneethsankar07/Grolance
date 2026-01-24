@@ -125,14 +125,14 @@ class Invitation(models.Model):
         related_name='sent_invitations'
     )
     freelancer = models.ForeignKey(
-        settings.AUTH_USER_MODEL, 
+        'profiles.FreelancerProfile', 
         on_delete=models.CASCADE, 
         related_name='received_invitations'
     )
     
     project = models.ForeignKey('Project', on_delete=models.CASCADE)
     
-    package = models.ForeignKey('profiles.FreelancerPackage', on_delete=models.CASCADE)
+    package = models.ForeignKey('profiles.FreelancerPackage', on_delete=models.SET_NULL,null=True,blank=True,related_name='invitations')
     
     message = models.TextField(blank=True, null=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')

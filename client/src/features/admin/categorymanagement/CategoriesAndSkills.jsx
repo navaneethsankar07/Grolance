@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { LayoutGrid, Wrench } from "lucide-react";
 import { ManagementList } from "./ManagementList";
-import { useCategories } from "./categoryQueries";
+import { useAllCategories, useCategories } from "./categoryQueries";
 import { useSkills } from "./skillQueries";
 import { useModal } from "../../../hooks/modal/useModalStore";
 
@@ -17,7 +17,7 @@ export default function CategoriesAndSkills() {
     page: categoryPage,
     search: categorySearch,
   });
-
+  const allCategories = useAllCategories()
   const { data: skillData, isLoading: skillLoading } = useSkills({
     page: skillPage,
     search: skillSearch,
@@ -76,7 +76,7 @@ export default function CategoriesAndSkills() {
           onPrev={() => setSkillPage(p => p - 1)}
           hasNext={!!skillData?.next}
           hasPrev={!!skillData?.previous}
-          onAdd={() => openModal("add-skill", { categories })}
+          onAdd={() => openModal("add-skill", { allCategories })}
           onEdit={(item) => openModal("edit-skill", { item, categories })}
           onDelete={(item) => openModal("delete-skill", item)}
         />

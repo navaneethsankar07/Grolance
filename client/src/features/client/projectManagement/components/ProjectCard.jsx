@@ -7,7 +7,7 @@ export default function ProjectCard({ job }) {
   const navigate = useNavigate();
   const { openModal } = useModal();
 
-  const isProjectInProgress = job.status === "in_progress" || job.status === "in-progress";
+  const isProjectInProgress = job.status === "in_progress" || job.status === "in-progress" || job.status === 'completed';
 
   const renderBudget = () => {
     const fixed = job.fixed_price ? Number(job.fixed_price).toLocaleString() : "0";

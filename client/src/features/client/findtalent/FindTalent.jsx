@@ -18,7 +18,8 @@ export default function FindTalent() {
   });
 
   const { data, isLoading } = useFreelancerList(queryParams);
-
+  console.log(data);
+  
 const handleApplyFilters = () => {
     const minVal = minPriceRef.current.value ? parseFloat(minPriceRef.current.value) : null;
     const maxVal = maxPriceRef.current.value ? parseFloat(maxPriceRef.current.value) : null;

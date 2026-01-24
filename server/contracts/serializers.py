@@ -72,7 +72,7 @@ class ContractSerializer(serializers.ModelSerializer):
     skills = serializers.SerializerMethodField()
     package_name = serializers.CharField(source='package.package_type', read_only=True)
     delivery_days = serializers.IntegerField(source='package.delivery_days', read_only=True)
-    freelancer_name = serializers.CharField(source='freelancer.full_name', read_only=True)
+    freelancer_name = serializers.CharField(source='freelancer.user.full_name', read_only=True)
     deliverables = ContractDeliverableSerializer(many=True, read_only=True)
     revisions = ContractRevisionSerializer(many=True, read_only=True)
 

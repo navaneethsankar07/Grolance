@@ -6,6 +6,7 @@ from adminpanel.permissions import IsAdminUser
 from  rest_framework.exceptions import ValidationError
 from common.pagination import AdminUserPagination
 from rest_framework.filters import SearchFilter, OrderingFilter
+from rest_framework.response import Response
 from django.db.models.deletion import ProtectedError
 
 class CategoryListView(ListAPIView):
@@ -17,6 +18,15 @@ class CategoryListView(ListAPIView):
     ordering = ["-id"]
     def get_queryset(self):
         return Category.objects.all().order_by('id')
+    
+    def list(self, request, *args, **kwargs):
+        if request.query_params.get('no_pagination') == 'true':
+            self.pagination_class = None
+            queryset = self.get_queryset()
+            serializer = self.get_serializer(queryset, many=True)
+            return Response(serializer.data)
+            
+        return super().list(request, *args, **kwargs)
 
 class CategoryCreateView(CreateAPIView):
     permission_classes = [IsAdminUser]
@@ -49,6 +59,16 @@ class SkillListView(ListAPIView):
 
     def get_queryset(self):
         return Skill.objects.select_related("category").all()
+    
+
+    def list(self, request, *args, **kwargs):
+        if request.query_params.get('no_pagination') == 'true':
+            self.pagination_class = None
+            queryset = self.get_queryset()
+            serializer = self.get_serializer(queryset, many=True)
+            return Response(serializer.data)
+            
+        return super().list(request, *args, **kwargs)
 
 class SkillCreateView(CreateAPIView):
     permission_classes = [IsAdminUser]

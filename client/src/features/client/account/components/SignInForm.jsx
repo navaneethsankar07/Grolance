@@ -50,7 +50,11 @@ useEffect(() => {
         );
 
         closeModal();
-        navigate("/");
+         if (data.user.current_role === 'freelancer') {
+      navigate("/freelancer");
+    } else {
+      navigate("/");
+    }
         toast.success('Login Successful')
       } catch (err) {
         console.log();

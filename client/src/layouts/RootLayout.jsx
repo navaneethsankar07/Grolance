@@ -27,6 +27,8 @@ import ViewUserModal from "../features/admin/usermanagement/components/ViewUserM
 import ContractOfferModal from "../features/client/contract/components/ContractOfferModal";
 import ProposalDetailModal from "../features/freelancer/proposals/components/ProposalDetailModal";
 import OfferModal from "../features/freelancer/offers/OfferModal";
+import ApproveContractModal from "../features/client/contract/components/ApproveContractModal";
+import PayoutReleaseModal from "../features/admin/payoutmanagement/PayoutReleaseModal";
 export default function RootLayout() {
   const { modal, modalProps, closeModal } = useModal();
 const { loading, initialized, accessToken } = useSelector((s) => s.auth);
@@ -56,7 +58,7 @@ useEffect(() => {
       {modal === 'edit-category' && <EditCategoryModal open onOpenChange={closeModal} category={modalProps} />  }
       {modal === 'edit-skill' && <EditSkillModal open onOpenChange={closeModal} skill={modalProps.item} categories={modalProps.categories} />  }
       {modal === 'add-category' && <AddCategoryModal open onOpenChange={closeModal} />}
-      {modal === 'add-skill' && <AddSkillModal categories={modalProps.categories} onClose={closeModal} />}
+      {modal === 'add-skill' && <AddSkillModal categories={modalProps.allCategories?.data} onClose={closeModal} />}
       {modal === 'delete-category' && <DeleteCategoryModal open onOpenChange={closeModal} category={modalProps}/> }
       {modal === 'delete-skill' && <DeleteSkillModal open onOpenChange={closeModal} skill={modalProps}/> }
       {modal === "delete-user" && ( <DeleteUserModal isOpen onClose={closeModal} modalProps={modalProps} />)}
@@ -70,6 +72,8 @@ useEffect(() => {
       {modal === 'contract-offer' && <ContractOfferModal modalProps={modalProps} />}
       {modal === 'my-proposal-details' && <ProposalDetailModal isOpen onClose={closeModal} proposal={modalProps.proposal} />}
       {modal === 'offer-modal' && <OfferModal/>}
+      {modal === 'approve-contract' && <ApproveContractModal modalProps={modalProps} />}
+      {modal === 'release-payout' && <PayoutReleaseModal isOpen onClose={closeModal} contract={modalProps} />}
     </>
   );
 }

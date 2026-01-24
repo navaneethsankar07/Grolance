@@ -1,15 +1,16 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useCategories, useSkills } from "../../projectManagement/projectQueries";
+import { useAllSkillls } from "../../projectManagement/projectQueries";
 import { useOnBoarding } from "../OnBoardingContext";
 import OnboardingLayout from "../../../../layouts/OnBoardingLayout";
 import { stepTwoSchema } from "./stepTwoSchema";
+import { useAllCategories } from "../../../admin/categorymanagement/categoryQueries";
 
 function StepTwo() {
   const { formData, updateFormData, nextStep } = useOnBoarding();
-  const { data: categories } = useCategories();
-  const { data: skillsSuggestions } = useSkills();
+  const { data: categories } = useAllCategories();
+  const { data: allSkills } = useAllSkillls();
   const [customInput, setCustomInput] = useState("");
 
   const {
@@ -26,11 +27,18 @@ function StepTwo() {
       experienceLevel: formData.experienceLevel || "",
     },
   });
+
   const [inputError, setInputError] = useState("");
-
-
   const selectedSkills = watch("skills");
   const selectedLevel = watch("experienceLevel");
+  const selectedCategoryId = watch("primaryCategory");
+
+  const filteredSkills = React.useMemo(() => {
+    if (!selectedCategoryId || !allSkills) return [];
+    return allSkills.filter(
+      (skill) => String(skill.category) === String(selectedCategoryId)
+    );
+  }, [selectedCategoryId, allSkills]);
 
   const onSubmit = (data) => {
     updateFormData(data);
@@ -45,24 +53,21 @@ function StepTwo() {
 
     setValue("skills", newSkills, { shouldValidate: true });
   };
+
   const handleAddCustom = () => {
     const trimmed = customInput.trim();
-
     if (trimmed.length < 2) {
       setInputError("Skill is too short");
       return;
     }
-
     if (/^\d+$/.test(trimmed)) {
       setInputError("Skill cannot be only numbers");
       return;
     }
-
     if (selectedSkills.includes(trimmed)) {
       setInputError("Skill already added");
       return;
     }
-
     setValue("skills", [...selectedSkills, trimmed], { shouldValidate: true });
     setCustomInput("");
     setInputError("");
@@ -74,16 +79,16 @@ function StepTwo() {
       subtitle="Help us match you with the right projects."
     >
       <form id="onboarding-form" onSubmit={handleSubmit(onSubmit)} className="space-y-10">
-
         <div className="space-y-2">
           <label className="text-sm font-bold text-gray-900 block">Primary Category</label>
           <select
             {...register("primaryCategory")}
-            className={`w-full h-[54px] px-5 rounded-xl border bg-white text-base focus:ring-2 focus:ring-primary/20 outline-none appearance-none ${errors.primaryCategory ? "border-red-500" : "border-[#D1D5DB]"
-              }`}
+            className={`w-full h-[54px] px-5 rounded-xl border bg-white text-base focus:ring-2 focus:ring-primary/20 outline-none appearance-none ${
+              errors.primaryCategory ? "border-red-500" : "border-[#D1D5DB]"
+            }`}
           >
-            <option value="" disabled>Select a category</option>
-            {categories?.results?.map((cat) => (
+            <option value="">Select a category</option>
+            {categories?.map((cat) => (
               <option key={cat.id} value={cat.id}>{cat.name}</option>
             ))}
           </select>
@@ -107,19 +112,22 @@ function StepTwo() {
         </div>
 
         <div className="space-y-4">
-          <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Suggested for you</p>
+          <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">
+            {selectedCategoryId ? "Suggested for your category" : "Please select a category to see suggestions"}
+          </p>
           <div className="flex flex-wrap gap-2">
-            {skillsSuggestions?.results?.slice(0, 12).map((skill) => (
+            {filteredSkills.map((skill) => (
               <button
                 key={skill.id}
                 type="button"
                 onClick={() => handleToggleSkill(skill.name)}
-                className={`px-4 py-2 rounded-xl text-xs font-bold border transition-all ${selectedSkills.includes(skill.name)
-                    ? "hidden"
+                className={`px-4 py-2 rounded-xl text-xs font-bold border transition-all ${
+                  selectedSkills.includes(skill.name)
+                    ? "bg-primary/10 border-primary text-primary"
                     : "bg-white border-gray-200 text-gray-700 hover:border-primary hover:text-primary"
-                  }`}
+                }`}
               >
-                + {skill.name}
+                {selectedSkills.includes(skill.name) ? "✓ " : "+ "} {skill.name}
               </button>
             ))}
           </div>
@@ -133,14 +141,14 @@ function StepTwo() {
                   setCustomInput(e.target.value);
                   if (inputError) setInputError("");
                 }}
-                placeholder="e.g. Bootstrap 5, React 18..."
-                className={`h-[50px] px-5 rounded-xl border transition-all flex-1 outline-none focus:ring-2 focus:ring-primary/20 ${inputError ? "border-red-500" : "border-[#D1D5DB] focus:border-primary"
-                  }`}
+                placeholder="Add custom skill..."
+                className={`h-[50px] px-5 rounded-xl border transition-all flex-1 outline-none focus:ring-2 focus:ring-primary/20 ${
+                  inputError ? "border-red-500" : "border-[#D1D5DB] focus:border-primary"
+                }`}
                 onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddCustom())}
               />
               {inputError && <p className="text-red-500 text-[10px] ml-2 font-medium">{inputError}</p>}
             </div>
-
             <button
               type="button"
               onClick={handleAddCustom}
@@ -163,10 +171,11 @@ function StepTwo() {
                 key={level.id}
                 type="button"
                 onClick={() => setValue("experienceLevel", level.id, { shouldValidate: true })}
-                className={`p-6 rounded-2xl border-2 text-left transition-all ${selectedLevel === level.id
+                className={`p-6 rounded-2xl border-2 text-left transition-all ${
+                  selectedLevel === level.id
                     ? "border-primary bg-primary/5 ring-1 ring-primary"
                     : "border-gray-100 bg-white hover:border-gray-300"
-                  }`}
+                }`}
               >
                 <h3 className="text-base font-bold text-gray-900 mb-1">{level.label}</h3>
                 <p className="text-xs text-gray-500">{level.desc}</p>

@@ -24,12 +24,6 @@ export function FreelancerCard({
     navigate(`/find-talents/${id}`);
   };
 
-  const handleActionClick = (e, action) => {
-    e.stopPropagation();
-    if (action === 'profile') {
-      navigate(`/freelancer/profile/${id}`);
-    } 
-  };
 
   const handleHireClick = async (e) => {
     e.stopPropagation();
@@ -119,7 +113,7 @@ console.log(packages)
 
         <div className="flex flex-col gap-2 w-full mt-4">
           <button 
-            onClick={(e) => handleActionClick(e, 'profile')}
+            onClick={handleCardClick}
             className="w-full py-2.5 rounded-xl bg-gray-900 text-white text-sm font-bold hover:bg-gray-800 transition-all active:scale-95"
           >
             View Profile

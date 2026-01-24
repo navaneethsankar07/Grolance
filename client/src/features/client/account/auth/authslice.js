@@ -31,6 +31,9 @@ const authSlice = createSlice({
     finishLoading: (state) => {
       state.loading = false;
     },
+    setUser: (state, action) => {
+  state.user = action.payload;
+}
   },
 
   extraReducers: (builder) => {

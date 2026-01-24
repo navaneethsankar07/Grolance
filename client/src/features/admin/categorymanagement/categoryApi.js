@@ -13,3 +13,9 @@ export const updateSkill = (id, data) =>
 
 export const deleteSkill = (id) =>
   axiosInstance.delete(`/categories/skills/${id}/`);
+
+export const fetchAllCategories = async () => {
+  const res = await axiosInstance.get("/categories/", {params: {no_pagination: 'true'}});
+  
+  return res.data; 
+};

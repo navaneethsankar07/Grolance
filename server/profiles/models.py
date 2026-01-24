@@ -128,22 +128,22 @@ class FreelancerPortfolio(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
 
-class FreelancerBankDetails(models.Model):
+class FreelancerPaymentSettings(models.Model):
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        related_name="freelancer_bank"
+        related_name="payment_settings"
     )
-
-    account_number = models.CharField(max_length=30)
-    ifsc = models.CharField(max_length=11)
-    account_holder_name = models.CharField(max_length=255)
-    bank_name = models.CharField(max_length=255)
-    branch_name = models.CharField(max_length=255)
-
+    
+    paypal_email = models.EmailField(
+        max_length=255, 
+        help_text="The email associated with the freelancer's PayPal account"
+    )
+    
     is_verified = models.BooleanField(default=False)
 
-
+    def __str__(self):
+        return f"PayPal: {self.paypal_email} ({self.user.email})"
 @receiver(post_delete, sender=FreelancerProfile)
 def delete_freelancer_related_data(sender, instance, **kwargs):
     user = instance.user
@@ -151,7 +151,7 @@ def delete_freelancer_related_data(sender, instance, **kwargs):
     FreelancerSkill.objects.filter(user=user).delete()
     FreelancerPackage.objects.filter(user=user).delete()
     FreelancerPortfolio.objects.filter(user=user).delete()
-    FreelancerBankDetails.objects.filter(user=user).delete()
+    FreelancerPaymentSettings.objects.filter(user=user).delete()
     
 
     user.is_freelancer = False

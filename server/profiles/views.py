@@ -4,7 +4,7 @@ from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
-from .models import ClientProfile,FreelancerProfile,FreelancerBankDetails,FreelancerPackage,FreelancerPortfolio,FreelancerSkill
+from .models import ClientProfile,FreelancerProfile,FreelancerPaymentSettings,FreelancerPackage,FreelancerPortfolio,FreelancerSkill
 from .serializers import ClientProfileOverviewSerializer,ClientProfileUpdateSerializer, FreelancerOnboardingSerializer, SendPhoneOTPSerializer, VerifyPhoneOTPSerializer, FreelancerProfileSerializer, RoleSwitchSerializer, FreelancerProfileManageSerializer, FreelancerProfileUpdateSerializer, FreelancerListingSerializer
 from .services import send_phone_otp, verify_phone_otp
 from rest_framework.pagination import PageNumberPagination
@@ -121,17 +121,19 @@ class FreelancerOnboardingAPIView(APIView):
                 image_url=image_url,
             )
 
+        paypal_email = data.get("payment_details", {}).get("paypalEmail")
+        
+        if not paypal_email:
+             return Response({"detail": "PayPal email is required for payments"}, status=400)
 
-        FreelancerBankDetails.objects.update_or_create(
+        FreelancerPaymentSettings.objects.update_or_create(
             user=user,
             defaults={
-                "account_holder_name": data["bank_details"]["fullName"],
-                "account_number": data["bank_details"]["accountNumber"],
-                "ifsc": data["bank_details"]["ifscCode"],
-                "bank_name": data["bank_details"]["bankName"],
-                "branch_name": data["bank_details"].get("branchName", ""),
+                "paypal_email": paypal_email,
             },
         )
+
+        
 
         user.is_freelancer = True
         user.current_role = "freelancer"

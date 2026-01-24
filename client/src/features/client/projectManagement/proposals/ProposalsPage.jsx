@@ -32,6 +32,7 @@ export default function ProposalsIndex() {
   const displayBudget = project?.pricing_type === "fixed" 
     ? `$${Number(project.fixed_price).toLocaleString()}` 
     : `$${Number(project.min_budget).toLocaleString()} - $${Number(project.max_budget).toLocaleString()}`;
+console.log(invitations);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -57,6 +58,7 @@ export default function ProposalsIndex() {
                 <ProposalCard
                   key={inv.id}
                   isInvitation={true}
+                  invitationStatus={inv.status}
                   anyOfferMade={anyOfferMade}
                   freelancer={{
                     id: inv.freelancer_id,
@@ -88,6 +90,7 @@ export default function ProposalsIndex() {
               <ProposalCard
                 key={prop.id}
                 isInvitation={false}
+                invitationStatus={prop.status}
                 anyOfferMade={anyOfferMade}
                 freelancer={{
                   id: prop.freelancer_id,

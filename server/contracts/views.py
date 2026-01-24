@@ -90,11 +90,20 @@ class ContractViewSet(viewsets.ModelViewSet):
         new_status = request.data.get('status')
         
         if new_status == 'completed' and contract.client == request.user:
+            if contract.status != 'submitted':
+                return Response({"error": "Work must be submitted before completion."}, status=400)
+                
             contract.status = 'completed'
+            contract.completed_at = timezone.now()
             contract.save()
-            return Response({"message": "Order marked as completed."})
+
+            project = contract.project
+            project.status = 'completed'
+            project.save()
+
+            return Response({"message": "Order approved and marked as completed. It is now ready for payout."})
         
-        return Response({"error": "Invalid action."}, status=400)
+        return Response({"error": "Invalid action or unauthorized user."}, status=400)
 
 class SubmitDeliverableView(APIView):
     permission_classes = [permissions.IsAuthenticated]

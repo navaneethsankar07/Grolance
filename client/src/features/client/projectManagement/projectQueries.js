@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { fetchCategories, fetchMyProjects, fetchProjectById, fetchSkills} from './ProjectApi';
+import { fetchAllSkills, fetchCategories, fetchMyProjects, fetchProjectById, fetchSkills} from './ProjectApi';
 
 export const useCategories = () => {
   return useQuery({
@@ -16,6 +16,14 @@ export const useSkills = () => {
     staleTime: 5 * 60 * 1000,
   });
 };
+
+export const useAllSkillls = ()=>{
+  return useQuery({
+    queryKey:['all-skills'],
+    queryFn:fetchAllSkills,
+    staleTime:5 * 60 * 1000,
+  })
+}
 
 
 export const useMyProjects = ({page,status, search}) =>{

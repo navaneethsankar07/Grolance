@@ -156,8 +156,8 @@ class InvitationViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         return Invitation.objects.filter(
-            models.Q(client=user) | models.Q(freelancer=user)
-        ).exclude(client=user, freelancer=user).order_by('-created_at')
+            models.Q(client=user) | models.Q(freelancer__user=user)
+        ).order_by('-created_at')
 
     def perform_create(self, serializer):
         freelancer = serializer.validated_data.get('freelancer')
@@ -183,7 +183,10 @@ class InvitationViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['get'])
     def received(self, request):
-        invitations = Invitation.objects.filter(freelancer=request.user).exclude(client=request.user).order_by('-created_at')
+        print(request.user)
+        invitations = Invitation.objects.filter(
+            freelancer__user=request.user
+        ).order_by('-created_at')
         page = self.paginate_queryset(invitations)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
@@ -194,7 +197,7 @@ class InvitationViewSet(viewsets.ModelViewSet):
     
     @action(detail=False, methods=['get'])
     def sent(self, request):
-        queryset = Invitation.objects.filter(client=request.user).exclude(freelancer=request.user)
+        queryset = Invitation.objects.filter(client=request.user).exclude(freelancer__user=request.user)
         
         project_id = request.query_params.get('project_id')
         if project_id:
@@ -214,7 +217,7 @@ class InvitationViewSet(viewsets.ModelViewSet):
     def update_status(self, request, pk=None):
         invitation = self.get_object()
         
-        if invitation.freelancer != request.user:
+        if invitation.freelancer.user != request.user:
             return Response({"error": "Permission denied"}, status=status.HTTP_403_FORBIDDEN)
         
         new_status = request.data.get('status')
