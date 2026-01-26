@@ -16,13 +16,13 @@ export default function MyProjects() {
 
   const jobs = data?.results ?? [];
   const totalCount = data?.count ?? 0;
+console.log(jobs);
 
   const handleSearch = () => {
     const value = searchInputRef.current.value;
     setSearchQuery(value);
     setPage(1);
   }
-console.log(data);
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') handleSearch();

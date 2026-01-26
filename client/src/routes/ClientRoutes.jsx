@@ -18,6 +18,7 @@ import FreelancerProfile from "../features/client/freelancerprofile/FreelancerPr
 import ClientContracts from "../features/client/contract/ClientContracts";
 import ClientContractDetail from "../features/client/contract/ContractDetail";
 import ClientJobDetail from "../features/client/projectManagement/ProjectDetails";
+import SpendingSummary from "../features/client/profile/SpendingSummary";
 
 export default function ClientRoutes() {
   const { user,loading } = useSelector(state => state.auth);
@@ -41,6 +42,7 @@ export default function ClientRoutes() {
           <Route path="/profile/settings" element={<AccountSettings/>}/>
           <Route path="/profile/interests" element={<Interests/>}/>
           <Route path="/profile/edit" element={<ProfileEdit/>}/>
+          <Route path="/profile/spending" element={<SpendingSummary/>}/>
           </Route>
           <Route path="/onboarding" element={ <OnBoardingProvider><OnboardingManager /></OnBoardingProvider>} />
           <Route path="/contracts" element={<ClientContracts/>}/>

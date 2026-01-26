@@ -28,6 +28,7 @@ export default function ProposalsIndex() {
   });
 
   const anyOfferMade = actualProposals.some(p => p.contract_info !== null);
+console.log(invitations);
 
   const displayBudget = project?.pricing_type === "fixed" 
     ? `$${Number(project.fixed_price).toLocaleString()}` 
@@ -61,14 +62,18 @@ console.log(invitations);
                   invitationStatus={inv.status}
                   anyOfferMade={anyOfferMade}
                   freelancer={{
-                    id: inv.freelancer_id,
+                    id: inv.freelancer,
                     name: inv.freelancer_name, 
                     title: inv.freelancer_tagline || "Invited Talent",
                     image: inv.freelancer_image || "https://via.placeholder.com/150",
                   }}
                   proposal={{
+                    title: project?.title,       
+                    projectId: id,               
+                    freelancerId: inv.freelancer_id, 
                     description: inv.message || "No message.",
-                    bidAmount: "N/A"
+                    bidAmount: inv.package_amount,
+                    contract_info: inv.contract_info
                   }}
                 />
               ))}

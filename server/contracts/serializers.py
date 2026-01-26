@@ -100,3 +100,10 @@ class ContractAcceptSerializer(serializers.ModelSerializer):
     class Meta:
         model = Contract
         fields = ['freelancer_signature', 'freelancer_signature_type']
+
+class ContractListSerializer(serializers.ModelSerializer):
+    project_title = serializers.CharField(source='project.title', read_only=True)
+    freelancer_name = serializers.CharField(source='freelancer.user.full_name', read_only=True)
+    class Meta:
+        model = Contract
+        fields = ['id', 'project_title','freelancer_name', 'status' ,'total_amount']

@@ -61,59 +61,66 @@ export default function ProposalCard({ freelancer, proposal, isInvitation = fals
     </div>
   );
 
-  // Invitation View Logic
- if (isInvitation) {
-  const statusConfig = {
-    pending: { bg: "bg-yellow-500", text: "Invitation Pending" },
-    accepted: { bg: "bg-green-600", text: "Invitation Accepted" },
-    declined: { bg: "bg-red-500", text: "Invitation Declined" },
-  };
-  const currentStatus = statusConfig[invitationStatus] || statusConfig.pending;
+  if (isInvitation) {
+    const statusConfig = {
+      pending: { bg: "bg-yellow-500", text: "Invitation Pending" },
+      accepted: { bg: "bg-green-600", text: "Invitation Accepted" },
+      declined: { bg: "bg-red-500", text: "Invitation Declined" },
+      hired: { bg: "bg-blue-600", text: "Hired" },
+    };
+    const currentStatus = statusConfig[invitationStatus] || statusConfig.pending;
 
-  return (
-    <div className="relative rounded-lg border border-gray-200 bg-white px-6 pb-6 pt-[25px] shadow-sm">
-      {isModalOpen && <Modal />}
-      <div className="flex justify-between items-start mb-4">
-        <span className={`inline-flex items-center rounded-full ${currentStatus.bg} px-3 py-1.5 text-xs font-medium text-white`}>
-          {currentStatus.text}
-        </span>
-        
-        {/* ADDED HIRE BUTTON FOR ACCEPTED INVITATIONS */}
-        {invitationStatus === 'accepted' && (
-          <button 
-            onClick={handleHire}
-            disabled={anyOfferMade}
-            className={`rounded-lg px-4 py-1.5 text-xs font-medium transition ${
-              anyOfferMade 
-              ? "bg-gray-100 text-gray-400 cursor-not-allowed" 
-              : "bg-blue-500 text-white hover:bg-blue-600"
-            }`}
-          >
-            {anyOfferMade ? "Offer already out" : "Hire Now"}
-          </button>
-        )}
-      </div>
-
-      <div className="flex items-start gap-4">
-        <img src={freelancer.image} alt="" referrerPolicy='no-referrer' className="h-16 w-16 shrink-0 rounded-full object-cover bg-gray-100" />
-        <div className="flex min-w-0 flex-col gap-1">
-          <h3 className="text-[15px] font-semibold text-gray-900">{freelancer.name}</h3>
-          <p className="text-xs font-medium text-gray-600">{freelancer.title}</p>
-          <div className="mt-1">
-            <p className="text-xs text-gray-500 italic">"{displayDescription}"</p>
-            {isLongMessage && (
-              <button onClick={() => setIsModalOpen(true)} className="ml-1 text-xs font-semibold text-blue-600 hover:underline">
-                Read more
+    return (
+      <div className={`relative rounded-lg border px-6 pb-6 pt-[25px] shadow-sm transition-all ${isHiredFreelancer ? 'border-blue-500 bg-blue-50/40 ring-1 ring-blue-500' : 'border-gray-200 bg-white'}`}>
+        {isModalOpen && <Modal />}
+        <div className="flex justify-between items-start mb-4">
+          <span className={`inline-flex items-center rounded-full ${currentStatus.bg} px-3 py-1.5 text-xs font-medium text-white`}>
+            {currentStatus.text}
+          </span>
+          
+          {isHiredFreelancer ? (
+            <button 
+              onClick={() => navigate(`/contracts/${contract.id}`)}
+              className="rounded-lg bg-blue-600 px-4 py-1.5 text-xs font-bold text-white hover:bg-blue-700 transition"
+            >
+              View Contract
+            </button>
+          ) : (
+            invitationStatus === 'accepted' && (
+              <button 
+                onClick={handleHire}
+                disabled={anyOfferMade}
+                className={`rounded-lg px-4 py-1.5 text-xs font-medium transition ${
+                  anyOfferMade 
+                  ? "bg-gray-100 text-gray-400 cursor-not-allowed" 
+                  : "bg-blue-500 text-white hover:bg-blue-600"
+                }`}
+              >
+                {anyOfferMade ? "Offer already out" : "Hire Now"}
               </button>
-            )}
+            )
+          )}
+        </div>
+
+        <div className="flex items-start gap-4">
+          <img src={freelancer.image} alt="" referrerPolicy='no-referrer' className="h-16 w-16 shrink-0 rounded-full object-cover bg-gray-100" />
+          <div className="flex min-w-0 flex-col gap-1">
+            <h3 className="text-[15px] font-semibold text-gray-900">{freelancer.name}</h3>
+            <p className="text-xs font-medium text-gray-600">{freelancer.title}</p>
+            <div className="mt-1">
+              <p className="text-xs text-gray-500 italic">"{displayDescription}"</p>
+              {isLongMessage && (
+                <button onClick={() => setIsModalOpen(true)} className="ml-1 text-xs font-semibold text-blue-600 hover:underline">
+                  Read more
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  );
-}
+    );
+  }
 
-  // Standard Proposal View
   return (
     <div className={`rounded-xl border p-6 shadow-sm transition-all ${isHiredFreelancer ? 'border-blue-500 bg-blue-50/40 ring-1 ring-blue-500' : 'border-gray-200 bg-white'}`}>
       {isModalOpen && <Modal />}

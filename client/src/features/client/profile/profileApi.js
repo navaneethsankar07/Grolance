@@ -18,3 +18,10 @@ export const changePassword = async (payload) => {
   const { data } = await axiosInstance.post("/auth/change-password/", payload);
   return data;
 };
+
+export const fetchClientSpendingSummary = async () => {
+    const { data } = await axiosInstance.get('/payments/client/spending-summary/');
+    console.log(data);
+    
+    return data;
+};

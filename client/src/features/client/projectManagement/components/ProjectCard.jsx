@@ -8,7 +8,8 @@ export default function ProjectCard({ job }) {
   const { openModal } = useModal();
 
   const isProjectInProgress = job.status === "in_progress" || job.status === "in-progress" || job.status === 'completed';
-
+  console.log(job.fixed_price);
+  
   const renderBudget = () => {
     const fixed = job.fixed_price ? Number(job.fixed_price).toLocaleString() : "0";
     const min = job.min_budget ? Number(job.min_budget).toLocaleString() : "0";

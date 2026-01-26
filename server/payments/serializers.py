@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import Payment
+from contracts.serializers import ContractListSerializer
 
 class PaymentVerificationSerializer(serializers.Serializer):
     paypal_order_id = serializers.CharField()
@@ -13,3 +14,13 @@ class PaymentVerificationSerializer(serializers.Serializer):
 class ReleasePaymentSerializer(serializers.Serializer):
     contract_id = serializers.IntegerField()
     platform_paypal_email = serializers.EmailField()
+
+class ClientDashboardSerializer(serializers.Serializer):
+    total_spent = serializers.DecimalField(max_digits=10,decimal_places=2)
+    projects_completed = serializers.IntegerField()
+    ongoing_projects = serializers.IntegerField()
+    avg_per_project = serializers.DecimalField(max_digits=10, decimal_places=2)
+
+    recent_projects = ContractListSerializer(many=True)
+
+

@@ -9,9 +9,9 @@ from .models import Payment
 from profiles.models import FreelancerPaymentSettings
 from contracts.models import Contract
 from projects.models import Project, Proposal
-from .serializers import PaymentVerificationSerializer,ReleasePaymentSerializer
+from .serializers import PaymentVerificationSerializer,ReleasePaymentSerializer, ClientDashboardSerializer
 from adminpanel.permissions import IsAdminUser
-
+from django.db.models import Sum,Count,Avg, Q
 class VerifyEscrowPaymentView(APIView):
     def get_paypal_token(self):
         url = "https://api-m.sandbox.paypal.com/v1/oauth2/token"
@@ -70,7 +70,6 @@ class VerifyEscrowPaymentView(APIView):
             
             if invitation:
                 selected_package = invitation.package
-        print(selected_package)
         contract = Contract.objects.create(
             project=project,
             client=request.user,
@@ -95,6 +94,17 @@ class VerifyEscrowPaymentView(APIView):
             freelancer_share=freelancer_share,
             status='escrow'
         )
+
+        project.status = 'in_progress'
+        project.save()
+
+        if not proposal:
+            from projects.models import Invitation
+            Invitation.objects.filter(
+                project=project,
+                freelancer=freelancer_profile,
+                status='accepted'
+            ).update(status='hired')
 
         return Response({"message": "Escrow secured via PayPal.", "contract_id": contract.id}, status=201)
     
@@ -187,3 +197,28 @@ class ReleasePaymentView(APIView):
             "error": "PayPal Payout Failed", 
             "details": res_data
         }, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+class ClientSpendingSummaryView(APIView):
+    def get(self,request):
+        user_contracts = Contract.objects.filter(client=request.user)
+
+        stats = user_contracts.aggregate(
+            total_spent=Sum('total_amount'),
+            projects_completed = Count('id',filter=Q(status='completed')),
+            ongoing_projects=Count('id',filter=Q(status='active')),
+            avg_per_project=Avg('total_amount',filter=Q())
+        )
+
+        recent_contracts = user_contracts.order_by('-client_signed_at')[:5]
+
+        data = {
+            'total_spent':stats['total_spent'] or 0,
+            'projects_completed':stats['projects_completed'] or 0,
+            'ongoing_projects':stats['ongoing_projects'] or 0,
+            'avg_per_project':stats['avg_per_project'] or 0,
+            'recent_projects': recent_contracts
+        }
+        serializer = ClientDashboardSerializer(data)
+        return Response(serializer.data)

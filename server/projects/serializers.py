@@ -2,7 +2,7 @@ from rest_framework import serializers
 from .models import Project, ProjectSkill, Invitation, Proposal
 from categories.models import Skill
 from profiles.models import ClientProfile, FreelancerProfile, FreelancerPackage
-
+from contracts.models import Contract
 class ProjectCreateSerializer(serializers.ModelSerializer):
     skills = serializers.ListField(
         child=serializers.CharField(),
@@ -294,16 +294,19 @@ class ProjectDetailSerializer(ProjectListSerializer):
     def get_client_info(self, obj):
         profile, created = ClientProfile.objects.get_or_create(user=obj.client)
         return ProjectClientSerializer(profile).data
-
+    
+    
 class InvitationSerializer(serializers.ModelSerializer):
     client_name = serializers.ReadOnlyField(source='client.full_name')
     project_title = serializers.ReadOnlyField(source='project.title')
     package_type = serializers.ReadOnlyField(source='package.package_type')
-    
+    package_amount = serializers.ReadOnlyField(source='package.price')
     freelancer_name = serializers.ReadOnlyField(source='freelancer.user.full_name')
+    freelancer_id = serializers.ReadOnlyField(source='freelancer.id') # Useful for frontend mapping
     freelancer_image = serializers.ReadOnlyField(source='freelancer.user.profile_photo')
-    
     freelancer_tagline = serializers.ReadOnlyField(source='freelancer.user.freelancer_profile.tagline')
+    
+    contract_info = serializers.SerializerMethodField()
 
     class Meta:
         model = Invitation
@@ -311,9 +314,25 @@ class InvitationSerializer(serializers.ModelSerializer):
             'id', 'client', 'freelancer', 'project', 
             'package', 'message', 'status', 'created_at',
             'client_name', 'project_title', 'package_type',
-            'freelancer_name', 'freelancer_image', 'freelancer_tagline'
+            'freelancer_name', 'freelancer_id', 'freelancer_image', 
+            'freelancer_tagline', 'package_amount', 'contract_info'
         ]
         read_only_fields = ['client', 'status', 'created_at']
+
+    def get_contract_info(self, obj):
+       
+        contract = Contract.objects.filter(
+            project=obj.project, 
+            freelancer=obj.freelancer.user
+        ).first()
+
+        if contract:
+            return {
+                "id": contract.id,
+                "status": contract.status,
+                "is_this_freelancer": True
+            }
+        return None
 
     def validate(self, data):
         request = self.context.get('request')
