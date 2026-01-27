@@ -4,7 +4,7 @@ import { useContractDetail } from "../../freelancer/contracts/contractsQueries";
 import { useRequestRevision, useUpdateContractStatus } from "./contractMutations";
 import { 
   FileText, Clock, Download, MessageSquare, ShieldAlert, 
-  ExternalLink, X, AlertCircle, History, CheckCircle2
+  ExternalLink, X, AlertCircle, History, CheckCircle2, ShieldCheck
 } from "lucide-react";
 import { toast } from "react-toastify";
 import { useModal } from "../../../hooks/modal/useModalStore";
@@ -19,6 +19,8 @@ export default function ClientContractDetail() {
   const [isRevisionModalOpen, setIsRevisionModalOpen] = useState(false);
   const [revisionReason, setRevisionReason] = useState("");
   const {openModal} = useModal()
+console.log(contract);
+
   useEffect(() => {
     if (contract?.freelancer_signed_at && contract?.delivery_days) {
       const calculateTime = () => {
@@ -62,19 +64,19 @@ export default function ClientContractDetail() {
     );
   };
 
-const handleApproveOrder = () => {
-  openModal("approve-contract", {
-    projectName: contract.project_title,
-    freelancerName: contract.freelancer_name,
-    amount: contract.total_amount,
-    onApprove: () => {
-      updateStatusMutation.mutate({ 
-        contractId: contract.id, 
-        status: 'completed' 
-      });
-    }
-  });
-};
+  const handleApproveOrder = () => {
+    openModal("approve-contract", {
+      projectName: contract.project_title,
+      freelancerName: contract.freelancer_name,
+      amount: contract.total_amount,
+      onApprove: () => {
+        updateStatusMutation.mutate({ 
+          contractId: contract.id, 
+          status: 'completed' 
+        });
+      }
+    });
+  };
 
   if (isLoading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
   if (isError) return <div className="min-h-screen flex items-center justify-center text-red-500">Error loading contract details.</div>;
@@ -167,6 +169,28 @@ const handleApproveOrder = () => {
             </div>
           </div>
         </div>
+
+        {contract.legal_document_url && (
+          <div className="mb-6 bg-blue-50 border border-blue-100 rounded-2xl p-6 flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-white rounded-xl shadow-sm">
+                <ShieldCheck className="w-6 h-6 text-blue-600" />
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-blue-900">Legal Service Agreement</h3>
+                <p className="text-xs text-blue-700 mt-0.5">A binding document signed by both parties is available.</p>
+              </div>
+            </div>
+            <a 
+              href={contract.legal_document_url} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white text-xs font-bold rounded-lg hover:bg-blue-700 shadow-sm"
+            >
+              <Download className="w-4 h-4" /> Download Legal PDF
+            </a>
+          </div>
+        )}
 
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm mb-6">
           <div className="p-6 border-b border-gray-50 flex justify-between items-center">

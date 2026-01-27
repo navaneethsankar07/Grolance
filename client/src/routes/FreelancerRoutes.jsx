@@ -12,6 +12,7 @@ import FreelancerOffers from '../features/freelancer/offers/FreelancerOffers'
 import Contracts from '../features/freelancer/contracts/Contracts'
 import ContractDetail from '../features/freelancer/contracts/ContractDetail'
 import EarningsOverview from '../features/freelancer/profile/EarningsOverview'
+import PaymentSettings from '../features/freelancer/profile/PaymentSettings'
 
 function FreelancerRoutes() {
   return (
@@ -28,6 +29,7 @@ function FreelancerRoutes() {
         <Route path='/offers' element={<FreelancerOffers/>} />
         <Route path='/contracts' element={<Contracts/>}/>
         <Route path='/contracts/:id' element={<ContractDetail/>}/>
+        <Route path='/settings/payment' element={<PaymentSettings/>}/>
         </Route>
     </Routes>
 )

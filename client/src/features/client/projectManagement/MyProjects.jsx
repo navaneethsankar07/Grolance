@@ -1,7 +1,7 @@
 import React, { useRef, useState } from "react";
 import ProjectCard from "./components/ProjectCard";
 import { useMyProjects } from "./projectQueries";
-import { Briefcase, CircleCheck, Hourglass , Search, ChevronRight, ChevronLeft, FolderOpen} from "lucide-react";
+import { Briefcase, CircleCheck, Hourglass, Search, ChevronRight, ChevronLeft, FolderOpen, X } from "lucide-react";
 
 export default function MyProjects() {
   const [activeTab, setActiveTab] = useState("all");
@@ -16,17 +16,22 @@ export default function MyProjects() {
 
   const jobs = data?.results ?? [];
   const totalCount = data?.count ?? 0;
-console.log(jobs);
 
   const handleSearch = () => {
     const value = searchInputRef.current.value;
     setSearchQuery(value);
     setPage(1);
-  }
+  };
+
+  const clearSearch = () => {
+    searchInputRef.current.value = "";
+    setSearchQuery("");
+    setPage(1);
+  };
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') handleSearch();
-  }
+  };
 
   const TabButton = ({ id, label, Icon, count }) => (
     <button
@@ -35,7 +40,7 @@ console.log(jobs);
         activeTab === id ? "border-blue-500 text-blue-600" : "border-transparent text-gray-500 hover:text-gray-700"
       }`}
     >
-      <Icon className="w-5 h-5"/>
+      <Icon className="w-5 h-5" />
       <span className="text-sm font-medium">{label}</span>
       <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
         activeTab === id ? "bg-blue-100 text-blue-600" : "bg-gray-100 text-gray-600"
@@ -63,8 +68,16 @@ console.log(jobs);
                 ref={searchInputRef}
                 onKeyDown={handleKeyDown}
                 placeholder="Search Jobs..."
-                className="w-full h-[46px] pl-11 pr-4 border border-gray-300 rounded-l-md text-base focus:ring-2 focus:ring-blue-500 outline-none"
+                className="w-full h-[46px] pl-11 pr-10 border border-gray-300 rounded-l-md text-base focus:ring-2 focus:ring-blue-500 outline-none"
               />
+              {searchQuery && (
+                <button
+                  onClick={clearSearch}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              )}
             </div>
             <button
               onClick={handleSearch}
@@ -78,8 +91,8 @@ console.log(jobs);
         <div className="border-b border-gray-200 mb-6">
           <nav className="flex gap-6">
             <TabButton id="all" label="All Posts" Icon={Briefcase} count={activeTab === 'all' ? totalCount : null} />
-            <TabButton id="completed" label="completed" Icon={CircleCheck} count={activeTab === 'completed'? totalCount:null}  />
-            <TabButton id="in_progress" label="In Progress" Icon={Hourglass} count={activeTab === 'in_progress'?totalCount:null } />
+            <TabButton id="completed" label="completed" Icon={CircleCheck} count={activeTab === 'completed' ? totalCount : null} />
+            <TabButton id="in_progress" label="In Progress" Icon={Hourglass} count={activeTab === 'in_progress' ? totalCount : null} />
           </nav>
         </div>
 
@@ -90,7 +103,7 @@ console.log(jobs);
             jobs.map((job) => <ProjectCard key={job.id} job={job} />)
           ) : (
             <div className="bg-white flex flex-col items-center justify-center p-20 gap-3 text-center rounded-lg border text-gray-400">
-              <FolderOpen className="w-12 h-12 mb-2"/>
+              <FolderOpen className="w-12 h-12 mb-2" />
               <p>No projects found in this category.</p>
             </div>
           )}
@@ -104,7 +117,7 @@ console.log(jobs);
               onClick={() => setPage(p => p - 1)}
               className="h-9 w-9 flex items-center justify-center border border-gray-300 rounded-l-md hover:bg-gray-50 disabled:opacity-50"
             >
-              <ChevronLeft className="text-gray-400 w-5 h-5"/>
+              <ChevronLeft className="text-gray-400 w-5 h-5" />
             </button>
             <div className="h-9 px-4 bg-blue-500 text-white text-sm font-semibold flex items-center border-t border-b border-blue-500">
               {page}
@@ -114,7 +127,7 @@ console.log(jobs);
               onClick={() => setPage(p => p + 1)}
               className="h-9 w-9 flex items-center justify-center border border-gray-300 rounded-r-md hover:bg-gray-50 disabled:opacity-50"
             >
-              <ChevronRight className="text-gray-400 w-5 h-5"/>
+              <ChevronRight className="text-gray-400 w-5 h-5" />
             </button>
           </nav>
         </div>

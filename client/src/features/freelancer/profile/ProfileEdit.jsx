@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Plus, Pencil, Trash2, Camera, X, Check } from "lucide-react";
+import { Plus, Pencil, Trash2, Camera, X, Check, Loader2 } from "lucide-react";
 import { uploadToCloudinary } from "../../client/profile/cloudinaryHelper";
 import { useFreelancerProfile } from "./profileQueries";
 import { useUpdateFreelancerProfile } from "./profileMutation";
@@ -72,6 +72,7 @@ export default function ProfileEdit() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [newSkill, setNewSkill] = useState("");
+  const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
     if (initialData) {
@@ -114,14 +115,18 @@ export default function ProfileEdit() {
     }));
   };
   const navigate = useNavigate()
+  
   const handlePhotoUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
+    setIsUploading(true);
     try {
       const data = await uploadToCloudinary(file);
       setProfile((prev) => ({ ...prev, profilePhoto: data.secure_url }));
     } catch (err) {
       alert("Photo upload failed");
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -194,7 +199,7 @@ export default function ProfileEdit() {
           </div>
           <button
             onClick={handleSaveChanges}
-            disabled={isPending}
+            disabled={isPending || isUploading}
             className="flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-blue-600 text-white text-sm font-bold hover:bg-blue-700 disabled:opacity-50 transition-all"
           >
             {isPending ? "Saving..." : <><Check className="w-4 h-4" /> Save Changes</>}
@@ -206,7 +211,12 @@ export default function ProfileEdit() {
             <h2 className="text-lg font-bold mb-6 text-gray-900">Basic Information</h2>
             <div className="flex flex-col md:flex-row gap-8">
               <div className="relative group">
-                <div className="w-24 h-24 rounded-2xl bg-blue-100 flex items-center justify-center overflow-hidden border-2 border-gray-100">
+                <div className="w-24 h-24 rounded-2xl bg-blue-100 flex items-center justify-center overflow-hidden border-2 border-gray-100 relative">
+                  {isUploading && (
+                    <div className="absolute inset-0 z-10 bg-white/60 flex items-center justify-center">
+                       <Loader2 className="w-6 h-6 text-blue-600 animate-spin" />
+                    </div>
+                  )}
                   {profile.profilePhoto ? (
                     <img src={profile.profilePhoto} className="w-full h-full object-cover" alt="Profile" />
                   ) : (
@@ -215,7 +225,7 @@ export default function ProfileEdit() {
                 </div>
                 <label className="absolute top-18 -right-2 p-2 bg-white rounded-full shadow-lg border cursor-pointer hover:bg-gray-50">
                   <Camera className="w-4 h-4 text-gray-600" />
-                  <input type="file" className="hidden" onChange={handlePhotoUpload} accept="image/*" />
+                  <input type="file" className="hidden" onChange={handlePhotoUpload} accept="image/*" disabled={isUploading} />
                 </label>
               </div>
 

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        @page { size: a4 portrait; margin: 1.5cm; }
+        body { font-family: Helvetica, Arial, sans-serif; color: #1f2937; line-height: 1.5; font-size: 11px; }
+        .logo-box { text-align: center; margin-bottom: 20px; }
+        .logo-gro { font-size: 32px; font-weight: bold; color: #1a1a1a; }
+        .logo-lance { font-size: 32px; font-weight: bold; color: #3b82f6; }
+        
+        .header-line { border-bottom: 2px solid #3b82f6; padding-bottom: 10px; margin-bottom: 20px; text-align: center; }
+        .doc-title { font-size: 18px; font-weight: bold; text-transform: uppercase; margin: 0; }
+        
+        .section { margin-bottom: 20px; }
+        .section-title { font-weight: bold; font-size: 12px; background: #f3f4f6; padding: 5px 10px; border-left: 4px solid #3b82f6; margin-bottom: 10px; }
+        
+        table { width: 100%; border-collapse: collapse; }
+        .info-table td { padding: 5px; vertical-align: top; }
+        .label { font-weight: bold; color: #4b5563; width: 30%; }
+        
+        .legal-text { font-size: 10px; text-align: justify; color: #374151; }
+        .highlight { color: #111827; font-weight: bold; }
+        
+        .sig-container { width: 100%; margin-top: 30px; }
+        .sig-box { width: 45%; border: 1px solid #e5e7eb; padding: 10px; }
+        .sig-img { width: 160px; height: auto; border-bottom: 1px solid #374151; margin-bottom: 5px; }
+        .sig-meta { font-size: 8px; color: #9ca3af; line-height: 1.2; }
+    </style>
+</head>
+<body>
+    <div class="logo-box">
+        <span class="logo-gro">gro</span><span class="logo-lance">lance</span>
+    </div>
+
+    <div class="header-line">
+        <h1 class="doc-title">Master Service Agreement</h1>
+        <p style="margin: 5px 0; color: #6b7280;">Contract ID: #ORD-{{ contract.id }}</p>
+    </div>
+
+    <div class="section">
+        <div class="section-title">1. PROJECT SPECIFICATIONS</div>
+        <table class="info-table">
+            <tr><td class="label">Project:</td><td>{{ project.title }}</td></tr>
+            <tr><td class="label">Client:</td><td>{{ client.full_name }}</td></tr>
+            <tr><td class="label">Freelancer:</td><td>{{ freelancer.full_name }}</td></tr>
+            <tr><td class="label">Total Budget:</td><td class="highlight">${{ contract.total_amount }}</td></tr>
+        </table>
+    </div>
+
+    <div class="section">
+        <div class="section-title">2. FINANCIAL CLAUSES & FEES</div>
+        <div class="legal-text">
+            <p><strong>2.1 Escrow Protection:</strong> The total amount of <span class="highlight">${{ contract.total_amount }}</span> is currently held in Grolance Escrow. Funds are released only upon successful completion and approval.</p>
+            <p><strong>2.2 Platform Service Fee:</strong> Grolance maintains a platform fee for every transaction. The Freelancer acknowledges that the amount disbursed to their account will be the <strong>Total Budget minus Grolance Service Fees</strong> as defined in the platform's pricing policy.</p>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">3. DISPUTE RESOLUTION</div>
+        <div class="legal-text">
+            <p><strong>3.1 Administrative Mediation:</strong> In the event of a dispute, the Grolance Admin team shall serve as the sole and final arbitrator. The Admin will evaluate work history, messages, and deliverables submitted through the platform.</p>
+            <p><strong>3.2 Binding Decision:</strong> By signing this agreement, both parties consent to be bound by the Admin's final decision regarding fund distribution, which may include full refund, partial payment, or full release.</p>
+        </div>
+    </div>
+
+    <table class="sig-container">
+        <tr>
+            <td class="sig-box">
+                <div style="font-weight: bold; margin-bottom: 10px;">CLIENT SIGNATURE</div>
+                <img src="{{ contract.client_signature }}" class="sig-img">
+                <div class="sig-meta">
+                    <strong>Signed By:</strong> {{ client.full_name }}<br>
+                    <strong>Timestamp:</strong> {{ contract.client_signed_at|date:"Y-m-d H:i:s" }} UTC<br>
+                    <strong>IP Address:</strong> {{ contract.client_ip }}
+                </div>
+            </td>
+            <td style="width: 10%;"></td>
+            <td class="sig-box">
+                <div style="font-weight: bold; margin-bottom: 10px;">FREELANCER SIGNATURE</div>
+                <img src="{{ contract.freelancer_signature }}" class="sig-img">
+                <div class="sig-meta">
+                    <strong>Signed By:</strong> {{ freelancer.full_name }}<br>
+                    <strong>Timestamp:</strong> {{ contract.freelancer_signed_at|date:"Y-m-d H:i:s" }} UTC<br>
+                    <strong>IP Address:</strong> {{ contract.freelancer_ip }}
+                </div>
+            </td>
+        </tr>
+    </table>
+
+    <div style="margin-top: 40px; text-align: center; font-size: 8px; color: #d1d5db;">
+        Digitally Certified by Grolance Security Systems &copy; 2026
+    </div>
+</body>
+</html>

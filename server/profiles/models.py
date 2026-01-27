@@ -140,10 +140,12 @@ class FreelancerPaymentSettings(models.Model):
         help_text="The email associated with the freelancer's PayPal account"
     )
     
-    is_verified = models.BooleanField(default=False)
+    is_verified = models.BooleanField(default=True)
 
     def __str__(self):
         return f"PayPal: {self.paypal_email} ({self.user.email})"
+    
+    
 @receiver(post_delete, sender=FreelancerProfile)
 def delete_freelancer_related_data(sender, instance, **kwargs):
     user = instance.user

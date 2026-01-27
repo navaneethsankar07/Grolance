@@ -175,6 +175,16 @@ LOGGING = {
             'level': 'DEBUG',
             'propagate': True,
         },
+        'contracts': {
+            'handlers': ['console', 'file', 'error_file'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        'payments': {
+            'handlers': ['console', 'file', 'error_file'],
+            'level': 'INFO',
+            'propagate': True,
+        },
     },
 }
 

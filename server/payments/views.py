@@ -1,4 +1,5 @@
 import requests
+import logging
 from django.conf import settings
 from django.utils import timezone
 from django.shortcuts import get_object_or_404
@@ -9,12 +10,14 @@ from .models import Payment
 from profiles.models import FreelancerPaymentSettings
 from contracts.models import Contract
 from projects.models import Project, Proposal
-from .serializers import PaymentVerificationSerializer,ReleasePaymentSerializer, ClientDashboardSerializer, FreelancerTransactionSerializer
+from .serializers import PaymentVerificationSerializer, ReleasePaymentSerializer, ClientDashboardSerializer, FreelancerTransactionSerializer
 from adminpanel.permissions import IsAdminUser
-from django.db.models import Sum,Count,Avg, Q
+from django.db.models import Sum, Count, Avg, Q
 from projects.permissions import IsClientUser, IsFreelancerUser
 from datetime import timedelta
 from common.pagination import AdminUserPagination
+
+logger = logging.getLogger('payments')
 
 class VerifyEscrowPaymentView(APIView):
     def get_paypal_token(self):
@@ -24,8 +27,13 @@ class VerifyEscrowPaymentView(APIView):
         
         data = {"grant_type": "client_credentials"}
         auth = (settings.PAYPAL_CLIENT_ID, settings.PAYPAL_SECRET)
-        response = requests.post(url, data=data, auth=auth)
-        return response.json().get('access_token')
+        try:
+            response = requests.post(url, data=data, auth=auth)
+            response.raise_for_status()
+            return response.json().get('access_token')
+        except Exception as e:
+            logger.error(f"Failed to fetch PayPal OAuth token: {str(e)}")
+            return None
 
     def post(self, request):
         serializer = PaymentVerificationSerializer(data=request.data)
@@ -35,6 +43,9 @@ class VerifyEscrowPaymentView(APIView):
         paypal_order_id = serializer.validated_data['paypal_order_id']
         token = self.get_paypal_token()
         
+        if not token:
+            return Response({"error": "Payment verification service unavailable"}, status=503)
+
         base_url = "https://api-m.sandbox.paypal.com" if settings.PAYPAL_MODE == 'sandbox' else "https://api-m.paypal.com"
         verify_url = f"{base_url}/v2/checkout/orders/{paypal_order_id}"
         headers = {"Authorization": f"Bearer {token}"}
@@ -43,6 +54,7 @@ class VerifyEscrowPaymentView(APIView):
         order_data = res.json()
 
         if order_data.get('status') != 'COMPLETED':
+            logger.warning(f"PayPal order {paypal_order_id} verification failed. Status: {order_data.get('status')}")
             return Response({"error": "Payment status not completed on PayPal."}, status=400)
 
         project_id = serializer.validated_data['project_id']
@@ -74,6 +86,8 @@ class VerifyEscrowPaymentView(APIView):
             
             if invitation:
                 selected_package = invitation.package
+        client_sig = request.data.get('client_signature')
+        client_sig_type = request.data.get('client_signature_type', 'type')
         contract = Contract.objects.create(
             project=project,
             client=request.user,
@@ -81,6 +95,8 @@ class VerifyEscrowPaymentView(APIView):
             total_amount=total_amount,
             client_ip=request.META.get('REMOTE_ADDR'),
             client_signed_at=timezone.now(),
+            client_signature=client_sig,
+            client_signature_type=client_sig_type,
             is_funded=True,
             status='offered',
             package=selected_package  
@@ -110,9 +126,8 @@ class VerifyEscrowPaymentView(APIView):
                 status='accepted'
             ).update(status='hired')
 
+        logger.info(f"Escrow secured for Project {project.id}. Contract {contract.id} created. PayPal Order: {paypal_order_id} by User {request.user.id}")
         return Response({"message": "Escrow secured via PayPal.", "contract_id": contract.id}, status=201)
-    
-
 
 class ReleasePaymentView(APIView):
     permission_classes = [IsAdminUser] 
@@ -124,8 +139,13 @@ class ReleasePaymentView(APIView):
         
         data = {"grant_type": "client_credentials"}
         auth = (settings.PAYPAL_CLIENT_ID, settings.PAYPAL_SECRET)
-        response = requests.post(url, data=data, auth=auth)
-        return response.json().get('access_token')
+        try:
+            response = requests.post(url, data=data, auth=auth)
+            response.raise_for_status()
+            return response.json().get('access_token')
+        except Exception as e:
+            logger.error(f"Failed to fetch PayPal Payout token: {str(e)}")
+            return None
 
     def post(self, request):
         serializer = ReleasePaymentSerializer(data=request.data)
@@ -141,6 +161,8 @@ class ReleasePaymentView(APIView):
         freelancer_email = freelancer_payment_info.paypal_email
 
         token = self.get_paypal_token() 
+        if not token:
+            return Response({"error": "Payout service unavailable"}, status=503)
         
         base_url = "https://api-m.sandbox.paypal.com" if getattr(settings, 'PAYPAL_MODE', 'sandbox') == 'sandbox' else "https://api-m.paypal.com"
         payout_url = f"{base_url}/v1/payments/payouts"        
@@ -182,47 +204,51 @@ class ReleasePaymentView(APIView):
             ]
         }
 
-        response = requests.post(payout_url, json=payload, headers=headers)
-        res_data = response.json()
+        try:
+            response = requests.post(payout_url, json=payload, headers=headers)
+            res_data = response.json()
 
-        if response.status_code in [201, 200]:
-            payment_record.status = 'completed'
-            payment_record.save()
-            contract.status = 'completed'
-            contract.paid_to_freelancer = True
-            contract.save()
-            project = contract.project
-            project.status = 'completed'
-            project.is_active = False
-            project.save()
-            return Response({"message": "Payout initiated successfully."}, status=200)
-        
-        return Response({
-            "error": "PayPal Payout Failed", 
-            "details": res_data
-        }, status=status.HTTP_400_BAD_REQUEST)
-
-
+            if response.status_code in [201, 200]:
+                payment_record.status = 'completed'
+                payment_record.save()
+                contract.status = 'completed'
+                contract.paid_to_freelancer = True
+                contract.save()
+                project = contract.project
+                project.status = 'completed'
+                project.is_active = False
+                project.save()
+                logger.info(f"Payout successful for Contract {contract.id}. Batch ID: {batch_id}. Admin: {request.user.id}")
+                return Response({"message": "Payout initiated successfully."}, status=200)
+            
+            logger.error(f"PayPal Payout Failed for Contract {contract.id}. Status: {response.status_code}. Response: {res_data}")
+            return Response({
+                "error": "PayPal Payout Failed", 
+                "details": res_data
+            }, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            logger.critical(f"Critical error during payout release for Contract {contract.id}: {str(e)}")
+            return Response({"error": "Internal server error during payout processing"}, status=500)
 
 class ClientSpendingSummaryView(APIView):
     permission_classes = [IsClientUser]
-    def get(self,request):
+    def get(self, request):
         user_contracts = Contract.objects.filter(client=request.user)
 
         stats = user_contracts.aggregate(
             total_spent=Sum('total_amount'),
-            projects_completed = Count('id',filter=Q(status='completed')),
-            ongoing_projects=Count('id',filter=Q(status='active')),
-            avg_per_project=Avg('total_amount',filter=Q())
+            projects_completed = Count('id', filter=Q(status='completed')),
+            ongoing_projects=Count('id', filter=Q(status='active')),
+            avg_per_project=Avg('total_amount', filter=Q())
         )
 
         recent_contracts = user_contracts.order_by('-client_signed_at')[:5]
 
         data = {
-            'total_spent':stats['total_spent'] or 0,
-            'projects_completed':stats['projects_completed'] or 0,
-            'ongoing_projects':stats['ongoing_projects'] or 0,
-            'avg_per_project':stats['avg_per_project'] or 0,
+            'total_spent': stats['total_spent'] or 0,
+            'projects_completed': stats['projects_completed'] or 0,
+            'ongoing_projects': stats['ongoing_projects'] or 0,
+            'avg_per_project': stats['avg_per_project'] or 0,
             'recent_projects': recent_contracts
         }
         serializer = ClientDashboardSerializer(data)
@@ -231,12 +257,12 @@ class ClientSpendingSummaryView(APIView):
 class FreelancerTransactionView(APIView):
     permission_classes = [IsFreelancerUser]
 
-    def get(self,request):
+    def get(self, request):
         queryset = Contract.objects.filter(freelancer=request.user).order_by('-client_signed_at')
-        status = request.query_params.get('status')
+        status_filter = request.query_params.get('status')
         
-        if status:
-            queryset=queryset.filter(status=status)
+        if status_filter:
+            queryset = queryset.filter(status=status_filter)
         
         time_range = request.query_params.get('range')
         if time_range:
@@ -251,16 +277,9 @@ class FreelancerTransactionView(APIView):
         stats = queryset.aggregate(
             total_earning = Sum('total_amount'),
             total_projects = Count('id')
-        
         )
         paginator = AdminUserPagination()
         page = paginator.paginate_queryset(queryset, request)
-
-        data = {
-            'total_earning':stats['total_earning'] or 0,
-            'total_projects':stats['total_projects'] or 0,
-            'contracts':page
-        }
 
         serializer = FreelancerTransactionSerializer({
             'total_earning': stats['total_earning'] or 0,

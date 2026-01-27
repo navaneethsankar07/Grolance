@@ -20,3 +20,13 @@ export const fetchFreelancerTransactions = async ({ status, range, page }) => {
   });
   return data;
 };
+
+export const fetchPaymentSettings = async () => {
+    const { data } = await axiosInstance.get('/profile/freelancer/payment-settings/');
+    return data;
+};
+
+export const updatePaymentSettings = async (payload) => {
+    const { data } = await axiosInstance.put('/profile/freelancer/payment-settings/', payload);
+    return data;
+};

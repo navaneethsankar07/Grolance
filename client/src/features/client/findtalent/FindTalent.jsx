@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import { Search, SlidersHorizontal, ArrowLeft } from "lucide-react";
+import { Search, SlidersHorizontal, ArrowLeft, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import { FreelancerCard } from "./components/FreelancerCard";
 import { useFreelancerList } from "./findTalentQueries";
@@ -18,9 +18,8 @@ export default function FindTalent() {
   });
 
   const { data, isLoading } = useFreelancerList(queryParams);
-  console.log(data);
-  
-const handleApplyFilters = () => {
+
+  const handleApplyFilters = () => {
     const minVal = minPriceRef.current.value ? parseFloat(minPriceRef.current.value) : null;
     const maxVal = maxPriceRef.current.value ? parseFloat(maxPriceRef.current.value) : null;
 
@@ -46,6 +45,11 @@ const handleApplyFilters = () => {
     if (e.key === "Enter") {
       handleApplyFilters();
     }
+  };
+
+  const clearSearch = () => {
+    searchRef.current.value = "";
+    setQueryParams(prev => ({ ...prev, search: "" }));
   };
 
   const resetFilters = () => {
@@ -88,8 +92,16 @@ const handleApplyFilters = () => {
                 type="text"
                 onKeyDown={handleKeyDown}
                 placeholder="Search by skill, name or job title..."
-                className="block w-full pl-12 pr-4 py-4.5 bg-white border border-gray-200 rounded-2xl shadow-sm focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all text-gray-900"
+                className="block w-full pl-12 pr-12 py-4.5 bg-white border border-gray-200 rounded-2xl shadow-sm focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all text-gray-900"
               />
+              {searchRef.current?.value && (
+                <button 
+                  onClick={clearSearch}
+                  className="absolute inset-y-0 right-0 pr-5 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              )}
             </div>
           </div>
         </div>

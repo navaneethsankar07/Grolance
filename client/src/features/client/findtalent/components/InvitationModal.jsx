@@ -10,7 +10,7 @@ export default function InviteFreelancerModal({ isOpen, onClose, modalProps }) {
   const [message, setMessage] = useState('');
 
   const { data: projects, isLoading: projectsLoading } = useEligibleProjects(isOpen);
-    console.log(freelancerId);
+   
     
  const inviteMutation = useSendInvitation({
     onSuccess: () => {
@@ -24,7 +24,9 @@ export default function InviteFreelancerModal({ isOpen, onClose, modalProps }) {
       
       toast.error(serverError);
     }
+
   });
+  
 
 const handleSendInvite = () => {
     if (!selectedProjectId || !selectedPackageId) {

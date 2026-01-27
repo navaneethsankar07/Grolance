@@ -53,6 +53,8 @@ export function ProposalModal({ onClose, projectId }) {
 
   const currentPkgData = profile.packages[selectedPackage];
   
+console.log(currentPkgData.id);
+
   const handleSubmit = () => {
     if (!coverLetter.trim()) {
       return toast.error("Please write a cover letter");

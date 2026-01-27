@@ -3,11 +3,12 @@ import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form';
 import { zodResolver } from "@hookform/resolvers/zod";
 import { projectCreateSchema } from "./projectSchemas";
-import { useCategories, useSkills } from './projectQueries';
+import { useAllSkillls, useCategories, useSkills } from './projectQueries';
 import { useCreateProject } from "./projectMutations";
 import { useModal } from '../../../hooks/modal/useModalStore';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { useAllCategories } from '../../admin/categorymanagement/categoryQueries';
 
 
 function AddProject() {
@@ -32,13 +33,13 @@ useEffect(() => {
     }
   });
   const {
-    data: categoriesData,
-    isLoading: categoriesLoading,
-    isError: categoriesError,
-  } = useCategories();
-  const categories = categoriesData?.results ?? [];
-  const { data: skillsResponse } = useSkills();
-  const skillsData = skillsResponse?.results ?? [];
+    data: categoriesData
+  } = useAllCategories();
+
+  
+  const categories = categoriesData??[];
+  const { data: skillsResponse } = useAllSkillls();
+  const skillsData = skillsResponse ?? [];
   const { mutateAsync: createProject, isPending } = useCreateProject();
   const { openModal, closeModal } = useModal()
   const selectedCategory = watch("category");

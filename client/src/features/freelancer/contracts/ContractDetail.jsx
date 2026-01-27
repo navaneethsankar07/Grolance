@@ -7,6 +7,7 @@ import {
   X, Link2, ExternalLink, Download, AlertCircle, History
 } from "lucide-react";
 import { useSubmitWork, useRevisionAction } from "./contractMutation";
+import { formatDateDMY } from "../../../utils/date";
 
 export default function ContractDetail() {
   const { id } = useParams();
@@ -22,17 +23,17 @@ export default function ContractDetail() {
   
   const [activeRevisionId, setActiveRevisionId] = useState(null);
   const [rejectionNote, setRejectionNote] = useState("");
-
+  
   useEffect(() => {
+    if (contract?.status === 'completed') {
+      setTimeLeft({ days: 0, hours: 0, percentage: 100 });
+      return;
+    }
 
-    console.log(contract);
     if (contract?.freelancer_signed_at && contract?.delivery_days) {
       const calculateTime = () => {
-        
         const start = new Date(contract.freelancer_signed_at).getTime();
         const durationMs = contract.delivery_days * 24 * 60 * 60 * 1000;
-        console.log(contract.deliverable_days);
-        
         const end = start + durationMs;
         const now = new Date().getTime();
         const difference = end - now;
@@ -190,7 +191,7 @@ export default function ContractDetail() {
               <div>
                 <p className="text-sm text-gray-400 font-medium mb-1">Due Date</p>
                 <p className="text-lg font-bold text-gray-900">
-                  {dueDate ? dueDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '---'}
+                  {dueDate ? formatDateDMY(dueDate) : '---'}
                 </p>
               </div>
             </div>
@@ -201,17 +202,29 @@ export default function ContractDetail() {
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-2">
               <Clock className="w-5 h-5 text-blue-600" />
-              <h2 className="text-[17px] font-bold text-gray-900">Delivery Countdown</h2>
+              <h2 className="text-[17px] font-bold text-gray-900">
+                {contract.status === 'completed' ? 'Order Completed' : 'Delivery Countdown'}
+              </h2>
             </div>
           </div>
-          <div className="flex items-baseline gap-2 mb-4">
-            <span className="text-3xl font-bold text-gray-900">{timeLeft.days}</span>
-            <span className="text-sm font-semibold text-gray-500 mr-2">days</span>
-            <span className="text-3xl font-bold text-gray-900">{timeLeft.hours}</span>
-            <span className="text-sm font-semibold text-gray-500">hours remaining</span>
-          </div>
+          {contract.status !== 'completed' ? (
+            <div className="flex items-baseline gap-2 mb-4">
+              <span className="text-3xl font-bold text-gray-900">{timeLeft.days}</span>
+              <span className="text-sm font-semibold text-gray-500 mr-2">days</span>
+              <span className="text-3xl font-bold text-gray-900">{timeLeft.hours}</span>
+              <span className="text-sm font-semibold text-gray-500">hours remaining</span>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2 mb-4 text-green-600">
+              <CheckCircle2 className="w-6 h-6" />
+              <span className="text-xl font-bold">The work has been successfully delivered and approved.</span>
+            </div>
+          )}
           <div className="relative w-full h-2.5 bg-gray-100 rounded-full overflow-hidden">
-            <div className="absolute left-0 top-0 h-full bg-blue-600 transition-all duration-1000 ease-linear rounded-full" style={{ width: `${timeLeft.percentage}%` }} />
+            <div 
+              className={`absolute left-0 top-0 h-full transition-all duration-1000 ease-linear rounded-full ${contract.status === 'completed' ? 'bg-green-500' : 'bg-blue-600'}`} 
+              style={{ width: `${timeLeft.percentage}%` }} 
+            />
           </div>
         </div>
 
@@ -236,12 +249,12 @@ export default function ContractDetail() {
                         {rev.status}
                       </span>
                     </div>
-                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{new Date(rev.created_at).toLocaleDateString()}</p>
+                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{formatDateDMY(rev.created_at)}</p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-700 leading-relaxed font-medium">"{rev.reason}"</p>
                   </div>
-                  {rev.status === 'pending' && (
+                  {rev.status === 'pending' && contract.status !== 'completed' && (
                     <div className="flex gap-3 pt-2">
                       <button 
                         disabled={revisionActionMutation.isPending}
@@ -306,7 +319,7 @@ export default function ContractDetail() {
                     {item.deliverable_type === 'link' ? <Link2 className="w-4 h-4 text-blue-500" /> : <FileText className="w-4 h-4 text-gray-500" />}
                     <div>
                       <p className="text-sm font-bold text-gray-800">{item.title}</p>
-                      <p className="text-[10px] text-gray-400">{new Date(item.created_at).toLocaleDateString()}</p>
+                      <p className="text-[10px] text-gray-400">{formatDateDMY(item.created_at)}</p>
                     </div>
                   </div>
                   <a href={item.file_url} target="_blank" rel="noreferrer" className="p-2 hover:bg-white rounded-lg transition-colors text-gray-400 hover:text-blue-600">
@@ -334,7 +347,6 @@ export default function ContractDetail() {
         </div>
       </div>
 
-      {/* REJECTION MODAL */}
       {isRejectModalOpen && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[60] p-4">
           <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
@@ -347,7 +359,6 @@ export default function ContractDetail() {
                 <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Reason for Rejection</label>
                 <textarea 
                   rows="4"
-                  placeholder="Explain why you cannot accept this revision (e.g., out of scope, revisions exhausted)..."
                   className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 ring-red-500/20 resize-none"
                   value={rejectionNote}
                   onChange={(e) => setRejectionNote(e.target.value)}
@@ -373,7 +384,6 @@ export default function ContractDetail() {
         </div>
       )}
 
-      {/* SUBMISSION MODAL */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
@@ -388,7 +398,7 @@ export default function ContractDetail() {
               </div>
               <div>
                 <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Display Title</label>
-                <input type="text" placeholder="e.g. Final Source Code" className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 ring-blue-500/20" value={formData.title} onChange={(e) => setFormData({...formData, title: e.target.value})} />
+                <input type="text" className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 ring-blue-500/20" value={formData.title} onChange={(e) => setFormData({...formData, title: e.target.value})} />
               </div>
               {subType === 'file' ? (
                 <div className="border-2 border-dashed border-gray-200 rounded-2xl p-10 text-center hover:border-blue-300 transition-colors">
@@ -402,7 +412,7 @@ export default function ContractDetail() {
               ) : (
                 <div>
                   <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 block">URL</label>
-                  <input type="text" placeholder="https://github.com/..." className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 ring-blue-500/20" value={formData.link_url} onChange={(e) => setFormData({...formData, link_url: e.target.value})} />
+                  <input type="text" className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 ring-blue-500/20" value={formData.link_url} onChange={(e) => setFormData({...formData, link_url: e.target.value})} />
                 </div>
               )}
               <button onClick={handleWorkSubmission} disabled={submitWorkMutation.isPending} className="w-full py-4 bg-blue-600 text-white text-sm font-bold rounded-xl hover:bg-blue-700 disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-blue-500/30">

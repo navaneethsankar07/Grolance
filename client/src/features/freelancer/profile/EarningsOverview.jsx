@@ -15,6 +15,8 @@ export default function EarningsOverview() {
   });
 
   const { data, isLoading, isError } = useFreelancerTransactions(activeFilters);
+  console.log(data);
+  
   const handleApplyFilters = () => {
     setPage(1);
     setActiveFilters({ ...tempFilters, page: 1 });
@@ -129,7 +131,7 @@ export default function EarningsOverview() {
               <tbody>
                 {earningsData.contracts.map((contract) => (
                   <tr key={contract.id} className="border-t border-gray-200 hover:bg-gray-50">
-                    <td className="px-6 py-4 text-xs font-medium text-gray-900">#{contract.id}</td>
+                    <td className="px-6 py-4 text-xs font-medium text-gray-900">#{contract.id.toString().padStart(3, '0')}</td>
                     <td className="px-6 py-4 text-xs text-gray-700">{contract.project_title}</td>
                     <td className="px-6 py-4 text-xs font-semibold text-gray-900">${Number(contract.total_amount).toLocaleString()}</td>
                     <td className="px-6 py-4"><StatusBadge status={contract.status} /></td>

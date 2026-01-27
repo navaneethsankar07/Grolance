@@ -29,6 +29,7 @@ import ProposalDetailModal from "../features/freelancer/proposals/components/Pro
 import OfferModal from "../features/freelancer/offers/OfferModal";
 import ApproveContractModal from "../features/client/contract/components/ApproveContractModal";
 import PayoutReleaseModal from "../features/admin/payoutmanagement/PayoutReleaseModal";
+import EditPaymentModal from "../features/freelancer/profile/EditPaymentModal";
 export default function RootLayout() {
   const { modal, modalProps, closeModal } = useModal();
 const { loading, initialized, accessToken } = useSelector((s) => s.auth);
@@ -74,6 +75,7 @@ useEffect(() => {
       {modal === 'offer-modal' && <OfferModal/>}
       {modal === 'approve-contract' && <ApproveContractModal modalProps={modalProps} />}
       {modal === 'release-payout' && <PayoutReleaseModal isOpen onClose={closeModal} contract={modalProps} />}
+      {modal === 'edit-payment' && <EditPaymentModal isOpen onClose={closeModal} currentEmail={modalProps.currentEmail} />}
     </>
   );
 }

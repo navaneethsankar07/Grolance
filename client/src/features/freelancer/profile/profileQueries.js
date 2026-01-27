@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query"
-import { fetchFreelancerProfile, fetchFreelancerTransactions } from "./profileApi"
+import { fetchFreelancerProfile, fetchFreelancerTransactions, fetchPaymentSettings } from "./profileApi"
 
 export const useFreelancerProfile = ()=>{
     return useQuery({
@@ -16,4 +16,13 @@ export const useFreelancerTransactions = (filters) => {
     keepPreviousData: true,
     staleTime: 1000 * 60 * 5,
   });
+};
+
+
+export const usePaymentSettings = () => {
+    return useQuery({
+        queryKey: ["paymentSettings"],
+        queryFn: fetchPaymentSettings,
+        staleTime:1000 * 60 * 5
+    });
 };

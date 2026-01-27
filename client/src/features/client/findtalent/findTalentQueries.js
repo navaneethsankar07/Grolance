@@ -20,7 +20,8 @@ export const useEligibleProjects = (isOpen) => {
 
 export const useSendInvitation = (options) => { 
   const queryClient = useQueryClient();
-  
+    console.log(options);
+    
   return useMutation({
     mutationFn: createInvitation,
     ...options, 

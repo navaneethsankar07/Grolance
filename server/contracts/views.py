@@ -6,6 +6,11 @@ from django.utils import timezone
 from django.db.models import Q
 from .models import Contract, ContractRevision
 from .serializers import ContractSerializer, ContractOfferSerializer, ContractAcceptSerializer, ContractDeliverableSerializer
+import logging
+from .utils import generate_contract_pdf
+
+
+logger = logging.getLogger('contracts')
 
 class ContractViewSet(viewsets.ModelViewSet):
     queryset = Contract.objects.all()
@@ -19,7 +24,13 @@ class ContractViewSet(viewsets.ModelViewSet):
     
     def get_queryset(self):
         user = self.request.user
-        queryset = Contract.objects.filter(Q(client=user) | Q(freelancer=user)).prefetch_related('deliverables')
+        queryset = Contract.objects.filter(Q(client=user) | Q(freelancer=user)).select_related(
+        'project', 
+        'project__category', 
+        'client', 
+        'package',
+        'freelancer'
+    ).prefetch_related('deliverables', 'revisions')
         
         status_param = self.request.query_params.get('status')
         if status_param and status_param != 'All':
@@ -53,6 +64,7 @@ class ContractViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
     
     def create(self, request, *args, **kwargs):
+        logger.warning(f"Direct contract creation attempt blocked for user {request.user.id}")
         return Response({"error": "Use payment flow to create contracts"}, status=405)
     
 
@@ -61,13 +73,22 @@ class ContractViewSet(viewsets.ModelViewSet):
         contract = self.get_object()
         
         if request.user != contract.freelancer:
+            logger.warning(f"Unauthorized acceptance attempt on contract {contract.id} by user {request.user.id}")
             return Response({"error": "Only authorized freelancer can sign."}, status=403)
         
         serializer = self.get_serializer(contract, data=request.data)
         if serializer.is_valid():
+            contract.freelancer_signature = request.data.get('freelancer_signature')
+            contract.freelancer_signature_type = request.data.get('freelancer_signature_type')
             contract.freelancer_ip = request.META.get('REMOTE_ADDR')
             contract.freelancer_signed_at = timezone.now()
             contract.status = 'active'
+            contract.save()
+            
+            pdf_url = generate_contract_pdf(contract)
+
+            if pdf_url:
+                contract.legal_document = pdf_url
             contract.save()
 
             project = contract.project
@@ -80,7 +101,8 @@ class ContractViewSet(viewsets.ModelViewSet):
                 freelancer__user=contract.freelancer
             ).update(status='accepted')
 
-            return Response({"status": "Contract is now active and project started!"})
+            logger.info(f"Contract {contract.id} accepted by freelancer {request.user.id}. Project {project.id} is now in_progress.")
+            return Response({"status": "Contract is now active and project started!","pdf_url": pdf_url})
         
         return Response(serializer.errors, status=400)
 
@@ -91,6 +113,7 @@ class ContractViewSet(viewsets.ModelViewSet):
         
         if new_status == 'completed' and contract.client == request.user:
             if contract.status != 'submitted':
+                logger.warning(f"Completion attempt on contract {contract.id} without submission by user {request.user.id}")
                 return Response({"error": "Work must be submitted before completion."}, status=400)
                 
             contract.status = 'completed'
@@ -101,6 +124,7 @@ class ContractViewSet(viewsets.ModelViewSet):
             project.status = 'completed'
             project.save()
 
+            logger.info(f"Contract {contract.id} marked as completed by client {request.user.id}. Project {project.id} finished.")
             return Response({"message": "Order approved and marked as completed. It is now ready for payout."})
         
         return Response({"error": "Invalid action or unauthorized user."}, status=400)
@@ -113,6 +137,7 @@ class SubmitDeliverableView(APIView):
             contract = Contract.objects.get(id=contract_id)
             
             if contract.freelancer != request.user:
+                logger.warning(f"Unauthorized submission attempt on contract {contract.id} by user {request.user.id}")
                 return Response(
                     {"error": "You are not authorized to submit work for this contract."}, 
                     status=status.HTTP_403_FORBIDDEN
@@ -133,12 +158,16 @@ class SubmitDeliverableView(APIView):
                 serializer.save(freelancer=request.user, contract=contract)
                 contract.status = 'submitted'
                 contract.save()
+                logger.info(f"Deliverable submitted for contract {contract.id} by freelancer {request.user.id}")
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         except Contract.DoesNotExist:
             return Response({"error": "Contract not found."}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            logger.error(f"Error in SubmitDeliverableView for contract {contract_id}: {str(e)}")
+            return Response({"error": "An internal error occurred"}, status=500)
 
 class RequestRevisionView(APIView):
     permission_classes = [permissions.IsAuthenticated]
@@ -167,10 +196,14 @@ class RequestRevisionView(APIView):
                 status='pending'
             )
 
+            logger.info(f"Revision requested for contract {contract.id} by client {request.user.id}")
             return Response({"message": "Revision requested. Waiting for freelancer response."})
 
         except Contract.DoesNotExist:
             return Response({"error": "Contract not found."}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            logger.error(f"Error in RequestRevisionView for contract {contract_id}: {str(e)}")
+            return Response({"error": "An internal error occurred"}, status=500)
 
 class FreelancerRevisionActionView(APIView):
     permission_classes = [permissions.IsAuthenticated]
@@ -189,6 +222,7 @@ class FreelancerRevisionActionView(APIView):
                 revision.contract.status = 'active'
                 revision.contract.save()
                 revision.save()
+                logger.info(f"Revision {revision.id} accepted by freelancer {request.user.id} for contract {revision.contract.id}")
                 return Response({"message": "Revision accepted. Contract is now active."})
                 
             elif action == 'reject':
@@ -199,9 +233,13 @@ class FreelancerRevisionActionView(APIView):
                 revision.status = 'rejected'
                 revision.rejection_message = message
                 revision.save()
+                logger.info(f"Revision {revision.id} rejected by freelancer {request.user.id} for contract {revision.contract.id}")
                 return Response({"message": "Revision rejected successfully."})
             
             return Response({"error": "Invalid action."}, status=400)
 
         except ContractRevision.DoesNotExist:
             return Response({"error": "Revision request not found."}, status=404)
+        except Exception as e:
+            logger.error(f"Error in FreelancerRevisionActionView for revision {revision_id}: {str(e)}")
+            return Response({"error": "An internal error occurred"}, status=500)

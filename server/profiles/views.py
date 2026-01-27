@@ -5,9 +5,12 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 from .models import ClientProfile,FreelancerProfile,FreelancerPaymentSettings,FreelancerPackage,FreelancerPortfolio,FreelancerSkill
-from .serializers import ClientProfileOverviewSerializer,ClientProfileUpdateSerializer, FreelancerOnboardingSerializer, SendPhoneOTPSerializer, VerifyPhoneOTPSerializer, FreelancerProfileSerializer, RoleSwitchSerializer, FreelancerProfileManageSerializer, FreelancerProfileUpdateSerializer, FreelancerListingSerializer
+from .serializers import ClientProfileOverviewSerializer,ClientProfileUpdateSerializer, FreelancerOnboardingSerializer, SendPhoneOTPSerializer, VerifyPhoneOTPSerializer, FreelancerProfileSerializer, RoleSwitchSerializer, FreelancerProfileManageSerializer, FreelancerProfileUpdateSerializer, FreelancerListingSerializer,FreelancerPaymentSettingsSerializer
 from .services import send_phone_otp, verify_phone_otp
 from rest_framework.pagination import PageNumberPagination
+from common.pagination import AdminUserPagination
+from projects.permissions import IsFreelancerUser
+
 class ClientProfileOverviewAPIView(RetrieveAPIView):
     permission_classes = [IsAuthenticated]
 
@@ -272,14 +275,28 @@ class FreelancerProfileManageAPIView(RetrieveUpdateAPIView):
         read_serializer = FreelancerProfileManageSerializer(instance)
         return Response(read_serializer.data)
     
-class StandardPagination(PageNumberPagination):
-    page_size = 10
-    page_size_query_param = 'page_size'
-    max_page_size = 100
+
+class FreelancerPaymentSettingsUpdateView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        settings, _ = FreelancerPaymentSettings.objects.get_or_create(user=request.user)
+        serializer = FreelancerPaymentSettingsSerializer(settings)
+        return Response(serializer.data)
+
+    def put(self, request):
+        settings, _ = FreelancerPaymentSettings.objects.get_or_create(user=request.user)
+        serializer = FreelancerPaymentSettingsSerializer(settings, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        if not serializer.is_valid():
+            print(serializer.error_messages,serializer.errors)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 class FreelancerListAPIView(ListAPIView):
     serializer_class = FreelancerListingSerializer
-    pagination_class = StandardPagination
+    pagination_class = AdminUserPagination
     filter_backends = [SearchFilter, OrderingFilter]
     search_fields = ['user__full_name', 'tagline', 'user__freelancer_skills__custom_name']
     ordering_fields = ['created_at', 'experience_level']

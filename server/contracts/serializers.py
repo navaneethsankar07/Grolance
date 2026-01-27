@@ -72,16 +72,19 @@ class ContractSerializer(serializers.ModelSerializer):
     skills = serializers.SerializerMethodField()
     package_name = serializers.CharField(source='package.package_type', read_only=True)
     delivery_days = serializers.IntegerField(source='package.delivery_days', read_only=True)
-    freelancer_name = serializers.CharField(source='freelancer.user.full_name', read_only=True)
+    freelancer_name = serializers.CharField(source='freelancer.full_name', read_only=True)
     deliverables = ContractDeliverableSerializer(many=True, read_only=True)
     revisions = ContractRevisionSerializer(many=True, read_only=True)
+    legal_document_url = serializers.SerializerMethodField()
 
     class Meta:
         model = Contract
         fields = [
             'id', 'project_title', 'project_description', 'project_category', 'project_id',
             'client_name', 'freelancer_name', 'total_amount', 'status', 'freelancer_signed_at',
-            'skills', 'profile_photo', 'package_name', 'delivery_days', 'deliverables', 'revisions'
+            'skills', 'profile_photo', 'package_name', 'delivery_days', 'deliverables', 'revisions',
+            'legal_document_url', 'client_signature', 'freelancer_signature', 
+            'client_signed_at', 'client_ip', 'freelancer_ip'
         ]
 
     def get_skills(self, obj):
@@ -90,6 +93,10 @@ class ContractSerializer(serializers.ModelSerializer):
             item.skill.name if item.skill else item.custom_name 
             for item in skills_queryset
         ]
+    def get_legal_document_url(self, obj):
+        if obj.legal_document:
+            return obj.legal_document.url
+        return None
 
 class ContractOfferSerializer(serializers.ModelSerializer):
     class Meta:

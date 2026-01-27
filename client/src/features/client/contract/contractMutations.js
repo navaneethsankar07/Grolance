@@ -12,6 +12,7 @@ export const useVerifyPayment = () => {
       
       if (variables.project_id) {
         queryClient.invalidateQueries({ queryKey: ['proposals', variables.project_id] });
+        queryClient.invalidateQueries({ queryKey: ['sent-invitations', variables.project_id] });
       }
       
       queryClient.invalidateQueries({ queryKey: ['my_offers'] });

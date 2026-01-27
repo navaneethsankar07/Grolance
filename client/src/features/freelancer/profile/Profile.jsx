@@ -1,7 +1,6 @@
 import React from "react";
-import { Star, Calendar, Briefcase, Clock, Check, Edit3, Eye } from "lucide-react";
+import { Star, Calendar, Briefcase, Clock, Check, Edit3, Eye, CreditCard } from "lucide-react";
 import { useFreelancerProfile } from "./profileQueries";
-import { useSelector } from "react-redux";
 import { formatDateDMY } from "../../../utils/date";
 import { Link } from "react-router-dom";
 
@@ -72,7 +71,14 @@ export default function Profile() {
             <h1 className="text-2xl font-bold text-gray-900">My Profile</h1>
             <p className="text-gray-500 text-sm">View and manage your freelance professional profile.</p>
           </div>
+
           <div className="flex gap-3">
+            <Link 
+  to={'/freelancer/settings/payment'} 
+  className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 font-medium text-sm transition-all shadow-sm"
+>
+  <CreditCard size={16} /> Bank Details
+</Link>
             <Link to={'/freelancer/profile/earnings-overview'} className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 font-medium text-sm transition-all shadow-sm">
               <Eye size={16} /> View Earnings
             </Link>

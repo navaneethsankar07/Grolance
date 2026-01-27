@@ -1,5 +1,7 @@
 from django.db import models
 from accounts.models import  User
+from cloudinary.models import CloudinaryField
+
 class Contract(models.Model):
     STATUS_CHOICES = [
         ('offered', 'Offered'),     
@@ -29,6 +31,8 @@ class Contract(models.Model):
     
     freelancer_signed_at = models.DateTimeField(null=True, blank=True)
     freelancer_ip = models.GenericIPAddressField(null=True)
+
+    legal_document = CloudinaryField('legal_document', resource_type="raw", null=True, blank=True)
     completed_at = models.DateTimeField(null=True, blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='offered')
 
@@ -63,7 +67,7 @@ class ContractRevision(models.Model):
     reason = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=10, choices=REVISION_STATUS, default='pending')
-    rejection_message = models.TextField(null=True, blank=True) # New field
+    rejection_message = models.TextField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
