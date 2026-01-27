@@ -20,7 +20,7 @@ export default function ClientJobDetail() {
 console.log(data);
 
   return (
-    <div className="min-h-screen bg-white py-8 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-white py-8 -mt-5 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-8">
         
         <div className="w-full lg:w-2/3">

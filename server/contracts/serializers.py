@@ -106,4 +106,4 @@ class ContractListSerializer(serializers.ModelSerializer):
     freelancer_name = serializers.CharField(source='freelancer.user.full_name', read_only=True)
     class Meta:
         model = Contract
-        fields = ['id', 'project_title','freelancer_name', 'status' ,'total_amount']
+        fields = ['id', 'project_title','freelancer_name', 'status' ,'total_amount', 'client_signed_at']

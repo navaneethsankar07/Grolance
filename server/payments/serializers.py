@@ -23,4 +23,8 @@ class ClientDashboardSerializer(serializers.Serializer):
 
     recent_projects = ContractListSerializer(many=True)
 
+class FreelancerTransactionSerializer(serializers.Serializer):
+    total_earning = serializers.DecimalField(max_digits=10,decimal_places=2)
+    total_projects = serializers.IntegerField()
+    contracts = ContractListSerializer(many=True)
 

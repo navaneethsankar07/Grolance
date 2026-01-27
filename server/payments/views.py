@@ -9,9 +9,13 @@ from .models import Payment
 from profiles.models import FreelancerPaymentSettings
 from contracts.models import Contract
 from projects.models import Project, Proposal
-from .serializers import PaymentVerificationSerializer,ReleasePaymentSerializer, ClientDashboardSerializer
+from .serializers import PaymentVerificationSerializer,ReleasePaymentSerializer, ClientDashboardSerializer, FreelancerTransactionSerializer
 from adminpanel.permissions import IsAdminUser
 from django.db.models import Sum,Count,Avg, Q
+from projects.permissions import IsClientUser, IsFreelancerUser
+from datetime import timedelta
+from common.pagination import AdminUserPagination
+
 class VerifyEscrowPaymentView(APIView):
     def get_paypal_token(self):
         url = "https://api-m.sandbox.paypal.com/v1/oauth2/token"
@@ -201,6 +205,7 @@ class ReleasePaymentView(APIView):
 
 
 class ClientSpendingSummaryView(APIView):
+    permission_classes = [IsClientUser]
     def get(self,request):
         user_contracts = Contract.objects.filter(client=request.user)
 
@@ -222,3 +227,44 @@ class ClientSpendingSummaryView(APIView):
         }
         serializer = ClientDashboardSerializer(data)
         return Response(serializer.data)
+
+class FreelancerTransactionView(APIView):
+    permission_classes = [IsFreelancerUser]
+
+    def get(self,request):
+        queryset = Contract.objects.filter(freelancer=request.user).order_by('-client_signed_at')
+        status = request.query_params.get('status')
+        
+        if status:
+            queryset=queryset.filter(status=status)
+        
+        time_range = request.query_params.get('range')
+        if time_range:
+            now = timezone.now()
+            if time_range == '1m':
+                queryset = queryset.filter(client_signed_at__gte=now - timedelta(days=30))
+            elif time_range == '6m':
+                queryset = queryset.filter(client_signed_at__gte=now - timedelta(days=180))
+            elif time_range == '1y':
+                queryset = queryset.filter(client_signed_at__gte=now - timedelta(days=365))
+        
+        stats = queryset.aggregate(
+            total_earning = Sum('total_amount'),
+            total_projects = Count('id')
+        
+        )
+        paginator = AdminUserPagination()
+        page = paginator.paginate_queryset(queryset, request)
+
+        data = {
+            'total_earning':stats['total_earning'] or 0,
+            'total_projects':stats['total_projects'] or 0,
+            'contracts':page
+        }
+
+        serializer = FreelancerTransactionSerializer({
+            'total_earning': stats['total_earning'] or 0,
+            'total_projects': stats['total_projects'] or 0,
+            'contracts': page
+        })
+        return paginator.get_paginated_response(serializer.data)

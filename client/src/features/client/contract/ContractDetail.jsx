@@ -246,11 +246,11 @@ const handleApproveOrder = () => {
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-gray-500 font-medium">Platform Service Fee</span>
-              <span className="text-gray-900 font-bold">${(contract.total_amount * 0.05).toLocaleString()}</span>
+              <span className="text-gray-900 font-bold">$0</span>
             </div>
             <div className="pt-4 border-t border-gray-100 flex justify-between items-center">
               <span className="text-md font-bold text-gray-900">Total Paid</span>
-              <span className="text-2xl font-black text-gray-900">${(contract.total_amount * 1.05).toLocaleString()}</span>
+              <span className="text-2xl font-black text-gray-900">${(contract.total_amount).toLocaleString()}</span>
             </div>
           </div>
         </div>

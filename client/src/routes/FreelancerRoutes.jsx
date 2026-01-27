@@ -11,6 +11,7 @@ import MyProposals from '../features/freelancer/proposals/components/MyProposals
 import FreelancerOffers from '../features/freelancer/offers/FreelancerOffers'
 import Contracts from '../features/freelancer/contracts/Contracts'
 import ContractDetail from '../features/freelancer/contracts/ContractDetail'
+import EarningsOverview from '../features/freelancer/profile/EarningsOverview'
 
 function FreelancerRoutes() {
   return (
@@ -21,6 +22,7 @@ function FreelancerRoutes() {
         <Route path='/jobs/:id' element={<JobDetail/>}/>
         <Route path='/profile' element={<Profile/>}/>
         <Route path='/profile/edit' element={<ProfileEdit/>}/>
+        <Route path='/profile/earnings-overview' element={<EarningsOverview/>}/>
         <Route path='/invitations' element={<InvitationsPage/>}/>
         <Route path='/my-proposals' element = {<MyProposals/>}/>
         <Route path='/offers' element={<FreelancerOffers/>} />

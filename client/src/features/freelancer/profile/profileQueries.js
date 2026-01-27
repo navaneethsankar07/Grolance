@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query"
-import { fetchFreelancerProfile } from "./profileApi"
+import { fetchFreelancerProfile, fetchFreelancerTransactions } from "./profileApi"
 
 export const useFreelancerProfile = ()=>{
     return useQuery({
@@ -8,3 +8,12 @@ export const useFreelancerProfile = ()=>{
         staleTime:1000 * 60 * 5
     })
 }
+
+export const useFreelancerTransactions = (filters) => {
+  return useQuery({
+    queryKey: ["freelancerTransactions", filters],
+    queryFn: () => fetchFreelancerTransactions(filters),
+    keepPreviousData: true,
+    staleTime: 1000 * 60 * 5,
+  });
+};

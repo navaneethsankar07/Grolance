@@ -73,9 +73,9 @@ export default function Profile() {
             <p className="text-gray-500 text-sm">View and manage your freelance professional profile.</p>
           </div>
           <div className="flex gap-3">
-            <button className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 font-medium text-sm transition-all shadow-sm">
+            <Link to={'/freelancer/profile/earnings-overview'} className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 font-medium text-sm transition-all shadow-sm">
               <Eye size={16} /> View Earnings
-            </button>
+            </Link>
             <Link to={'edit/'} className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium text-sm transition-all shadow-sm">
               <Edit3 size={16} /> Edit Profile
             </Link>

@@ -67,12 +67,12 @@ const handleSwitchToFreelancer = async() => {
         </Link>
 
         <Link
-          to="/my-projects"
+          to="/contracts"
           onClick={onClose}
           className="menu-item flex items-center gap-3 rounded-lg px-4 py-3 transition-colors hover:bg-gray-200"
           style={{ backgroundColor: "#F1F1F1" }}
         >
-          <span className="text-sm font-medium text-gray-700">My Posts</span>
+          <span className="text-sm font-medium text-gray-700">My Contracts</span>
         </Link>
 
         <Link
