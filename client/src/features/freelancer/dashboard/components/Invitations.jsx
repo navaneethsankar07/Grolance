@@ -1,24 +1,43 @@
 import { ChevronRight } from 'lucide-react'
 import React from 'react'
+import { useReceivedInvitations } from '../../invitations/invitationQueries'
+import { formatDateDMY } from '../../../../utils/date';
+import { Link } from 'react-router-dom';
 
 function Invitations() {
+  const { data, isLoading, isError } = useReceivedInvitations();
+  console.log(data);
+  const invitations = data?.results || [];
+  const displayInvitations = invitations.status === 'pending'? invitations.slice(0, 5) : [];
+
+  if (isLoading) {
+    return (
+      <div className="bg-white rounded-lg p-6 mb-8 shadow-sm border border-[#F3F4F6] text-center">
+        <p className="text-gray-500">Loading invitations...</p>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="bg-white rounded-lg p-6 mb-8 shadow-sm border border-[#F3F4F6] text-center">
+        <p className="text-red-500">Failed to load invitations.</p>
+      </div>
+    );
+  }
   return (
     <div className="bg-white rounded-lg p-6 mb-8 shadow-sm border border-[#F3F4F6]">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-[25px] font-semibold text-[#1E293B] leading-7" style={{ fontFamily: 'Poppins, -apple-system, Roboto, Helvetica, sans-serif' }}>
                 Pending Invitations
               </h2>
-              <button className="text-sm font-medium text-[#4F46E5] hover:underline" style={{ fontFamily: 'Poppins, -apple-system, Roboto, Helvetica, sans-serif' }}>
+              <Link to={'invitations'} className="text-sm font-medium text-[#4F46E5] hover:underline" style={{ fontFamily: 'Poppins, -apple-system, Roboto, Helvetica, sans-serif' }}>
                 View All
-              </button>
+              </Link>
             </div>
 
             <div className="flex flex-col gap-4">
-              {[
-                { title: "Senior UI/UX Designer Needed", company: "TechFlow Solutions", time: "Sent 2 hours ago", icon: "design" },
-                { title: "Frontend React Developer", company: "GreenLeaf Corp", time: "Sent yesterday", icon: "code" },
-                { title: "Senior UI/UX Designer Needed", company: "TechFlow Solutions", time: "Sent 2 hours ago", icon: "design" },
-              ].map((invitation, index) => (
+              {displayInvitations.length > 0 ?displayInvitations.map((invitation, index) => (
                 <div key={index} className="flex items-center justify-between p-4 rounded-lg border border-[#E2E8F0]">
                   <div className="flex items-center gap-4">
                     <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${index === 1 ? 'bg-[#DCFCE7]' : 'bg-[#E0E7FF]'}`}>
@@ -34,21 +53,27 @@ function Invitations() {
                     </div>
                     <div>
                       <h3 className="text-base font-semibold text-[#1E293B] leading-6" style={{ fontFamily: 'Poppins, -apple-system, Roboto, Helvetica, sans-serif' }}>
-                        {invitation.title}
+                        {invitation.project_title}
                       </h3>
                       <p className="text-sm font-normal text-[#64748B] leading-5" style={{ fontFamily: 'Poppins, -apple-system, Roboto, Helvetica, sans-serif' }}>
-                        {invitation.company} • {invitation.time}
+                        {invitation.client_name} • {formatDateDMY(invitation.created_at)}
                       </p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="bg-[#FEF9C3] text-[#CA8A04] px-3 py-1 rounded-full text-sm font-medium" style={{ fontFamily: 'Poppins, -apple-system, Roboto, Helvetica, sans-serif' }}>
-                      Pending
+                      {invitation.status}
                     </span>
                     <ChevronRight className="w-6 h-6 text-[#64748B]" />
                   </div>
                 </div>
-              ))}
+              )):(
+          <div className="text-center py-8 border-2 border-dashed border-[#E2E8F0] rounded-lg">
+            <p className="text-[#64748B] font-medium" style={{ fontFamily: 'Poppins, -apple-system, Roboto, Helvetica, sans-serif' }}>
+              No pending invitations found.
+            </p>
+          </div>
+        )}
             </div>
           </div>
   )

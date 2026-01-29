@@ -19,6 +19,7 @@ import ClientContracts from "../features/client/contract/ClientContracts";
 import ClientContractDetail from "../features/client/contract/ContractDetail";
 import ClientJobDetail from "../features/client/projectManagement/ProjectDetails";
 import SpendingSummary from "../features/client/profile/SpendingSummary";
+import HowItWorks from "../features/client/howitworks/HowItWorks";
 
 export default function ClientRoutes() {
   const { user,loading } = useSelector(state => state.auth);
@@ -47,6 +48,7 @@ export default function ClientRoutes() {
           <Route path="/onboarding" element={ <OnBoardingProvider><OnboardingManager /></OnBoardingProvider>} />
           <Route path="/contracts" element={<ClientContracts/>}/>
           <Route path="/contracts/:id" element={<ClientContractDetail/>}/>
+          <Route path="/how-it-works" element={<HowItWorks/>}/>
         </Route>
           
     </Routes>

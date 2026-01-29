@@ -1,8 +1,9 @@
 import React from "react";
 import { Link, useParams } from "react-router-dom";
-import { ArrowLeft, Star, MapPin, Clock, Truck, Check, Calendar } from "lucide-react";
+import {Star, Clock, Truck, Check, Calendar, LayoutGrid } from "lucide-react";
 import { useClientFreelancerProfile } from "./freelancerProfileQueries";
 import { useModal } from "../../../hooks/modal/useModalStore";
+import { formatDateDMY } from "../../../utils/date";
 
 function PackageOption({ title, price, features, isPopular = false }) {
   return (
@@ -36,6 +37,7 @@ export default function FreelancerProfile() {
   const { id } = useParams();
   const { data: freelancer, isLoading, isError } = useClientFreelancerProfile(id);
 const { openModal } = useModal();
+console.log(freelancer);
 
 const handleInviteClick = () => {
   const packageArray = freelancer.packages 
@@ -77,20 +79,20 @@ const handleInviteClick = () => {
 
               <div className="mt-8 space-y-5 text-left border-t border-gray-50 pt-8">
                 <div className="flex items-center gap-3 text-gray-400">
-                  <MapPin className="w-4 h-4" />
-                  <div className="text-xs font-semibold uppercase tracking-wider">Location <span className="block text-gray-900 normal-case mt-0.5">Remote</span></div>
+                  <LayoutGrid className="w-4 h-4" />
+                  <div className="text-xs font-semibold uppercase tracking-wider">Category <span className="block text-gray-900 normal-case mt-0.5">{freelancer.category}</span></div>
                 </div>
                 <div className="flex items-center gap-3 text-gray-400">
                   <Calendar className="w-4 h-4" />
-                  <div className="text-xs font-semibold uppercase tracking-wider">Member Since <span className="block text-gray-900 normal-case mt-0.5">June 2021</span></div>
+                  <div className="text-xs font-semibold uppercase tracking-wider">Member Since <span className="block text-gray-900 normal-case mt-0.5">{freelancer.created_at?formatDateDMY(freelancer.created_at):'June 2021'}</span></div>
                 </div>
                 <div className="flex items-center gap-3 text-gray-400">
                   <Clock className="w-4 h-4" />
-                  <div className="text-xs font-semibold uppercase tracking-wider">Availability <span className="block text-green-600 normal-case mt-0.5 font-bold">Available</span></div>
+                  <div className="text-xs font-semibold uppercase tracking-wider">Availability <span className="block text-green-600 normal-case mt-0.5 font-bold">{freelancer.availability?'Available':'Unavailable'}</span></div>
                 </div>
                 <div className="flex items-center gap-3 text-gray-400">
                   <Truck className="w-4 h-4" />
-                  <div className="text-xs font-semibold uppercase tracking-wider">Completed Projects Count <span className="block text-gray-900 normal-case mt-0.5">18</span></div>
+                  <div className="text-xs font-semibold uppercase tracking-wider">Completed Projects Count <span className="block text-gray-900 normal-case mt-0.5">{freelancer.completed_projects_count}</span></div>
                 </div>
               </div>
             </div>

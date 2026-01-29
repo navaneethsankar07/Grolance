@@ -10,10 +10,10 @@ export const useSentInvitations = (projectId) => {
   });
 };
 
-export const useProposals = (projectId) => {
+export const useProposals = (projectId,page=1, status = "") => {
   return useQuery({
-    queryKey:['proposals',projectId],
-    queryFn:()=>getProposals(projectId),
-    staleTime:1000 * 60 * 5
-  })
-}
+    queryKey: ['proposals', projectId, status],
+    queryFn: () => getProposals(projectId,page, status),
+    staleTime: 1000 * 60 * 5,
+  });
+};

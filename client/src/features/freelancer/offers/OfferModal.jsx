@@ -54,8 +54,12 @@ export default function OfferModal() {
     let signatureFinal = "";
 
     if (signatureMode === "draw") {
-      signatureFinal = sigCanvas.current.getTrimmedCanvas().toDataURL('image/png');
-    } else {
+      if (sigCanvas.current.isEmpty()) {
+        toast.error("Please provide a signature");
+        return;
+      }
+      signatureFinal = sigCanvas.current.getCanvas().toDataURL('image/png');
+    }else {
       const canvas = document.createElement("canvas");
       canvas.width = 600;
       canvas.height = 200;

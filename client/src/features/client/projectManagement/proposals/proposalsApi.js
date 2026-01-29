@@ -6,7 +6,14 @@ export const getSentInvitations = async (projectId) => {
   return data;
 };
 
-export const getProposals = async (projectId) => {
-  const {data} = await axiosInstance.get(`projects/${projectId}/proposals`);
+export const getProposals = async (projectId, page=1,status = "") => {
+  const { data } = await axiosInstance.get(`/projects/${projectId}/proposals/`, {
+    params: {page, status }
+  });
   return data;
-}
+};
+
+export const rejectProposal = async (proposalId) => {
+  const res = await axiosInstance.patch(`/projects/proposals/${proposalId}/reject/`);
+  return res.data;
+};

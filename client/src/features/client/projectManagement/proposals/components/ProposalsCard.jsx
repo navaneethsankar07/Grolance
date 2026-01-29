@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { X, CheckCircle2 } from 'lucide-react'; 
+import { X, CheckCircle2, Trash2, AlertTriangle } from 'lucide-react'; 
 import { useModal } from '../../../../../hooks/modal/useModalStore';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const StarIcon = () => (
   <svg width="16" height="20" viewBox="0 0 16 20" fill="none">
@@ -9,13 +9,15 @@ const StarIcon = () => (
   </svg>
 );
 
-export default function ProposalCard({ freelancer, proposal, isInvitation = false, invitationStatus = 'pending', anyOfferMade }) {
+export default function ProposalCard({ freelancer, proposal, isInvitation = false, invitationStatus = 'pending', anyOfferMade, onReject, isRejecting }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [showConfirmReject, setShowConfirmReject] = useState(false);
   const { openModal } = useModal();
   const navigate = useNavigate();
   
   const contract = proposal.contract_info;
   const isHiredFreelancer = contract?.is_this_freelancer;
+  const isRejected = invitationStatus === 'rejected';
   
   const MAX_LENGTH = 180; 
   const isLongMessage = proposal.description?.length > MAX_LENGTH;
@@ -33,9 +35,9 @@ export default function ProposalCard({ freelancer, proposal, isInvitation = fals
     });
   };
 
-  const Modal = () => (
+  const FullProposalModal = () => (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
-      <div className="w-full max-w-2xl rounded-2xl bg-white shadow-2xl overflow-hidden">
+      <div className="w-full max-w-2xl rounded-2xl bg-white shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
         <div className="flex items-center justify-between border-b px-6 py-4">
           <h3 className="text-lg font-bold text-gray-900">Full Proposal</h3>
           <button onClick={() => setIsModalOpen(false)} className="rounded-full p-1 hover:bg-gray-100 transition">
@@ -46,8 +48,10 @@ export default function ProposalCard({ freelancer, proposal, isInvitation = fals
           <div className="flex items-center gap-4 mb-6">
              <img src={freelancer.image} referrerPolicy="no-referrer" className="h-12 w-12 rounded-full object-cover" alt="" />
              <div>
-                <p className="font-bold text-gray-900">{freelancer.name}</p>
+                <Link to={`/find-talents/${freelancer.id}`}>
+                <p className="font-bold text-gray-900 hover:text-primary">{freelancer.name}</p>
                 <p className="text-sm text-gray-500">{freelancer.title}</p>
+                </Link>
              </div>
           </div>
           <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">{proposal.description}</p>
@@ -55,6 +59,39 @@ export default function ProposalCard({ freelancer, proposal, isInvitation = fals
         <div className="bg-gray-50 px-6 py-4 flex justify-end">
           <button onClick={() => setIsModalOpen(false)} className="rounded-lg bg-primary px-6 py-2 text-sm font-medium text-white hover:bg-primary/90">
             Close
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
+  const RejectConfirmModal = () => (
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+      <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl animate-in fade-in zoom-in duration-200">
+        <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
+          <AlertTriangle className="h-6 w-6 text-red-600" />
+        </div>
+        <h3 className="mb-2 text-lg font-bold text-gray-900">Reject Proposal?</h3>
+        <p className="mb-6 text-sm text-gray-600">
+          Are you sure you want to reject <strong>{freelancer.name}'s</strong> proposal? This action cannot be undone.
+        </p>
+        <div className="flex justify-end gap-3">
+          <button 
+            disabled={isRejecting}
+            onClick={() => setShowConfirmReject(false)} 
+            className="rounded-lg px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 transition"
+          >
+            Cancel
+          </button>
+          <button 
+            disabled={isRejecting}
+            onClick={() => {
+              onReject();
+              setShowConfirmReject(false);
+            }} 
+            className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 transition"
+          >
+            {isRejecting ? "Rejecting..." : "Yes, Reject"}
           </button>
         </div>
       </div>
@@ -72,7 +109,7 @@ export default function ProposalCard({ freelancer, proposal, isInvitation = fals
 
     return (
       <div className={`relative rounded-lg border px-6 pb-6 pt-[25px] shadow-sm transition-all ${isHiredFreelancer ? 'border-blue-500 bg-blue-50/40 ring-1 ring-blue-500' : 'border-gray-200 bg-white'}`}>
-        {isModalOpen && <Modal />}
+        {isModalOpen && <FullProposalModal />}
         <div className="flex justify-between items-start mb-4">
           <span className={`inline-flex items-center rounded-full ${currentStatus.bg} px-3 py-1.5 text-xs font-medium text-white`}>
             {currentStatus.text}
@@ -105,8 +142,10 @@ export default function ProposalCard({ freelancer, proposal, isInvitation = fals
         <div className="flex items-start gap-4">
           <img src={freelancer.image} alt="" referrerPolicy='no-referrer' className="h-16 w-16 shrink-0 rounded-full object-cover bg-gray-100" />
           <div className="flex min-w-0 flex-col gap-1">
-            <h3 className="text-[15px] font-semibold text-gray-900">{freelancer.name}</h3>
-            <p className="text-xs font-medium text-gray-600">{freelancer.title}</p>
+        <Link to={`/find-talents/${freelancer.id}`}>
+            <h3 className="text-[15px] font-semibold text-gray-900 hover:text-primary">{freelancer.name}</h3>
+            <p className="text-xs font-medium text-gray-600 hover:text-primary">{freelancer.title}</p>
+              </Link>
             <div className="mt-1">
               <p className="text-xs text-gray-500 italic">"{displayDescription}"</p>
               {isLongMessage && (
@@ -122,8 +161,9 @@ export default function ProposalCard({ freelancer, proposal, isInvitation = fals
   }
 
   return (
-    <div className={`rounded-xl border p-6 shadow-sm transition-all ${isHiredFreelancer ? 'border-blue-500 bg-blue-50/40 ring-1 ring-blue-500' : 'border-gray-200 bg-white'}`}>
-      {isModalOpen && <Modal />}
+    <div className={`rounded-xl border p-6 shadow-sm transition-all ${isRejected ? 'opacity-60 bg-gray-50 grayscale-[0.5]' : ''} ${isHiredFreelancer ? 'border-blue-500 bg-blue-50/40 ring-1 ring-blue-500' : 'border-gray-200 bg-white'}`}>
+      {isModalOpen && <FullProposalModal />}
+      {showConfirmReject && <RejectConfirmModal />}
       
       {isHiredFreelancer && (
         <div className="mb-4 flex items-center gap-2 text-blue-700">
@@ -134,12 +174,21 @@ export default function ProposalCard({ freelancer, proposal, isInvitation = fals
         </div>
       )}
 
+      {isRejected && (
+        <div className="mb-4 flex items-center gap-2 text-red-600">
+          <X size={16} />
+          <span className="text-xs font-bold uppercase tracking-wider">Rejected</span>
+        </div>
+      )}
+
       <div className="flex flex-col gap-6 lg:flex-row">
         <div className="flex gap-4">
           <img src={freelancer.image} referrerPolicy="no-referrer" alt="" className="h-[100px] w-[100px] shrink-0 rounded-full object-cover bg-gray-100" />
           <div className="flex flex-col gap-1">
-            <h3 className="text-lg font-bold text-gray-900">{freelancer.name}</h3>
-            <p className="text-sm text-gray-500">{freelancer.title}</p>
+            <Link to={`/find-talents/${freelancer.id}` }>
+            <h3 className="text-lg font-bold text-gray-900 hover:text-primary">{freelancer.name}</h3>
+            <p className="text-sm text-gray-500 hover:text-primary">{freelancer.title}</p>
+            </Link>
             <div className="flex items-center gap-1 pt-1">
               {[...Array(5)].map((_, i) => <StarIcon key={i} />)}
               <span className="ml-1 text-sm font-medium text-gray-700">{freelancer.rating}</span>
@@ -173,6 +222,16 @@ export default function ProposalCard({ freelancer, proposal, isInvitation = fals
       </div>
 
       <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end border-t pt-6">
+        {!isHiredFreelancer && !isRejected && (
+          <button 
+            onClick={() => setShowConfirmReject(true)}
+            className="flex items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-6 py-2 text-sm font-medium text-gray-700 hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition"
+          >
+            <Trash2 size={16} />
+            Reject
+          </button>
+        )}
+
         {isHiredFreelancer ? (
           <button 
             onClick={() => navigate(`/contracts/${contract.id}`)}
@@ -181,17 +240,19 @@ export default function ProposalCard({ freelancer, proposal, isInvitation = fals
             View Contract
           </button>
         ) : (
-          <button 
-            onClick={handleHire} 
-            disabled={anyOfferMade}
-            className={`rounded-lg px-6 py-2 text-sm font-medium transition ${
-              anyOfferMade 
-              ? "bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200" 
-              : "bg-blue-500 text-white hover:bg-blue-600"
-            }`}
-          >
-            {anyOfferMade ? "Offer already out" : "Hire Freelancer"}
-          </button>
+          !isRejected && (
+            <button 
+              onClick={handleHire} 
+              disabled={anyOfferMade}
+              className={`rounded-lg px-6 py-2 text-sm font-medium transition ${
+                anyOfferMade 
+                ? "bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200" 
+                : "bg-blue-500 text-white hover:bg-blue-600"
+              }`}
+            >
+              {anyOfferMade ? "Offer already out" : "Hire Freelancer"}
+            </button>
+          )
         )}
       </div>
     </div>

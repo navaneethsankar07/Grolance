@@ -1,8 +1,12 @@
 from django.db import models
 
-# Create your models here.
 class Category(models.Model):
     name = models.CharField(max_length=100, unique=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['name']),
+        ]
 
     def __str__(self):
         return self.name
@@ -21,6 +25,10 @@ class Skill(models.Model):
 
     class Meta:
         unique_together = ("name", "category")
+        indexes = [
+            models.Index(fields=['name']),
+            models.Index(fields=['is_custom']),
+        ]
 
     def __str__(self):
         return self.name

@@ -16,7 +16,8 @@ const filteredInvitations = invitations?.filter(inv => {
   const counts = {
     all: invitations?.length || 0,
     pending: invitations?.filter(inv => inv.status === 'pending').length || 0,
-    accepted: invitations?.filter(inv => inv.status === 'accepted').length || 0
+    accepted: invitations?.filter(inv => inv.status === 'accepted').length || 0,
+    hired:invitations?.filter(inv=>inv.status === 'hired').length || 0
   };
 
   if (isLoading) {
@@ -36,7 +37,7 @@ const filteredInvitations = invitations?.filter(inv => {
         </div>
 
         <div className="border-b border-gray-200 mb-8 flex gap-8">
-          {['all', 'pending', 'accepted'].map((tab) => (
+          {['all', 'pending', 'accepted','hired'].map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}

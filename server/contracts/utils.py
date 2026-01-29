@@ -26,7 +26,6 @@ def generate_contract_pdf(contract):
             pdf_payload = result.getvalue()
             
             if len(pdf_payload) < 100:
-                print("PDF Generation failed: Payload too small")
                 return None
 
             upload_result = cloudinary.uploader.upload(
@@ -45,7 +44,6 @@ def generate_contract_pdf(contract):
             return url
             
     except Exception as e:
-        print(f"Error during PDF process: {str(e)}")
         return None
     
     return None

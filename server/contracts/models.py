@@ -1,5 +1,5 @@
 from django.db import models
-from accounts.models import  User
+from accounts.models import User
 from cloudinary.models import CloudinaryField
 
 class Contract(models.Model):
@@ -36,6 +36,11 @@ class Contract(models.Model):
     completed_at = models.DateTimeField(null=True, blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='offered')
 
+    class Meta:
+        indexes = [
+            models.Index(fields=['status']),
+            models.Index(fields=['client_signed_at']),
+        ]
 
 
 class ContractDeliverable(models.Model):
@@ -52,6 +57,11 @@ class ContractDeliverable(models.Model):
     notes = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        indexes = [
+            models.Index(fields=['created_at']),
+        ]
+
     def __str__(self):
         return f"{self.title} - {self.contract.id}"
     
@@ -65,10 +75,15 @@ class ContractRevision(models.Model):
     contract = models.ForeignKey(Contract, on_delete=models.CASCADE, related_name='revisions')
     requested_by = models.ForeignKey(User, on_delete=models.CASCADE)
     reason = models.TextField()
-    created_at = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=10, choices=REVISION_STATUS, default='pending')
     rejection_message = models.TextField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['status']),
+            models.Index(fields=['created_at']),
+        ]
 
     def __str__(self):
         return f"Revision for Contract {self.contract.id} at {self.created_at}"

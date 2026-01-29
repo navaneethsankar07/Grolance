@@ -1,25 +1,28 @@
 import React, { useState } from "react";
 import ProjectHeader from "./components/ProposalHeader";
 import ProposalCard from "./components/ProposalsCard";
-import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import { useParams } from "react-router-dom";
 import { useProjectDetails } from "../projectQueries";
 import { useProposals, useSentInvitations } from "./proposalsQueries";
-import { useModal } from "../../../../hooks/modal/useModalStore";
+import { useRejectProposal } from "./proposalsMutations";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 export default function ProposalsIndex() {
   const { id } = useParams();
-  
+  const [page, setPage] = useState(1);
+  const [status, setStatus] = useState("");
+
   const { data: project, isLoading: isProjectLoading } = useProjectDetails(id);
   const { data: invitationsData, isLoading: isInvitesLoading } = useSentInvitations(id);
-  const { data: proposals, isLoading: isProposalsLoading } = useProposals(id);
+  const { data: proposalsData, isLoading: isProposalsLoading } = useProposals(id, page, status);
+  const { mutate: rejectMutation, isPending: isRejecting } = useRejectProposal();
 
   if (isProjectLoading || isInvitesLoading || isProposalsLoading) {
     return <div className="p-10 text-center font-inter text-gray-600">Loading data...</div>;
   }
 
   const invitations = invitationsData?.results || (Array.isArray(invitationsData) ? invitationsData : []);
-  const actualProposals = proposals?.results || (Array.isArray(proposals) ? proposals : []);
+  const actualProposals = proposalsData?.results || [];
   
   const sortedProposals = [...actualProposals].sort((a, b) => {
     if (a.contract_info?.is_this_freelancer) return -1;
@@ -28,12 +31,16 @@ export default function ProposalsIndex() {
   });
 
   const anyOfferMade = actualProposals.some(p => p.contract_info !== null);
-console.log(invitations);
 
   const displayBudget = project?.pricing_type === "fixed" 
     ? `$${Number(project.fixed_price).toLocaleString()}` 
     : `$${Number(project.min_budget).toLocaleString()} - $${Number(project.max_budget).toLocaleString()}`;
-console.log(invitations);
+
+  const tabs = [
+    { label: "All Proposals", value: "", count: project?.proposals_count || actualProposals.length },
+    { label: "Pending", value: "pending" },
+    { label: "Rejected", value: "rejected" },
+  ];
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -43,12 +50,12 @@ console.log(invitations);
           <ProjectHeader 
             title={project?.title}
             budget={displayBudget}
-            proposalCount={actualProposals.length}
+            proposalCount={proposalsData?.count || 0}
             postedTime={`Posted ${new Date(project?.created_at).toLocaleDateString()}`}
           />
         </div>
 
-        {invitations.length > 0 && (
+        {invitations.length > 0 && status === "" && (
           <div className="mb-10">
             <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
               Sent Invitations
@@ -82,10 +89,20 @@ console.log(invitations);
         )}
 
         <div className="mb-6 border-b border-gray-200">
-          <div className="flex gap-6">
-            <button className="border-b-2 border-blue-500 px-1 py-4 text-sm font-semibold text-blue-600">
-              Direct Proposals ({actualProposals.length})
-            </button>
+          <div className="flex gap-8">
+            {tabs.map((tab) => (
+              <button
+                key={tab.value}
+                onClick={() => { setStatus(tab.value); setPage(1); }}
+                className={`pb-4 text-sm font-semibold transition-all ${
+                  status === tab.value 
+                  ? "border-b-2 border-blue-500 text-blue-600" 
+                  : "text-gray-500 hover:text-gray-700"
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
           </div>
         </div>
 
@@ -97,6 +114,8 @@ console.log(invitations);
                 isInvitation={false}
                 invitationStatus={prop.status}
                 anyOfferMade={anyOfferMade}
+                onReject={() => rejectMutation(prop.id)}
+                isRejecting={isRejecting}
                 freelancer={{
                   id: prop.freelancer_id,
                   name: prop.freelancer_name,
@@ -117,10 +136,36 @@ console.log(invitations);
             ))
           ) : (
             <div className="text-center py-20 bg-white rounded-2xl border-2 border-dashed border-gray-100">
-              <p className="text-gray-500 font-medium">No proposals found in database.</p>
+              <p className="text-gray-500 font-medium">No proposals found for this filter.</p>
             </div>
           )}
         </div>
+
+        {proposalsData?.count > actualProposals.length && (
+          <div className="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6 rounded-xl shadow-sm">
+            <div className="flex flex-1 justify-between sm:hidden">
+              <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={!proposalsData?.previous} className="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">Previous</button>
+              <button onClick={() => setPage(p => p + 1)} disabled={!proposalsData?.next} className="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">Next</button>
+            </div>
+            <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
+              <div>
+                <p className="text-sm text-gray-700">
+                  Showing <span className="font-medium">{(page - 1) * 10 + 1}</span> to <span className="font-medium">{Math.min(page * 10, proposalsData.count)}</span> of <span className="font-medium">{proposalsData.count}</span> results
+                </p>
+              </div>
+              <div>
+                <nav className="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
+                  <button onClick={() => setPage(p => p - 1)} disabled={!proposalsData?.previous} className="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 disabled:opacity-50">
+                    <ChevronLeft className="h-5 w-5" />
+                  </button>
+                  <button onClick={() => setPage(p => p + 1)} disabled={!proposalsData?.next} className="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 disabled:opacity-50">
+                    <ChevronRight className="h-5 w-5" />
+                  </button>
+                </nav>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

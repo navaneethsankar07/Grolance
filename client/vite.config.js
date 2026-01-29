@@ -6,4 +6,11 @@ export default defineConfig({
   plugins: [react(),
     tailwindcss()
   ],
+  optimizeDeps: {
+    include: [
+      'react-signature-canvas',
+      'prop-types',
+      'trim-canvas'
+    ]
+  }
 })

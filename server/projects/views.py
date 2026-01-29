@@ -1,4 +1,4 @@
-from rest_framework.generics import CreateAPIView,ListAPIView, RetrieveUpdateDestroyAPIView,RetrieveAPIView
+from rest_framework.generics import CreateAPIView,ListAPIView, RetrieveUpdateDestroyAPIView,RetrieveAPIView,UpdateAPIView
 from rest_framework.permissions import IsAuthenticated
 from .permissions import IsClientUser, IsFreelancerUser
 from .models import Project,Invitation, Proposal
@@ -9,6 +9,9 @@ from django.db import models
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework import status
+from common.pagination import AdminUserPagination
+from django.db.models import Count
 import logging
 
 logger = logging.getLogger('projects')
@@ -47,7 +50,25 @@ class ProjectListView(ListAPIView):
             queryset = queryset.filter(title__icontains=search)
 
         return queryset.select_related('category').prefetch_related('project_skills__skill').order_by('-created_at')
-    
+    def list(self, request, *args, **kwargs):
+        response = super().list(request, *args, **kwargs)
+        
+        user = request.user
+        base_queryset = Project.objects.filter(client=user)
+        
+        search = request.query_params.get('search')
+        if search:
+            base_queryset = base_queryset.filter(title__icontains=search)
+
+        status_counts = base_queryset.aggregate(
+            all=Count('id'),
+            completed=Count('id', filter=models.Q(status='completed')),
+            in_progress=Count('id', filter=models.Q(status='in_progress')),
+            open=Count('id', filter=models.Q(status='open'))
+        )
+
+        response.data['counts'] = status_counts
+        return response
 
 class ProjectUpdateAPIView(RetrieveUpdateDestroyAPIView):
     serializer_class = ProjectUpdateSerializer
@@ -174,6 +195,16 @@ class InvitationViewSet(viewsets.ModelViewSet):
                 "error": "An active invitation already exists for this freelancer on this project."
             })
 
+        proposal_exists = Proposal.objects.filter(
+            project=project,
+            freelancer=freelancer
+        ).exists()
+
+        if proposal_exists:
+            raise ValidationError({
+                "error": "This freelancer has already submitted a proposal for this project. You cannot invite them."
+            })
+
         try:
             instance = serializer.save(client=self.request.user)
             logger.info(f"Invitation ID {instance.id} sent by client {self.request.user.id} to freelancer {instance.freelancer.id}")
@@ -183,7 +214,6 @@ class InvitationViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['get'])
     def received(self, request):
-        print(request.user)
         invitations = Invitation.objects.filter(
             freelancer__user=request.user
         ).order_by('-created_at')
@@ -248,10 +278,17 @@ class ProposalCreateView(CreateAPIView):
 class ProposalsListView(ListAPIView):
     serializer_class = ProposalsListSerializer
     permission_classes = [IsClientUser]
+    pagination_class = AdminUserPagination
 
     def get_queryset(self):
         project_id = self.kwargs.get('project_id')
-        return Proposal.objects.filter(project_id = project_id).order_by('-created_at')
+        queryset = Proposal.objects.filter(project_id = project_id).order_by('-created_at')
+
+        status = self.request.query_params.get('status')
+        if status:
+            queryset= queryset.filter(status=status)
+
+        return queryset
     
 class FreelancerProposalsListView(ListAPIView):
     serializer_class = FreelancerProposalSerializer
@@ -267,3 +304,31 @@ class FreelancerProposalsListView(ListAPIView):
             queryset= queryset.filter(status=status)
 
         return queryset
+
+class RejectProposalView(UpdateAPIView):
+    queryset = Proposal.objects.all()
+    serializer_class = ProposalsListSerializer
+    permission_classes = [IsClientUser]
+
+    def patch(self, request, *args, **kwargs):
+        proposal = self.get_object()
+        
+        if proposal.project.client != request.user:
+            return Response(
+                {"error": "You do not have permission to reject proposals for this project."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        if proposal.status != 'pending':
+            return Response(
+                {"error": f"Cannot reject a proposal that is already {proposal.status}."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        proposal.status = 'rejected'
+        proposal.save()
+
+        return Response(
+            {"message": "Proposal rejected successfully.", "status": proposal.status},
+            status=status.HTTP_200_OK
+        )

@@ -3,11 +3,13 @@ from .models import Project, ProjectSkill, Invitation, Proposal
 from categories.models import Skill
 from profiles.models import ClientProfile, FreelancerProfile, FreelancerPackage
 from contracts.models import Contract
+
+
 class ProjectCreateSerializer(serializers.ModelSerializer):
     skills = serializers.ListField(
         child=serializers.CharField(),
         write_only=True,
-        min_length = 1
+        min_length=1
     )
 
     class Meta:
@@ -58,6 +60,7 @@ class ProjectCreateSerializer(serializers.ModelSerializer):
                 )
 
         return attrs
+
     def validate_category(self, value):
         if not value:
             raise serializers.ValidationError("Category is required")
@@ -91,24 +94,24 @@ class ProjectCreateSerializer(serializers.ModelSerializer):
                     custom_name=normalized
                 )
 
-
         return project
 
 
 class ProjectListSerializer(serializers.ModelSerializer):
     category_name = serializers.CharField(
         source="category.name",
-        read_only = True
+        read_only=True
     )
     skills = serializers.SerializerMethodField()
     contract_id = serializers.SerializerMethodField()
     proposals_count = serializers.SerializerMethodField()
+
     class Meta:
         model = Project
         fields = [
-            'id', 'title', 'description', 'category_name', 
-            'pricing_type', 'fixed_price', 'min_budget', 
-            'max_budget', 'delivery_days', 'status', 
+            'id', 'title', 'description', 'category_name',
+            'pricing_type', 'fixed_price', 'min_budget',
+            'max_budget', 'delivery_days', 'status',
             'created_at', 'skills', 'contract_id', 'proposals_count'
         ]
 
@@ -120,7 +123,7 @@ class ProjectListSerializer(serializers.ModelSerializer):
             elif ps.custom_name:
                 skills.append(ps.custom_name)
         return skills
-    
+
     def get_contract_id(self, obj):
         try:
             return obj.contract.id
@@ -131,15 +134,14 @@ class ProjectListSerializer(serializers.ModelSerializer):
         return obj.proposals.count()
 
 
-
 class ProjectUpdateSerializer(serializers.ModelSerializer):
     skills = serializers.ListField(
         child=serializers.CharField(),
         required=False,
-        write_only = True
+        write_only=True
     )
     skills_display = serializers.SerializerMethodField(read_only=True)
-    
+
     class Meta:
         model = Project
         fields = [
@@ -157,7 +159,7 @@ class ProjectUpdateSerializer(serializers.ModelSerializer):
             "skills",
             "skills_display"
         ]
-    
+
     def get_skills_display(self, obj):
         skills = []
         for ps in obj.project_skills.all():
@@ -166,7 +168,7 @@ class ProjectUpdateSerializer(serializers.ModelSerializer):
             else:
                 skills.append(ps.custom_name)
         return skills
-    
+
     def validate(self, attrs):
         pricing_type = attrs.get("pricing_type", self.instance.pricing_type)
 
@@ -217,14 +219,12 @@ class ProjectUpdateSerializer(serializers.ModelSerializer):
                 skill = Skill.objects.filter(name__iexact=normalized).first()
 
                 ProjectSkill.objects.create(
-                project=instance,
-                skill=skill if skill else None,
-                custom_name=None if skill else normalized,
-            )
+                    project=instance,
+                    skill=skill if skill else None,
+                    custom_name=None if skill else normalized,
+                )
 
-    
         return instance
-    
 
 
 class RecommendedProjectSerializer(serializers.ModelSerializer):
@@ -259,25 +259,29 @@ class RecommendedProjectSerializer(serializers.ModelSerializer):
 
 class ProjectClientSerializer(serializers.ModelSerializer):
     full_name = serializers.CharField(source="user.full_name", read_only=True)
-    profile_photo = serializers.URLField(source="user.profile_photo", read_only=True)
+    profile_photo = serializers.URLField(
+        source="user.profile_photo", read_only=True)
     member_since = serializers.SerializerMethodField()
     total_jobs_posted = serializers.SerializerMethodField()
     contract_id = serializers.SerializerMethodField()
+
     class Meta:
         model = ClientProfile
-        fields = ["full_name", "profile_photo", "member_since", "total_jobs_posted", 'contract_id']
+        fields = ["full_name", "profile_photo",
+                  "member_since", "total_jobs_posted", 'contract_id']
 
     def get_member_since(self, obj):
-        return obj.user.created_at.strftime("%b %Y") 
+        return obj.user.created_at.strftime("%b %Y")
 
     def get_total_jobs_posted(self, obj):
         return Project.objects.filter(client=obj.user).count()
-    
+
     def get_contract_id(self, obj):
         try:
             return obj.contract.id
         except Exception:
             return None
+
 
 class ProjectDetailSerializer(ProjectListSerializer):
     requirements = serializers.CharField()
@@ -286,43 +290,47 @@ class ProjectDetailSerializer(ProjectListSerializer):
 
     class Meta(ProjectListSerializer.Meta):
         fields = ProjectListSerializer.Meta.fields + [
-            'requirements', 
-            'expected_deliverables', 
+            'requirements',
+            'expected_deliverables',
             'client_info'
         ]
-    
+
     def get_client_info(self, obj):
         profile, created = ClientProfile.objects.get_or_create(user=obj.client)
         return ProjectClientSerializer(profile).data
-    
-    
+
+
 class InvitationSerializer(serializers.ModelSerializer):
     client_name = serializers.ReadOnlyField(source='client.full_name')
     project_title = serializers.ReadOnlyField(source='project.title')
     package_type = serializers.ReadOnlyField(source='package.package_type')
     package_amount = serializers.ReadOnlyField(source='package.price')
-    freelancer_name = serializers.ReadOnlyField(source='freelancer.user.full_name')
-    freelancer_id = serializers.ReadOnlyField(source='freelancer.id') # Useful for frontend mapping
-    freelancer_image = serializers.ReadOnlyField(source='freelancer.user.profile_photo')
-    freelancer_tagline = serializers.ReadOnlyField(source='freelancer.user.freelancer_profile.tagline')
-    
+    freelancer_name = serializers.ReadOnlyField(
+        source='freelancer.user.full_name')
+    freelancer_id = serializers.ReadOnlyField(
+        source='freelancer.id')  # Useful for frontend mapping
+    freelancer_image = serializers.ReadOnlyField(
+        source='freelancer.user.profile_photo')
+    freelancer_tagline = serializers.ReadOnlyField(
+        source='freelancer.user.freelancer_profile.tagline')
+
     contract_info = serializers.SerializerMethodField()
 
     class Meta:
         model = Invitation
         fields = [
-            'id', 'client', 'freelancer', 'project', 
+            'id', 'client', 'freelancer', 'project',
             'package', 'message', 'status', 'created_at',
             'client_name', 'project_title', 'package_type',
-            'freelancer_name', 'freelancer_id', 'freelancer_image', 
+            'freelancer_name', 'freelancer_id', 'freelancer_image',
             'freelancer_tagline', 'package_amount', 'contract_info'
         ]
         read_only_fields = ['client', 'status', 'created_at']
 
     def get_contract_info(self, obj):
-       
+
         contract = Contract.objects.filter(
-            project=obj.project, 
+            project=obj.project,
             freelancer=obj.freelancer.user
         ).first()
 
@@ -337,21 +345,25 @@ class InvitationSerializer(serializers.ModelSerializer):
     def validate(self, data):
         request = self.context.get('request')
         if request and request.user == data['freelancer']:
-            raise serializers.ValidationError("You cannot invite yourself to a project.")
+            raise serializers.ValidationError(
+                "You cannot invite yourself to a project.")
         return data
-    
+
 
 class ProposalsSerializer(serializers.ModelSerializer):
-    bid_amount = serializers.DecimalField(max_digits=10,decimal_places=2, read_only=True )
+    bid_amount = serializers.DecimalField(
+        max_digits=10, decimal_places=2, read_only=True)
     delivery_days = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Proposal
-        fields = ['id', 'project', 'package', 'cover_letter', 'bid_amount', 'delivery_days', 'status']
+        fields = ['id', 'project', 'package', 'cover_letter',
+                  'bid_amount', 'delivery_days', 'status']
         read_only_fields = ['status', 'freelancer']
 
     def validate(self, data):
-        user = self.context['request'].user
+        request = self.context.get('request')
+        user = request.user
         project = data.get('project')
         package = data.get('package')
 
@@ -360,45 +372,63 @@ class ProposalsSerializer(serializers.ModelSerializer):
         except AttributeError:
             raise serializers.ValidationError("Freelancer profile not found.")
         if Proposal.objects.filter(project=project, freelancer=freelancer_profile).exists():
-            raise serializers.ValidationError("You have already submitted a proposal for this project.")
+            raise serializers.ValidationError(
+                "You have already submitted a proposal for this project.")
+
+        if Invitation.objects.filter(
+            project=project,
+            freelancer=freelancer_profile,
+            status__in=['pending', 'accepted']
+        ).exists():
+            raise serializers.ValidationError(
+                "You have already been invited to this project. Please respond to the invitation in your dashboard."
+            )
         if project.status != 'open':
-            raise serializers.ValidationError("This project is no longer accepting bids.")
+            raise serializers.ValidationError(
+                "This project is no longer accepting bids.")
 
         if project.client == user:
-            raise serializers.ValidationError("You cannot bid on your own project.")
+            raise serializers.ValidationError(
+                "You cannot bid on your own project.")
 
         if package.user != user:
-            raise serializers.ValidationError("You must use one of your own packages to bid.")
+            raise serializers.ValidationError(
+                "You must use one of your own packages to bid.")
 
         return data
 
     def create(self, validated_data):
         package = validated_data['package']
         user = self.context['request'].user
-    
+
         try:
             freelancer_profile = user.freelancer_profile
         except AttributeError:
-            raise serializers.ValidationError({"error": "Freelancer profile not found."})
-    
+            raise serializers.ValidationError(
+                {"error": "Freelancer profile not found."})
+
         validated_data['freelancer'] = freelancer_profile
         validated_data['bid_amount'] = package.price
-        validated_data['delivery_days'] = package.delivery_days 
-    
+        validated_data['delivery_days'] = package.delivery_days
+
         return super().create(validated_data)
-    
+
+
 class ProposalsListSerializer(serializers.ModelSerializer):
     freelancer_name = serializers.CharField(source='freelancer.user.full_name')
-    freelancer_photo = serializers.CharField(source='freelancer.user.profile_photo', read_only=True)
-    freelancer_tagline = serializers.CharField(source='freelancer.tagline', read_only=True)
+    freelancer_photo = serializers.CharField(
+        source='freelancer.user.profile_photo', read_only=True)
+    freelancer_tagline = serializers.CharField(
+        source='freelancer.tagline', read_only=True)
     contract_info = serializers.SerializerMethodField()
 
     class Meta:
         model = Proposal
         fields = [
-            'id','freelancer_id' ,'freelancer_name', 'freelancer_photo', 'freelancer_tagline',
-            'cover_letter', 'bid_amount', 'delivery_days', 'status', 'created_at','contract_info'
+            'id', 'freelancer_id', 'freelancer_name', 'freelancer_photo', 'freelancer_tagline',
+            'cover_letter', 'bid_amount', 'delivery_days', 'status', 'created_at', 'contract_info'
         ]
+
     def get_contract_info(self, obj):
         from contracts.models import Contract
         contract = Contract.objects.filter(project=obj.project).first()
@@ -409,25 +439,27 @@ class ProposalsListSerializer(serializers.ModelSerializer):
                 "is_this_freelancer": contract.freelancer.id == obj.freelancer.user.id
             }
         return None
-    
+
 
 class FreelancerProposalSerializer(serializers.ModelSerializer):
-    project_title = serializers.CharField(source='project.title', read_only=True)
-    client_name = serializers.CharField(source='project.client.full_name', read_only=True)
+    project_title = serializers.CharField(
+        source='project.title', read_only=True)
+    client_name = serializers.CharField(
+        source='project.client.full_name', read_only=True)
     contract_info = serializers.SerializerMethodField()
 
     class Meta:
         model = Proposal
         fields = [
-            'id', 'project_id', 'project_title', 'client_name', 
-            'cover_letter', 'bid_amount', 'delivery_days', 
+            'id', 'project_id', 'project_title', 'client_name',
+            'cover_letter', 'bid_amount', 'delivery_days',
             'status', 'created_at', 'contract_info'
         ]
 
     def get_contract_info(self, obj):
         from contracts.models import Contract
         contract = Contract.objects.filter(
-            project=obj.project, 
+            project=obj.project,
             freelancer=obj.freelancer.user
         ).first()
         if contract:

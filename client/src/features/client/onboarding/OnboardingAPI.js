@@ -4,7 +4,7 @@ export const sendPhoneOtp = async ({ phone }) => {
   const { data } = await axiosInstance.post(
     "/profile/freelancer/send-phone-otp/",
     { phone }
-  );
+  );  
   return data;
 };
 

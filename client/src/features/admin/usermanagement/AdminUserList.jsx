@@ -6,9 +6,9 @@ import UserTable from "./userTable";
 export default function AdminUserList() {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
-  const [role, setRole] = useState("");
+  const [status, setStatus] = useState("");
 
-  const { data, isLoading, isError } = useAdminUsers({ page, search, role });
+  const { data, isLoading, isError } = useAdminUsers({ page, search, status });
 
   return (
     <div className="max-w-7xl mx-auto">
@@ -38,17 +38,19 @@ export default function AdminUserList() {
         <div className="relative">
           <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
           <select
-            value={role}
+            value={status}
             onChange={(e) => {
-              setRole(e.target.value);
+              setStatus(e.target.value);
               setPage(1);
             }}
             className="h-11 pl-10 pr-10 bg-gray-50 border-none rounded-lg text-sm focus:ring-2 focus:ring-blue-500 appearance-none cursor-pointer font-medium text-gray-700"
           >
-            <option value="">All Roles</option>
-            <option value="client">Clients Only</option>
-            <option value="freelancer">Freelancers Only</option>
-            <option value="both">Dual Accounts</option>
+            <option value="">All Users</option>
+            <option value="active">Active Only</option>
+            <option value="both">Both (Active)</option>
+            <option value="client">Clients (Active)</option>
+            <option value="blocked">Blocked</option>
+            <option value="deleted">Deleted</option>
           </select>
           <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
         </div>

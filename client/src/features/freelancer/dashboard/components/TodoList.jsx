@@ -3,12 +3,6 @@ import { Trash2, Plus } from 'lucide-react';
 
 function TodoList() {
   const [tasks, setTasks] = useState([
-    { id: 1, text: "Review contract proposal from TechCorp", completed: false },
-    { id: 2, text: "Submit final designs for mobile app", completed: false },
-    { id: 3, text: "Schedule call with new client", completed: true },
-    { id: 4, text: "Review contract proposal from TechCorp", completed: false },
-    { id: 5, text: "Submit final designs for mobile app", completed: false },
-    { id: 6, text: "Schedule call with new client", completed: true },
   ]);
 
   const [newTask, setNewTask] = useState("");

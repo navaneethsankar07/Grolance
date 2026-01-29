@@ -62,12 +62,7 @@ export default function MyProposals() {
               <ChevronDown className="w-4 h-4 text-gray-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
             </div>
 
-            <button className="flex items-center justify-between gap-4 sm:gap-6 h-[42px] px-4 sm:px-[17px] rounded-xl border border-gray-200 bg-white hover:bg-gray-50 transition-colors">
-              <span className="text-sm font-medium text-gray-700">
-                Newest First
-              </span>
-              <ChevronDown className="w-4 h-4 text-gray-400" />
-            </button>
+            
           </div>
 
           <div className="text-xs text-gray-500 font-medium">

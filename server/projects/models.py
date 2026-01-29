@@ -3,7 +3,6 @@ from django.conf import settings
 from categories.models import Skill
 from categories.models import Category
 from django.core.validators import MinValueValidator
-# Project Model
 
 class Project(models.Model):
     STATUS_CHOICES = [
@@ -22,13 +21,11 @@ class Project(models.Model):
         on_delete=models.CASCADE,
         related_name="projects"
     )
-
     category = models.ForeignKey(
         Category,
         on_delete=models.PROTECT,
         related_name="projects"
     )
-
     title = models.CharField(max_length=255)
     description = models.TextField()
     requirements = models.TextField()
@@ -38,30 +35,25 @@ class Project(models.Model):
         choices=PRICING_TYPE_CHOICES,
         default="fixed"
     )
-
     fixed_price = models.DecimalField(
         max_digits=10,
         decimal_places=2,
         null=True,
         blank=True
     )
-
     min_budget = models.DecimalField(
         max_digits=10,
         decimal_places=2,
         null=True,
         blank=True
     )
-
     max_budget = models.DecimalField(
         max_digits=10,
         decimal_places=2,
         null=True,
         blank=True
     )
-
     delivery_days = models.PositiveIntegerField()
-
     status = models.CharField(
         max_length=20,
         choices=STATUS_CHOICES,
@@ -71,9 +63,14 @@ class Project(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    class Meta:
+        indexes = [
+            models.Index(fields=['status']),
+            models.Index(fields=['created_at']),
+        ]
+
     def __str__(self):
         return self.title
-
 
 class ProjectSkill(models.Model):
     project = models.ForeignKey(
@@ -81,7 +78,6 @@ class ProjectSkill(models.Model):
         on_delete=models.CASCADE,
         related_name="project_skills"
     )
-
     skill = models.ForeignKey(
         Skill,
         on_delete=models.PROTECT,
@@ -89,7 +85,6 @@ class ProjectSkill(models.Model):
         blank=True,
         related_name="project_skills"
     )
-
     custom_name = models.CharField(
         max_length=100,
         null=True,
@@ -110,8 +105,6 @@ class ProjectSkill(models.Model):
     def __str__(self):
         return self.custom_name or self.skill.name
 
-
-
 class Invitation(models.Model):
     STATUS_CHOICES = [
         ('pending', 'Pending'),
@@ -129,19 +122,26 @@ class Invitation(models.Model):
         on_delete=models.CASCADE, 
         related_name='received_invitations'
     )
-    
     project = models.ForeignKey('Project', on_delete=models.CASCADE)
-    
-    package = models.ForeignKey('profiles.FreelancerPackage', on_delete=models.SET_NULL,null=True,blank=True,related_name='invitations')
-    
+    package = models.ForeignKey(
+        'profiles.FreelancerPackage', 
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='invitations'
+    )
     message = models.TextField(blank=True, null=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     created_at = models.DateTimeField(auto_now_add=True)
 
-    def __str__(self):
-        return f"Invite for {self.project.title} to {self.freelancer.email}"
-    
+    class Meta:
+        indexes = [
+            models.Index(fields=['status']),
+            models.Index(fields=['created_at']),
+        ]
 
+    def __str__(self):
+        return f"Invite for {self.project.title} to {self.freelancer.user.email}"
 
 class Proposal(models.Model):
     STATUS_CHOICES = [
@@ -160,12 +160,15 @@ class Proposal(models.Model):
     cover_letter = models.TextField()
     bid_amount = models.DecimalField(max_digits=10, decimal_places=2)
     delivery_days = models.IntegerField(validators=[MinValueValidator(1)])
-    
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         unique_together = ('project', 'freelancer') 
+        indexes = [
+            models.Index(fields=['status']),
+            models.Index(fields=['created_at']),
+        ]
 
     def __str__(self):
         return f"{self.freelancer.user.full_name} - {self.project.title}"

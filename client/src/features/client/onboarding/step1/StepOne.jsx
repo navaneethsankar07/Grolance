@@ -40,9 +40,24 @@ const handleVerify = async () => {
 
  try {
     await sendOtp({ phone: phoneValue });
+    toast.success("OTP sent successfully!");
     openModal("phone-otp", { phone: phoneValue });
   } catch (err) {
-    toast.error("Failed to send OTP. Try again.");
+   const data = err.response?.data;
+    let errorMessage = "Failed to send OTP. Please try again.";
+
+    if (data) {
+      if (typeof data === 'string') {
+        errorMessage = data;
+      } else if (data.phone) {
+        errorMessage = data.phone[0];  
+      } else if (data.error) {
+        errorMessage = data.error;
+      } else if (data.detail) {
+        errorMessage = data.detail; 
+      }
+    }
+    toast.error(errorMessage);
   }
 };
 

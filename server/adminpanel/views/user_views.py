@@ -23,7 +23,23 @@ class AdminUserListAPIView(ListAPIView):
     ordering = ["-created_at"]  
 
     def get_queryset(self):
-        return User.objects.filter(is_admin=False)
+        queryset = User.objects.filter(is_admin=False)
+        status = self.request.query_params.get('status')
+
+        if status == 'blocked':
+            queryset = queryset.filter(is_active=False, is_deleted=False)
+        elif status == 'deleted':
+            queryset = queryset.filter(is_deleted=True)
+        elif status == 'active':
+            queryset = queryset.filter(is_active=True, is_deleted=False)
+        elif status == 'both':
+            # Active users who have a freelancer profile
+            queryset = queryset.filter(is_active=True, is_deleted=False, is_freelancer=True)
+        elif status == 'client':
+            # Active users who are NOT freelancers (Clients only)
+            queryset = queryset.filter(is_active=True, is_deleted=False, is_freelancer=False)
+
+        return queryset
 
 
 class AdminToggleUserActiveAPIView(APIView):

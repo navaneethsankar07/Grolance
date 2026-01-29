@@ -275,7 +275,7 @@ class FreelancerTransactionView(APIView):
                 queryset = queryset.filter(client_signed_at__gte=now - timedelta(days=365))
         
         stats = queryset.aggregate(
-            total_earning = Sum('total_amount'),
+            total_earning = Sum('escrow_details__freelancer_share'),
             total_projects = Count('id')
         )
         paginator = AdminUserPagination()

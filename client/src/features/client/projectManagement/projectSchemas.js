@@ -14,7 +14,7 @@ export const projectCreateSchema = z
     category: z.preprocess((val) => Number(val), z.number().min(1)),
     skills: z
       .array(z.string().regex(/^[^0-9]*$/, "Title cannot contain numbers")
-      .regex(/^[a-zA-Z\s]*$/, "Full name can only contain letters and spaces"))
+      .regex(/^[a-zA-Z\s\.]*$/, "Full name can only contain letters and spaces"))
       .min(3)
       
       ,

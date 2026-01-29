@@ -1,8 +1,8 @@
 import axiosInstance from "../../../api/axiosInstance";
 
-export const fetchUsers = async ({ page = 1, search = "" }) => {
+export const fetchUsers = async ({ page = 1, search = "" ,status=''}) => {
   const res = await axiosInstance.get("/admin/users/", {
-    params: { page, search },
+    params: { page, search, status },
   });
   return res.data;
 };

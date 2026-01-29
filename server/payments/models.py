@@ -20,6 +20,12 @@ class Payment(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    class Meta:
+        indexes = [
+            models.Index(fields=['status']),
+            models.Index(fields=['created_at']),
+        ]
+
 class PlatformAnalytics(models.Model):
     total_business_volume = models.DecimalField(max_digits=15, decimal_places=2, default=0)
     total_platform_profit = models.DecimalField(max_digits=15, decimal_places=2, default=0)

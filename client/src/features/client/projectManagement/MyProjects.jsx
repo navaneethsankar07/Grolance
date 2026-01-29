@@ -8,6 +8,7 @@ export default function MyProjects() {
   const [searchQuery, setSearchQuery] = useState("");
   const [page, setPage] = useState(1);
   const searchInputRef = useRef(null);
+
   const { data, isLoading } = useMyProjects({
     page,
     status: activeTab === "all" ? "" : activeTab,
@@ -16,6 +17,8 @@ export default function MyProjects() {
 
   const jobs = data?.results ?? [];
   const totalCount = data?.count ?? 0;
+
+const counts = data?.counts ?? { all: 0, completed: 0, in_progress: 0, open: 0 };
 
   const handleSearch = () => {
     const value = searchInputRef.current.value;
@@ -33,7 +36,7 @@ export default function MyProjects() {
     if (e.key === 'Enter') handleSearch();
   };
 
-  const TabButton = ({ id, label, Icon, count }) => (
+  const TabButton = ({ id, label, Icon }) => (
     <button
       onClick={() => { setActiveTab(id); setPage(1); }}
       className={`flex items-center gap-2 px-1 py-4 border-b-2 transition-colors ${
@@ -45,7 +48,7 @@ export default function MyProjects() {
       <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
         activeTab === id ? "bg-blue-100 text-blue-600" : "bg-gray-100 text-gray-600"
       }`}>
-        {count || 0}
+        {counts[id] || 0}
       </span>
     </button>
   );
@@ -90,9 +93,9 @@ export default function MyProjects() {
 
         <div className="border-b border-gray-200 mb-6">
           <nav className="flex gap-6">
-            <TabButton id="all" label="All Posts" Icon={Briefcase} count={activeTab === 'all' ? totalCount : null} />
-            <TabButton id="completed" label="completed" Icon={CircleCheck} count={activeTab === 'completed' ? totalCount : null} />
-            <TabButton id="in_progress" label="In Progress" Icon={Hourglass} count={activeTab === 'in_progress' ? totalCount : null} />
+            <TabButton id="all" label="All Posts" Icon={Briefcase} />
+            <TabButton id="completed" label="Completed" Icon={CircleCheck} />
+            <TabButton id="in_progress" label="In Progress" Icon={Hourglass} />
           </nav>
         </div>
 

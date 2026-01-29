@@ -63,12 +63,10 @@ class FreelancerOnboardingAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        print("DEBUG: Incoming Data ->", request.data)
         
         serializer = FreelancerOnboardingSerializer(data=request.data)
         
         if not serializer.is_valid():
-            print("DEBUG: Serializer Errors ->", serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         data = serializer.validated_data
@@ -78,12 +76,10 @@ class FreelancerOnboardingAPIView(APIView):
             freelancer_profile, _ = FreelancerProfile.objects.get_or_create(user=user)
 
             if not freelancer_profile.is_phone_verified:
-                print("DEBUG: Phone not verified for user", user.email)
                 return Response({"detail": "Phone number not verified"}, status=status.HTTP_400_BAD_REQUEST)
 
             
         except Exception as e:
-            print("DEBUG: Unexpected Error ->", str(e))
             return Response({"error": str(e)}, status=500)
 
         freelancer_profile.tagline = data["tagline"]
@@ -290,8 +286,6 @@ class FreelancerPaymentSettingsUpdateView(APIView):
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
-        if not serializer.is_valid():
-            print(serializer.error_messages,serializer.errors)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 class FreelancerListAPIView(ListAPIView):

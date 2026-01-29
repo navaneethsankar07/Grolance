@@ -30,9 +30,9 @@ export default function ClientHeader() {
           <Link to={'/find-talents'} className="text-sm font-medium text-[#111318]">
             Find Talent
           </Link>
-          <button className="text-sm font-medium text-[#111318]">
+          <Link to={'/how-it-works'} className="text-sm font-medium text-[#111318]">
             How It Works
-          </button>
+          </Link>
           <Link to="/my-projects" className="text-sm font-medium text-[#111318]">
             My Posts
           </Link>

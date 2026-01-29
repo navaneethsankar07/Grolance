@@ -36,5 +36,12 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     USERNAME_FIELD = "email"
 
+    class Meta:
+        indexes = [
+            models.Index(fields=['current_role']),
+            models.Index(fields=['is_active']),
+            models.Index(fields=['created_at']),
+        ]
+
     def __str__(self):
         return self.email

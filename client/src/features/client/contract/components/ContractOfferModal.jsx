@@ -61,7 +61,7 @@ console.log(modalProps);
   const getSignatureData = () => {
     if (signatureMode === "draw") {
       if (sigCanvas.current.isEmpty()) return null;
-      return sigCanvas.current.getTrimmedCanvas().toDataURL('image/png');
+      return sigCanvas.current.getCanvas().toDataURL('image/png');
     } else {
       if (!fullName.trim()) return null;
       const canvas = document.createElement("canvas");

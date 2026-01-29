@@ -3,6 +3,7 @@ import Invitations from './components/Invitations';
 import TodoList from './components/TodoList';
 import ActiveContacts from './components/ActiveContacts';
 import JobRecommendation from './components/JobRecommendation';
+import { Link } from 'react-router-dom';
 
 function FreelancerDashboard() {
   return (
@@ -16,12 +17,12 @@ function FreelancerDashboard() {
             Your personalized freelance workspace is ready. You have 3 new opportunities waiting.
           </p>
           <div className="flex items-center gap-5 mt-4">
-            <button className="bg-[#4F46E5] text-white px-6 py-2.5 rounded-lg font-semibold text-base shadow-sm hover:bg-[#4338CA] transition-all">
+            <Link to={'jobs'} className="bg-[#4F46E5] text-white px-6 py-2.5 rounded-lg font-semibold text-base shadow-sm hover:bg-[#4338CA] transition-all">
               Find Work
-            </button>
-            <button className="bg-white text-[#334155] px-6 py-2.5 rounded-lg font-semibold text-base border border-[#E2E8F0] hover:bg-gray-50 transition-all">
+            </Link>
+            <Link to={'profile'} className="bg-white text-[#334155] px-6 py-2.5 rounded-lg font-semibold text-base border border-[#E2E8F0] hover:bg-gray-50 transition-all">
               View Profile
-            </button>
+            </Link>
           </div>
         </div>
         <img 

@@ -133,7 +133,7 @@ export default function EarningsOverview() {
                   <tr key={contract.id} className="border-t border-gray-200 hover:bg-gray-50">
                     <td className="px-6 py-4 text-xs font-medium text-gray-900">#{contract.id.toString().padStart(3, '0')}</td>
                     <td className="px-6 py-4 text-xs text-gray-700">{contract.project_title}</td>
-                    <td className="px-6 py-4 text-xs font-semibold text-gray-900">${Number(contract.total_amount).toLocaleString()}</td>
+                    <td className="px-6 py-4 text-xs font-semibold text-gray-900">${Number(contract.freelancer_earnings).toLocaleString()}</td>
                     <td className="px-6 py-4"><StatusBadge status={contract.status} /></td>
                     <td className="px-6 py-4 text-xs text-gray-600">{formatDateDMY(contract.client_signed_at)}</td>
                   </tr>

@@ -111,6 +111,14 @@ class ContractAcceptSerializer(serializers.ModelSerializer):
 class ContractListSerializer(serializers.ModelSerializer):
     project_title = serializers.CharField(source='project.title', read_only=True)
     freelancer_name = serializers.CharField(source='freelancer.user.full_name', read_only=True)
+    freelancer_earnings = serializers.SerializerMethodField()
     class Meta:
         model = Contract
-        fields = ['id', 'project_title','freelancer_name', 'status' ,'total_amount', 'client_signed_at']
+        fields = ['id', 'project_title','freelancer_name', 'status' ,'total_amount', 'client_signed_at' , 'freelancer_earnings']
+
+    
+    def get_freelancer_earnings(self, obj):
+        try:
+            return obj.escrow_details.freelancer_share
+        except AttributeError:
+            return 0.00

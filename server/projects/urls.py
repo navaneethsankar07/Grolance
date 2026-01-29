@@ -1,5 +1,5 @@
 from django.urls import path,include 
-from .views import ProjectCreateAPIView, ProjectListView, ProjectUpdateAPIView, FreelancerProjectListAPIView, FreelancerProjectDetailView, InvitationViewSet, ProposalCreateView, ProposalsListView, FreelancerProposalsListView
+from .views import ProjectCreateAPIView, ProjectListView, ProjectUpdateAPIView, FreelancerProjectListAPIView, FreelancerProjectDetailView, InvitationViewSet, ProposalCreateView, ProposalsListView, FreelancerProposalsListView, RejectProposalView
 from rest_framework.routers import DefaultRouter
 
 router = DefaultRouter()
@@ -13,5 +13,6 @@ urlpatterns = [
     path("", include(router.urls)),
     path('create-proposal/',ProposalCreateView.as_view()),
     path('<int:project_id>/proposals/', ProposalsListView.as_view()),
-    path('my-proposals/',FreelancerProposalsListView.as_view())
+    path('my-proposals/',FreelancerProposalsListView.as_view()),
+    path('proposals/<int:pk>/reject/', RejectProposalView.as_view(), name='reject-proposal'),
 ]

@@ -7,12 +7,15 @@ import { stepSixSchema } from "./stepSixSchema";
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 import { useSubmitFreelancerOnboarding } from '../onBoardingMutations';
+import { useDispatch, useSelector } from 'react-redux';
+import { setUser } from '../../account/auth/authslice';
 
 export default function StepSix() {
   const { formData, updateFormData } = useOnBoarding();
   const navigate = useNavigate();
   const { mutateAsync, isPending } = useSubmitFreelancerOnboarding();
   const dispatch = useDispatch();
+  const { user } = useSelector((state) => state.auth);
   const {
     register,
     handleSubmit,
@@ -26,7 +29,7 @@ export default function StepSix() {
       }
     },
   });
-
+  
   const onSubmit = async (data) => {
     const payload = {
       tagline: formData.tagline,

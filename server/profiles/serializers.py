@@ -163,17 +163,25 @@ class FreelancerProfileManageSerializer(serializers.ModelSerializer):
     profile_photo = serializers.URLField(source="user.profile_photo", read_only=True)
     category = serializers.StringRelatedField()
     payment_settings = serializers.SerializerMethodField()
+    completed_projects_count = serializers.SerializerMethodField()
     
     class Meta:
         model = FreelancerProfile
         fields = [
             'full_name', 'profile_photo', 'tagline', 'bio', 'phone', 
             'category', 'experience_level', 'availability', 
-            'skills', 'packages', 'portfolios', 'payment_settings', 'created_at'
+            'skills', 'packages', 'portfolios', 'payment_settings', 'created_at','completed_projects_count'
         ]
 
     def get_skills(self, obj):
         return [s.custom_name for s in obj.user.freelancer_skills.all()]
+    
+    def get_completed_projects_count(self, obj):
+        from contracts.models import Contract  
+        return Contract.objects.filter(
+            freelancer=obj.user, 
+            status='completed'
+        ).count()
 
     def get_packages(self, obj):
         packages = obj.user.freelancer_packages.all()
