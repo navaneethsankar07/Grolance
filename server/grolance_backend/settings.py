@@ -17,7 +17,6 @@ from datetime import timedelta
 import cloudinary
 import cloudinary.uploader
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 env = environ.Env()
@@ -60,7 +59,7 @@ INSTALLED_APPS = [
     'cloudinary',
     'cloudinary_storage',
     'contracts',
-    'payments'
+    'payments',
     
 ]
 SIMPLE_JWT = {
@@ -206,7 +205,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'grolance_backend.wsgi.application'
-
 
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases

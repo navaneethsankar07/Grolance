@@ -5,10 +5,11 @@ from .views.user_views import (
     AdminSoftDeleteUserAPIView,
 )
 from .views.payout_request_views import PendingPayoutListView
-
+from .views.dashboard_views import AdminDashboardView
 urlpatterns = [
     path("users/", AdminUserListAPIView.as_view(), name="admin-user-list"),
     path("users/<int:user_id>/toggle-active/",AdminToggleUserActiveAPIView.as_view(),name="admin-user-toggle-active",),
     path("users/<int:user_id>/soft-delete/",AdminSoftDeleteUserAPIView.as_view(),name="admin-user-soft-delete",),
     path('pending-payouts/', PendingPayoutListView.as_view(), name='pending-payouts'),
+    path('dashboard-stats/',AdminDashboardView.as_view(), name='admin-dashboard-stats')
 ]

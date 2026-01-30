@@ -2,8 +2,12 @@ import { Users, Briefcase, FileText, File, AlertCircle, DollarSign, Wallet } fro
 import AdminStatsCard from "./AdminStatsCard";
 import AdminRevenueChart from "./AdminRevenueChart";
 import AdminProposalsChart from "./AdminProposalsChart";
+import { useDashboardStats } from "../dashboardQueries";
 
 export default function AdminOverview() {
+  const {data:dashboardStats} = useDashboardStats()
+  console.log(dashboardStats);
+  
   return (
     <div className="space-y-8 px-10 py-10">
       <div>
@@ -14,7 +18,7 @@ export default function AdminOverview() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <AdminStatsCard
           title="Total Users"
-          value="24,593"
+          value={dashboardStats?.total_users}
           change="12%"
           changeType="positive"
           icon={Users}
@@ -23,7 +27,7 @@ export default function AdminOverview() {
         />
         <AdminStatsCard
           title="Total Projects"
-          value="1,842"
+          value={dashboardStats?.total_projects}
           change="8.5%"
           changeType="positive"
           icon={Briefcase}
@@ -32,7 +36,7 @@ export default function AdminOverview() {
         />
         <AdminStatsCard
           title="Active Contracts"
-          value="645"
+          value={dashboardStats?.active_contracts}
           change="3.2%"
           changeType="positive"
           icon={FileText}
@@ -41,7 +45,7 @@ export default function AdminOverview() {
         />
         <AdminStatsCard
           title="Total Proposals"
-          value="12,204"
+          value={dashboardStats?.total_proposals}
           change="5.4%"
           changeType="negative"
           icon={File}
@@ -62,7 +66,7 @@ export default function AdminOverview() {
         />
         <AdminStatsCard
           title="Platform Revenue"
-          value="$142,300"
+          value={`$${dashboardStats?.platform_revenue}`}
           change="15.3%"
           changeType="positive"
           icon={DollarSign}
@@ -71,7 +75,7 @@ export default function AdminOverview() {
         />
         <AdminStatsCard
           title="Pending Withdrawals"
-          value="$23,450"
+          value={`$${dashboardStats?.pending_withdrawals}`}
           change="12 pending"
           changeType="positive"
           icon={Wallet}

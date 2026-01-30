@@ -3,6 +3,7 @@ import { Route, Routes } from 'react-router-dom'
 import AdminUserList from '../features/admin/usermanagement/AdminUserList'
 import CategoriesAndSkills from '../features/admin/categorymanagement/CategoriesAndSkills'
 import PaymentRelease from '../features/admin/payoutmanagement/PaymenRelease'
+import AdminTransactions from '../features/admin/transactions/AdminTransactions'
 
 function AdminRoutes() {
   return (
@@ -13,6 +14,7 @@ function AdminRoutes() {
         <Route path="users" element={<AdminUserList />} />
         <Route path='category-management' element={<CategoriesAndSkills/>}/>
         <Route path='payment-release' element={<PaymentRelease/>}/>
+        <Route path='transactions' element={<AdminTransactions/>}/>
     </Routes>
     </>
   )

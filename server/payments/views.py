@@ -5,17 +5,19 @@ from django.utils import timezone
 from django.shortcuts import get_object_or_404
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.generics import ListAPIView
 from rest_framework import status
 from .models import Payment
 from profiles.models import FreelancerPaymentSettings
 from contracts.models import Contract
 from projects.models import Project, Proposal
-from .serializers import PaymentVerificationSerializer, ReleasePaymentSerializer, ClientDashboardSerializer, FreelancerTransactionSerializer
+from .serializers import PaymentVerificationSerializer, ReleasePaymentSerializer, ClientDashboardSerializer, FreelancerTransactionSerializer, AdminTransactionSerializer
 from adminpanel.permissions import IsAdminUser
 from django.db.models import Sum, Count, Avg, Q
 from projects.permissions import IsClientUser, IsFreelancerUser
 from datetime import timedelta
 from common.pagination import AdminUserPagination
+from django_filters.rest_framework import DjangoFilterBackend
 
 logger = logging.getLogger('payments')
 
@@ -209,7 +211,7 @@ class ReleasePaymentView(APIView):
             res_data = response.json()
 
             if response.status_code in [201, 200]:
-                payment_record.status = 'completed'
+                payment_record.status = 'released'
                 payment_record.save()
                 contract.status = 'completed'
                 contract.paid_to_freelancer = True
@@ -287,3 +289,11 @@ class FreelancerTransactionView(APIView):
             'contracts': page
         })
         return paginator.get_paginated_response(serializer.data)
+
+class AdminTransactionListView(ListAPIView):
+    queryset = Payment.objects.select_related('contract__client','contract__freelancer').order_by('-created_at')
+    serializer_class = AdminTransactionSerializer
+    permission_classes = [IsAdminUser]
+
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['status']
