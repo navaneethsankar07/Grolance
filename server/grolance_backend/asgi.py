@@ -11,16 +11,17 @@ import os
 
 from django.core.asgi import get_asgi_application
 from channels.routing import ProtocolTypeRouter, URLRouter
-from channels.auth import AuthMiddlewareStack
+from communication.middleware import JwtAuthMiddleware
+import communication.routing
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'grolance_backend.settings')
 
 application = ProtocolTypeRouter({
     'http':get_asgi_application(),
-    'websocket':AuthMiddlewareStack(
-        URLRouter([
-            
-        ])
+    'websocket':JwtAuthMiddleware(
+        URLRouter(
+            communication.routing.websocket_urlpatterns            
+        )
     )
 
 })

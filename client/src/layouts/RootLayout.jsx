@@ -30,10 +30,12 @@ import OfferModal from "../features/freelancer/offers/OfferModal";
 import ApproveContractModal from "../features/client/contract/components/ApproveContractModal";
 import PayoutReleaseModal from "../features/admin/payoutmanagement/PayoutReleaseModal";
 import EditPaymentModal from "../features/freelancer/profile/EditPaymentModal";
+import Notifications from "../components/notifications/Notifications";
 export default function RootLayout() {
   const { modal, modalProps, closeModal } = useModal();
 const { loading, initialized, accessToken } = useSelector((s) => s.auth);
   const dispatch = useDispatch();
+  
 useEffect(() => {
   if(!accessToken){
    dispatch(fetchUser());
@@ -76,6 +78,15 @@ useEffect(() => {
       {modal === 'approve-contract' && <ApproveContractModal modalProps={modalProps} />}
       {modal === 'release-payout' && <PayoutReleaseModal isOpen onClose={closeModal} contract={modalProps} />}
       {modal === 'edit-payment' && <EditPaymentModal isOpen onClose={closeModal} currentEmail={modalProps.currentEmail} />}
+      {modal === 'notifications' && <>
+    <div 
+      className="fixed inset-0 bg-black/20 backdrop-blur-[2px] z-[55]" 
+      onClick={closeModal} 
+    />
+    <div className="fixed top-[73px] right-4 md:right-8 z-[60]">
+       <Notifications onClose={closeModal} />
+    </div>
+  </>}
     </>
   );
 }

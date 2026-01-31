@@ -61,7 +61,8 @@ INSTALLED_APPS = [
     'cloudinary_storage',
     'contracts',
     'payments',
-    'channels'
+    'channels',
+    'communication'
     
 ]
 SIMPLE_JWT = {

@@ -2,21 +2,44 @@ import { Bell, Mail } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useSwitchRole } from "../../../client/homepage/homePageMutation";
 import { useSelector } from "react-redux";
+import { useState, useEffect, useRef } from "react";
+import { useModal } from "../../../../hooks/modal/useModalStore";
+import { useNotifications } from "../../../../components/notifications/notificationQueries";
+import { useNotificationSocket } from "../../../../hooks/modal/useNotificationSocket";
 
 export function Header() {
-  const {mutateAsync} = useSwitchRole()
-  const user = useSelector(state => state.auth.user)
-  const navigate = useNavigate()
-  const handleSwitchToClient = async() => {
-  if (user?.is_freelancer) {
-    await mutateAsync({ role: "client" });
-    navigate('/')
-  }
-  else{
-    return;
-  }
-}
-console.log(user.current_role);
+  const { mutateAsync } = useSwitchRole();
+  const user = useSelector((state) => state.auth.user);
+  const navigate = useNavigate();
+  const { openModal } = useModal();
+  
+  const [shouldAnimate, setShouldAnimate] = useState(false);
+  const prevCountRef = useRef(0);
+
+  const { data: notifications } = useNotifications(false);
+  useNotificationSocket(user?.id);
+
+  const unreadCount = notifications?.results?.length || 0;
+
+  useEffect(() => {
+    if (unreadCount < prevCountRef.current) return;
+    if (unreadCount > prevCountRef.current) {
+      setShouldAnimate(true);
+      const timer = setTimeout(() => {
+        setShouldAnimate(false);
+      }, 5000);
+      prevCountRef.current = unreadCount;
+      return () => clearTimeout(timer);
+    }
+    prevCountRef.current = unreadCount;
+  }, [unreadCount]);
+
+  const handleSwitchToClient = async () => {
+    if (user?.is_freelancer) {
+      await mutateAsync({ role: "client" });
+      navigate("/");
+    }
+  };
 
   return (
     <header className="w-full h-[80px] bg-white border-b border-[#F3F4F6] flex items-center justify-between px-10">
@@ -46,9 +69,21 @@ console.log(user.current_role);
               </span>
             </button>
 
-            <button className="relative w-11 h-11 flex items-center justify-center hover:bg-gray-100 transition-colors rounded-full">
-              <Bell className="w-6 h-6 text-[#4B5563]" />
-              <div className="absolute top-2.5 right-2.5 w-2.5 h-2.5 bg-[#EF4444] border-2 border-white rounded-full"></div>
+            <button 
+              onClick={() => openModal("notifications")}
+              className="relative w-11 h-11 flex items-center justify-center hover:bg-gray-100 transition-colors rounded-full"
+            >
+              <Bell className={`w-6 h-6 text-[#4B5563] transition-colors ${shouldAnimate ? 'animate-bounce text-primary' : ''}`} />
+              
+              {unreadCount > 0 && (
+                <span className="absolute top-1.5 right-1.5 w-5 h-5 bg-primary border-2 border-white rounded-full flex items-center justify-center text-[10px] font-bold text-white animate-in zoom-in">
+                  {unreadCount > 9 ? '9+' : unreadCount}
+                </span>
+              )}
+
+              {shouldAnimate && (
+                <span className="absolute inset-0 rounded-full border-2 border-primary animate-ping" />
+              )}
             </button>
         </div>
       </div>

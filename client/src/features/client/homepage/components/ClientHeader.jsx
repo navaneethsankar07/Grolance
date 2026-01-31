@@ -1,20 +1,43 @@
-import { useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Link } from "react-router-dom";
-import { Plus, Bell, Mail, Menu, X } from "lucide-react"; // Added Menu and X
+import { Plus, Bell, Mail, Menu, X } from "lucide-react";
 import { useSelector } from "react-redux";
 import { useModal } from "../../../../hooks/modal/useModalStore";
+import { useNotifications } from "../../../../components/notifications/notificationQueries";
+import { useNotificationSocket } from "../../../../hooks/modal/useNotificationSocket";
 
 export default function ClientHeader() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [shouldAnimate, setShouldAnimate] = useState(false);
+  const prevCountRef = useRef(0);
+  
   const user = useSelector((state) => state.auth.user);
+  const { data: notifications } = useNotifications(false);
+  useNotificationSocket(user?.id);
+  
+  const unreadCount = notifications?.results?.length || 0;
   const fullName = user?.full_name ?? "";
   const displayName = fullName.split(" ")[0];
   const profilePic = user?.profile_photo ?? null;
-  const {openModal} = useModal()
+  const { openModal } = useModal();
+
+  useEffect(() => {
+    if (unreadCount < prevCountRef.current)return;
+    if (unreadCount > prevCountRef.current) {
+      setShouldAnimate(true);
+      const timer = setTimeout(() => {
+        setShouldAnimate(false);
+      }, 1000);
+      
+      return () => clearTimeout(timer);
+    }
+    
+    prevCountRef.current = unreadCount;
+  }, [unreadCount]);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-gray-200/80 bg-white/95 backdrop-blur-sm">
-      <div className=" w-full md:px-8 px-4  flex h-[73px] items-center justify-between">
+      <div className="w-full md:px-8 px-4 flex h-[73px] items-center justify-between">
         
         <Link to={"/"} className="flex items-center gap-4 shrink-0">
           <h1 className="text-[28px] md:text-[37px] font-bold leading-7" style={{ fontFamily: "MuseoModerno, sans-serif" }}>
@@ -50,11 +73,21 @@ export default function ClientHeader() {
           </Link>
 
           <div className="flex items-center gap-3 md:gap-6">
-            <button className="relative">
-              <Bell className="h-5 w-5 md:h-6 md:w-6 text-gray-400" />
-              <span className="absolute -right-1 -top-1 flex h-3.5 w-3.5 md:h-4 md:w-4 items-center justify-center rounded-full bg-primary text-[8px] md:text-[9px] font-semibold text-white">
-                3
-              </span>
+            <button 
+              className="relative p-1 hover:bg-gray-100 rounded-full transition-colors"
+              onClick={() => openModal("notifications")}
+            >
+              <Bell className={`h-5 w-5 md:h-6 md:w-6 text-gray-400 transition-colors ${shouldAnimate ? 'animate-bounce text-primary' : ''}`} />
+              
+              {unreadCount > 0 && (
+                <span className="absolute -right-0.5 -top-0.5 flex h-3.5 w-3.5 md:h-4 md:w-4 items-center justify-center rounded-full bg-primary text-[8px] md:text-[9px] font-bold text-white animate-in zoom-in">
+                  {unreadCount > 9 ? '9+' : unreadCount}
+                </span>
+              )}
+              
+              {shouldAnimate && (
+                <span className="absolute inset-0 rounded-full border-2 border-primary animate-ping" />
+              )}
             </button>
 
             <button className="relative p-1 md:p-2 hover:bg-gray-100 rounded-lg transition-colors">
@@ -71,20 +104,19 @@ export default function ClientHeader() {
               <div className="text-sm text-primary">Client Account</div>
             </div>
             <button
-  onClick={() => openModal("profile-menu")}
-  className="h-10 w-10 md:h-11 md:w-11 rounded-full overflow-hidden border border-gray-100"
->
-  {profilePic ? (
-    <img src={profilePic} alt={fullName} className="h-full w-full object-cover" />
-  ) : (
-    <div className="bg-[#3B82f6] h-full w-full rounded-full flex items-center justify-center">
-      <span className="text-white font-museo font-bold text-xl md:text-2xl">
-        {fullName?.charAt(0).toUpperCase()}
-      </span>
-    </div>
-  )}
-</button>
-
+              onClick={() => openModal("profile-menu")}
+              className="h-10 w-10 md:h-11 md:w-11 rounded-full overflow-hidden border border-gray-100"
+            >
+              {profilePic ? (
+                <img src={profilePic} alt={fullName} className="h-full w-full object-cover" />
+              ) : (
+                <div className="bg-[#3B82f6] h-full w-full rounded-full flex items-center justify-center">
+                  <span className="text-white font-museo font-bold text-xl md:text-2xl">
+                    {fullName?.charAt(0).toUpperCase()}
+                  </span>
+                </div>
+              )}
+            </button>
           </div>
 
           <button 
