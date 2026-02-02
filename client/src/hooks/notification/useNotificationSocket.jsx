@@ -7,6 +7,7 @@ const notificationSound = new Audio('/notification-pop.mp3');
 export const useNotificationSocket = (userId) => {
   const queryClient = useQueryClient();
   const accessToken = useSelector((state) => state.auth.accessToken);
+  const currentRole = useSelector((state) => state.auth.user?.current_role);
 
   useEffect(() => {
     if (!userId || !accessToken) return;
@@ -16,12 +17,18 @@ export const useNotificationSocket = (userId) => {
     socket.onmessage = (event) => {
       const newNotif = JSON.parse(event.data);
       
-      notificationSound.currentTime = 0; 
-      notificationSound.play().catch(err => {
-        console.warn("User must interact with the page before audio can play.", err);
-      });
+      const isCorrectRole = newNotif.target_role === currentRole;
+
+      if (isCorrectRole) {
+        notificationSound.currentTime = 0; 
+        notificationSound.play().catch(err => {
+          console.warn("Audio blocked: User interaction required.", err);
+        });
+      }
 
       queryClient.setQueryData(["notifications", false], (oldData) => {
+        if (!isCorrectRole) return oldData; 
+        
         if (!oldData) return { results: [newNotif] };
         return {
           ...oldData,
@@ -35,5 +42,5 @@ export const useNotificationSocket = (userId) => {
     socket.onclose = () => console.log("Notification Socket closed");
     
     return () => socket.close();
-  }, [userId, accessToken, queryClient]);
+  }, [userId, accessToken, queryClient, currentRole]);
 };

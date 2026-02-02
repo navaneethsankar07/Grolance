@@ -8,7 +8,6 @@ export default function Notifications({ onClose }) {
   const [fetchAll, setFetchAll] = useState(false);
   const { data: notifications, isLoading } = useNotifications(fetchAll);
   const markReadMutation = useMarkAsRead();
-    console.log(notifications);
     
   const getStyleMap = (type) => {
     const maps = {
@@ -17,6 +16,9 @@ export default function Notifications({ onClose }) {
       delivered: { icon: <FileText className="w-4 h-4" />, bg: "bg-amber-50", text: "text-amber-500", title: "Work Delivered" },
       offer_received: { icon: <MessageCircle className="w-4 h-4" />, bg: "bg-blue-50", text: "text-blue-500", title: "New Offer" },
       contract_started: { icon: <CheckCircle className="w-4 h-4" />, bg: "bg-green-50", text: "text-green-500", title: "Contract Started" },
+      contract_completed: { icon: <CheckCircle className="w-4 h-4" />, bg: "bg-primary/10", text: "text-primary", title: "Contract Completed" },
+      revision_requested: { icon: <AlertCircle className="w-4 h-4" />, bg: "bg-red-50", text: "text-red-500", title: "Revision Requested" },
+      revision_accepted: { icon: <CheckCircle className="w-4 h-4" />, bg: "bg-green-50", text: "text-green-500", title: "Revision Accepted" },
       default: { icon: <Bell className="w-4 h-4" />, bg: "bg-gray-50", text: "text-gray-500", title: "Notification" }
     };
     return maps[type] || maps.default;
@@ -31,7 +33,7 @@ export default function Notifications({ onClose }) {
   }
 
   return (
-    <div className="w-full max-w-[384px] animate-in fade-in zoom-in-95 duration-200">
+    <div className="w-[384px] min-w-[384px] animate-in fade-in zoom-in-95 duration-200">
       <div className="bg-white rounded-xl border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.12)] overflow-hidden">
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 bg-gray-50/50">
           <div className="flex items-center gap-2">
@@ -48,12 +50,10 @@ export default function Notifications({ onClose }) {
           </button>
         </div>
 
-        <div className="px-5 py-6 space-y-6 max-h-[400px] overflow-y-auto bg-white">
-          {notifications?.results.length > 0 ? (
-            
+        <div className="px-5 py-6 space-y-6 h-[400px] overflow-y-auto bg-white">
+          {notifications?.results?.length > 0 ? (
             notifications?.results.map((n) => {
               const style = getStyleMap(n.notification_type);
-              console.log('');
               
               return (
                 <div key={n.id} className={`flex gap-3 transition-opacity ${n.is_read ? 'opacity-50' : 'opacity-100'}`}>
@@ -86,16 +86,13 @@ export default function Notifications({ onClose }) {
               );
             })
           ) : (
-            <div className="text-center py-4">
+            <div className="flex flex-col items-center justify-center h-full gap-2">
+              <Bell className="w-8 h-8 text-gray-200" />
               <p className="text-[11px] text-gray-400">No notifications to show</p>
             </div>
           )}
         </div>
-        <div className="p-3 bg-gray-50 border-t border-gray-100 text-center">
-            <Link to="/all-notifications" onClick={onClose} className="text-[10px] font-medium text-blue-500 hover:underline">
-               View Full History
-            </Link>
-        </div>
+        
       </div>
     </div>
   );

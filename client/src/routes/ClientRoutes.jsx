@@ -20,7 +20,7 @@ import ClientContractDetail from "../features/client/contract/ContractDetail";
 import ClientJobDetail from "../features/client/projectManagement/ProjectDetails";
 import SpendingSummary from "../features/client/profile/SpendingSummary";
 import HowItWorks from "../features/client/howitworks/HowItWorks";
-import { useNotificationSocket } from "../hooks/modal/useNotificationSocket";
+import { useNotificationSocket } from "../hooks/notification/useNotificationSocket";
 
 export default function ClientRoutes() {
   const { user,loading } = useSelector(state => state.auth);

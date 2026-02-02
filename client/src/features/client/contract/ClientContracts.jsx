@@ -10,11 +10,16 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useMyContracts } from '../../freelancer/contracts/contractsQueries';
+import { useChatActions } from '../../../components/chat/chatMutations';
+import { useModal } from "../../../hooks/modal/useModalStore";
+import { toast } from "react-toastify";
 
 export default function ClientContracts() {
   const [activeTab, setActiveTab] = useState('All');
   const [page, setPage] = useState(1);
   const navigate = useNavigate();
+  const { getRoomMutation } = useChatActions();
+  const { openModal } = useModal();
 
   const { data, isLoading } = useMyContracts({ 
     status: activeTab, 
@@ -23,6 +28,15 @@ export default function ClientContracts() {
   });
 
   const tabs = ['All', 'In Progress', 'Submitted', 'Completed', 'Disputed'];
+
+  const handleMessageFreelancer = async (freelancerId) => {
+    try {
+      const room = await getRoomMutation.mutateAsync(freelancerId);
+      openModal("messages", { initialRoomId: room.id });
+    } catch (error) {
+      toast.error("Could not open chat room.");
+    }
+  };
 
   if (isLoading) return <div className="p-10 text-center animate-pulse">Loading Panel...</div>;
 
@@ -97,7 +111,7 @@ export default function ClientContracts() {
                         <Package className="w-3.5 h-3.5" />
                         <span className="text-[10px] font-bold uppercase">Package</span>
                       </div>
-                      <p className="text-xs font-bold text-gray-800">{contract.package_name? contract.package_name : 'pro'}</p>
+                      <p className="text-xs font-bold text-gray-800">{contract.package_name ? contract.package_name : 'pro'}</p>
                     </div>
                     <div className="space-y-1">
                       <div className="flex items-center gap-1.5 text-gray-400">
@@ -122,9 +136,13 @@ export default function ClientContracts() {
                       <ExternalLink className="w-3.5 h-3.5" />
                       View Order
                     </button>
-                    <button className="flex items-center gap-2 bg-white border border-gray-200 text-gray-600 px-5 py-2 rounded-lg text-xs font-bold hover:bg-gray-50 transition-colors">
+                    <button 
+                      onClick={() => handleMessageFreelancer(contract.freelancer_id)}
+                      disabled={getRoomMutation.isPending}
+                      className="flex items-center gap-2 bg-white border border-gray-200 text-gray-600 px-5 py-2 rounded-lg text-xs font-bold hover:bg-gray-50 transition-colors disabled:opacity-50"
+                    >
                       <MessageSquare className="w-3.5 h-3.5" />
-                      Message Freelancer
+                      {getRoomMutation.isPending ? "Connecting..." : "Message Freelancer"}
                     </button>
                   </div>
                 </div>

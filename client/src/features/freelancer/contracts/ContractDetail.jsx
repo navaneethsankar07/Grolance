@@ -8,22 +8,31 @@ import {
 } from "lucide-react";
 import { useSubmitWork, useRevisionAction } from "./contractMutation";
 import { formatDateDMY } from "../../../utils/date";
+import { toast } from 'react-toastify';
+import Chat from "../../../components/chat/Chat";
+import { useChatActions } from "../../../components/chat/chatMutations";
+import { useModal } from "../../../hooks/modal/useModalStore";
 
 export default function ContractDetail() {
   const { id } = useParams();
   const { data: contract, isLoading, isError } = useContractDetail(id);
   const submitWorkMutation = useSubmitWork();
   const revisionActionMutation = useRevisionAction();
+  
+  const { getRoomMutation } = useChatActions();
 
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, percentage: 0 });
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [selectedRoomId, setSelectedRoomId] = useState(null);
   const [subType, setSubType] = useState('file');
   const [formData, setFormData] = useState({ title: '', file: null, link_url: '', notes: '' });
   
   const [activeRevisionId, setActiveRevisionId] = useState(null);
   const [rejectionNote, setRejectionNote] = useState("");
-  
+  const { openModal } = useModal();
+
   useEffect(() => {
     if (contract?.status === 'completed') {
       setTimeLeft({ days: 0, hours: 0, percentage: 100 });
@@ -55,6 +64,27 @@ export default function ContractDetail() {
     }
   }, [contract]);
 
+const handleOpenChat = async () => {
+  try {
+    const targetId = contract.client_id || contract.client; 
+    
+    if (!targetId) {
+      toast.error("Client information missing.");
+      return;
+    }
+
+    const room = await getRoomMutation.mutateAsync(targetId);
+    
+    openModal("messages", { initialRoomId: room.id });
+    
+    setSelectedRoomId(room.id);
+    setIsChatOpen(true);
+  } catch (error) {
+    console.error("Chat Error:", error);
+    toast.error("Could not open chat. Please try again.");
+  }
+};
+
   const handleRevisionDecision = (revisionId, action) => {
     if (action === 'reject') {
       setActiveRevisionId(revisionId);
@@ -63,7 +93,7 @@ export default function ContractDetail() {
     }
 
     revisionActionMutation.mutate({ revisionId, action }, {
-      onSuccess: () => alert("Revision accepted. Status updated to Active."),
+      onSuccess: () => toast.success("Revision accepted. Status updated to Active."),
       onError: (err) => alert(err.response?.data?.error || "Error updating revision")
     });
   };
@@ -336,9 +366,13 @@ export default function ContractDetail() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <button className="flex items-center justify-center gap-2 px-6 py-3.5 bg-white border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors">
+          <button 
+            onClick={handleOpenChat}
+            disabled={getRoomMutation?.isPending}
+            className="flex items-center justify-center gap-2 px-6 py-3.5 bg-white border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+          >
             <MessageSquare className="w-5 h-5" strokeWidth={2.5}/>
-            Message Client
+            {getRoomMutation?.isPending ? "Connecting..." : "Message Client"}
           </button>
           <button className="flex items-center justify-center gap-2 px-6 py-3.5 bg-white border border-red-300 text-red-600 text-sm font-medium rounded-lg hover:bg-red-50 transition-colors">
             <ShieldAlert className="w-5 h-5" strokeWidth={2.5}/>
@@ -346,6 +380,13 @@ export default function ContractDetail() {
           </button>
         </div>
       </div>
+
+      {isChatOpen && (
+        <Chat 
+          onClose={() => setIsChatOpen(false)} 
+          data={{ initialRoomId: selectedRoomId }} 
+        />
+      )}
 
       {isRejectModalOpen && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[60] p-4">

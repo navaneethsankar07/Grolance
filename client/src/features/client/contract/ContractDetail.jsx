@@ -2,9 +2,10 @@ import React, { useState, useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useContractDetail } from "../../freelancer/contracts/contractsQueries";
 import { useRequestRevision, useUpdateContractStatus } from "./contractMutations";
+import { useChatActions } from "../../../components/chat/chatMutations";
 import { 
   FileText, Clock, Download, MessageSquare, ShieldAlert, 
-  ExternalLink, X, AlertCircle, History, CheckCircle2, ShieldCheck
+  ExternalLink, X, AlertCircle, CheckCircle2, ShieldCheck
 } from "lucide-react";
 import { toast } from "react-toastify";
 import { useModal } from "../../../hooks/modal/useModalStore";
@@ -14,12 +15,12 @@ export default function ClientContractDetail() {
   const { data: contract, isLoading, isError } = useContractDetail(id);
   const requestRevisionMutation = useRequestRevision();
   const updateStatusMutation = useUpdateContractStatus();
+  const { getRoomMutation } = useChatActions();
+  const { openModal } = useModal();
 
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, percentage: 0 });
   const [isRevisionModalOpen, setIsRevisionModalOpen] = useState(false);
   const [revisionReason, setRevisionReason] = useState("");
-  const {openModal} = useModal()
-console.log(contract);
 
   useEffect(() => {
     if (contract?.freelancer_signed_at && contract?.delivery_days) {
@@ -46,10 +47,20 @@ console.log(contract);
       return () => clearInterval(timer);
     }
   }, [contract]);
+console.log(contract);
+
+  const handleMessageFreelancer = async () => {
+    try {
+      const room = await getRoomMutation.mutateAsync(contract.freelancer_id);
+      openModal("messages", { initialRoomId: room.id });
+    } catch (error) {
+      toast.error("Could not open chat. Please try again.");
+    }
+  };
 
   const handleRevisionSubmit = () => {
     if (revisionReason.length < 10) {
-      toast.error("Please provide a more detailed reason (at least 10 characters).");
+      toast.error("Please provide a more detailed reason.");
       return;
     }
     requestRevisionMutation.mutate(
@@ -58,7 +69,7 @@ console.log(contract);
         onSuccess: () => {
           setIsRevisionModalOpen(false);
           setRevisionReason("");
-          toast.success('Request submitted.')
+          toast.success('Request submitted.');
         }
       }
     );
@@ -280,9 +291,13 @@ console.log(contract);
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <button className="flex items-center justify-center gap-2 px-6 py-4 bg-white border border-gray-200 text-gray-700 text-sm font-bold rounded-xl hover:bg-gray-50 shadow-sm transition-all">
+          <button 
+            onClick={handleMessageFreelancer}
+            disabled={getRoomMutation.isPending}
+            className="flex items-center justify-center gap-2 px-6 py-4 bg-white border border-gray-200 text-gray-700 text-sm font-bold rounded-xl hover:bg-gray-50 shadow-sm transition-all"
+          >
             <MessageSquare className="w-5 h-5" strokeWidth={2.5}/>
-            Message Freelancer
+            {getRoomMutation.isPending ? "Opening Chat..." : "Message Freelancer"}
           </button>
           <button className="flex items-center justify-center gap-2 px-6 py-4 bg-white border border-red-100 text-red-500 text-sm font-bold rounded-xl hover:bg-red-50 shadow-sm transition-all">
             <ShieldAlert className="w-5 h-5" strokeWidth={2.5}/>
@@ -304,7 +319,7 @@ console.log(contract);
               <div className="mb-4 p-3 bg-amber-50 rounded-lg flex gap-3">
                 <AlertCircle className="w-5 h-5 text-amber-600 shrink-0" />
                 <p className="text-xs text-amber-800 leading-relaxed">
-                  Explain clearly what needs to be changed. This will move the project back to <strong>Active</strong>.
+                  Explain clearly what needs to be changed.
                 </p>
               </div>
               <textarea 

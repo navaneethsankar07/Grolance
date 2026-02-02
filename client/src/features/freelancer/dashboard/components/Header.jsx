@@ -5,7 +5,7 @@ import { useSelector } from "react-redux";
 import { useState, useEffect, useRef } from "react";
 import { useModal } from "../../../../hooks/modal/useModalStore";
 import { useNotifications } from "../../../../components/notifications/notificationQueries";
-import { useNotificationSocket } from "../../../../hooks/modal/useNotificationSocket";
+import { useNotificationSocket } from "../../../../hooks/notification/useNotificationSocket";
 
 export function Header() {
   const { mutateAsync } = useSwitchRole();
@@ -22,16 +22,17 @@ export function Header() {
   const unreadCount = notifications?.results?.length || 0;
 
   useEffect(() => {
-    if (unreadCount < prevCountRef.current) return;
-    if (unreadCount > prevCountRef.current) {
-      setShouldAnimate(true);
-      const timer = setTimeout(() => {
-        setShouldAnimate(false);
-      }, 5000);
+    if (unreadCount <= prevCountRef.current) {
       prevCountRef.current = unreadCount;
-      return () => clearTimeout(timer);
+      return;
     }
+
+    setShouldAnimate(true);
+    const timer = setTimeout(() => {
+      setShouldAnimate(false);
+    }, 5000);
     prevCountRef.current = unreadCount;
+    return () => clearTimeout(timer);
   }, [unreadCount]);
 
   const handleSwitchToClient = async () => {
@@ -62,7 +63,10 @@ export function Header() {
         </button>
 
         <div className="flex items-center gap-2">
-            <button className="relative w-11 h-11 rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors">
+            <button 
+              onClick={() => openModal("messages")}
+              className="relative w-11 h-11 rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors"
+            >
               <Mail className="w-6 h-6 text-[#4B5563]" />
               <span className="absolute top-1.5 right-1.5 w-5 h-5 bg-[#3B82F6] border-2 border-white rounded-full flex items-center justify-center text-[10px] font-bold text-white">
                 3
