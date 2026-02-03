@@ -196,7 +196,7 @@ class LogoutView(APIView):
 
     def post(self, request):
         try:
-            refresh_token = request.COOKIES.get("refresh")
+            refresh_token = request.COOKIES.get("refresh_token")
             
 
             if refresh_token:
@@ -208,7 +208,7 @@ class LogoutView(APIView):
                 status=status.HTTP_200_OK
             )
 
-            response.delete_cookie("refresh", path='/')
+            response.delete_cookie("refresh_token", path='/',samesite='Lax')
 
             return response
 
@@ -293,7 +293,7 @@ class ResetPasswordView(APIView):
 
 class GoogleAuthView(APIView):
     permission_classes = [AllowAny]
-
+    authentication_classes= []
     def post(self, request):
         serializer = GoogleAuthSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -318,6 +318,7 @@ class GoogleAuthView(APIView):
                 "email": user.email,
                 "full_name": user.full_name,
                 "profile_photo": user.profile_photo,
+                'current_role':user.current_role
             }
         })
 
@@ -327,7 +328,7 @@ class GoogleAuthView(APIView):
             httponly=True,
             secure=not settings.DEBUG,
             samesite="Lax",
-            max_age=7 * 24 * 3600,
+            max_age=60,
         )
 
         return response
