@@ -18,7 +18,7 @@ export const useChatSocket = (roomId) => {
     socketRef.current = new WebSocket(wsUrl);
 
     socketRef.current.onopen = () => {
-      console.log("WebSocket Connected ✅");
+      console.log("WebSocket Connected");
       setIsConnected(true);
     };
 
@@ -27,18 +27,15 @@ export const useChatSocket = (roomId) => {
 
       switch (data.type) {
         case "chat_message":
-          // Update the Infinite Query cache with the new message
           queryClient.setQueryData(["messages", roomId], (oldData) => {
             if (!oldData) return oldData;
             const newPages = [...oldData.pages];
-            // Add the new message to the first page (latest results)
             newPages[0] = {
               ...newPages[0],
               results: [data.message, ...newPages[0].results],
             };
             return { ...oldData, pages: newPages };
           });
-          // Also update the Chat Rooms list to show the new last_message
           queryClient.invalidateQueries(["chatRooms"]);
           break;
 
@@ -47,7 +44,6 @@ export const useChatSocket = (roomId) => {
           break;
 
         case "delete":
-          // Real-time removal of message for the other user
           queryClient.setQueryData(["messages", roomId], (oldData) => {
             if (!oldData) return oldData;
             return {
@@ -66,7 +62,7 @@ export const useChatSocket = (roomId) => {
     };
 
     socketRef.current.onclose = () => {
-      console.log("WebSocket Disconnected ❌");
+      console.log("WebSocket Disconnected");
       setIsConnected(false);
     };
 
@@ -75,7 +71,6 @@ export const useChatSocket = (roomId) => {
     };
   }, [roomId, queryClient]);
 
-  // Methods to interact with the socket
   const sendMessage = (text) => {
     if (socketRef.current?.readyState === WebSocket.OPEN) {
       socketRef.current.send(JSON.stringify({ 

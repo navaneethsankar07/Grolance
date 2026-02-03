@@ -1,10 +1,14 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { X, Lock } from "lucide-react"; // Added Lock icon
+import { X, Lock, AlertCircle } from "lucide-react"; 
+import { useForm } from "react-hook-form"; 
+import { zodResolver } from "@hookform/resolvers/zod"; 
 import { useChatRooms, useChatMessages } from "./chatQueries";
 import { useChatMutations } from "./chatMutations";
 import { useChatSocket } from "../../hooks/chat/UseChatRooms";
+import { chatSchema } from "./chatSchema";
+
 
 const formatTimeAgo = (dateString) => {
   if (!dateString) return "";
@@ -24,13 +28,18 @@ export default function Chat({ onClose, data }) {
   const initialRoomId = data?.initialRoomId;
   const [selectedRoomId, setSelectedRoomId] = useState(initialRoomId || null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [messageInput, setMessageInput] = useState("");
+  
   const typingTimeoutRef = useRef(null);
   const messagesEndRef = useRef(null);
   const topItemRef = useRef(null);
   const scrollContainerRef = useRef(null);
   const lastScrollHeightRef = useRef(0);
   const lastMessageCountRef = useRef(0);
+
+  const { register, handleSubmit, reset, watch, formState: { errors } } = useForm({
+    resolver: zodResolver(chatSchema),
+    defaultValues: { message: "" }
+  });
 
   const currentUser = useSelector((state) => state.auth.user);
   const currentUserId = currentUser?.id;
@@ -68,6 +77,15 @@ export default function Chat({ onClose, data }) {
     return [...flattened].sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
   }, [messagePages]);
 
+  const messageValue = watch("message");
+  useEffect(() => {
+    if (!isConnected || isChatDisabled || !messageValue) return;
+
+    sendTypingStatus(true);
+    clearTimeout(typingTimeoutRef.current);
+    typingTimeoutRef.current = setTimeout(() => sendTypingStatus(false), 2000);
+  }, [messageValue, isConnected, isChatDisabled]);
+
   useEffect(() => {
     if (isFetchingNextPage && scrollContainerRef.current) {
       lastScrollHeightRef.current = scrollContainerRef.current.scrollHeight;
@@ -76,7 +94,6 @@ export default function Chat({ onClose, data }) {
 
   useEffect(() => {
     if (!scrollContainerRef.current) return;
-
     const currentCount = allMessages.length;
     const isNewMessage = currentCount > lastMessageCountRef.current;
     lastMessageCountRef.current = currentCount;
@@ -114,22 +131,11 @@ export default function Chat({ onClose, data }) {
     return () => observer.disconnect();
   }, [hasNextPage, isFetchingNextPage, fetchNextPage, selectedRoomId]);
 
-  const handleInputChange = (e) => {
+  
+  const onValidSubmit = (formData) => {
     if (isChatDisabled) return;
-    setMessageInput(e.target.value);
-    
-    if (isConnected) {
-      sendTypingStatus(true);
-      clearTimeout(typingTimeoutRef.current);
-      typingTimeoutRef.current = setTimeout(() => sendTypingStatus(false), 2000);
-    }
-  };
-
-  const handleSend = (e) => {
-    e.preventDefault();
-    if (!messageInput.trim() || isChatDisabled) return;
-    sendMessage(messageInput);
-    setMessageInput("");
+    sendMessage(formData.message);
+    reset(); 
     sendTypingStatus(false);
   };
 
@@ -146,13 +152,8 @@ export default function Chat({ onClose, data }) {
   return (
     <>
       <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[60]" onClick={onClose} />
-
       <div className="fixed inset-4 md:inset-10 lg:inset-x-40 lg:inset-y-10 bg-white z-[70] rounded-2xl shadow-2xl overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-200">
-
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-full z-[100] transition-colors"
-        >
+        <button onClick={onClose} className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-full z-[100] transition-colors">
           <X className="w-6 h-6 text-gray-500" />
         </button>
 
@@ -167,7 +168,6 @@ export default function Chat({ onClose, data }) {
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-
             <div className="flex-1 overflow-y-auto">
               {roomsLoading ? (
                 <div className="p-6 space-y-4">
@@ -184,7 +184,6 @@ export default function Chat({ onClose, data }) {
                     message={room.last_message?.text || "No messages yet"}
                     time={formatTimeAgo(room.last_message?.created_at)}
                     unread={!room.last_message?.is_read && (room.last_message?.sender === room.other_participant.id || room.last_message?.sender_id === room.other_participant.id)}
-                    // Only show online status if chat isn't disabled
                     isOnline={!room.can_chat ? false : isConnected && selectedRoomId === room.id}
                   />
                 ))
@@ -221,10 +220,7 @@ export default function Chat({ onClose, data }) {
                   </div>
                 </div>
 
-                <div
-                  ref={scrollContainerRef}
-                  className="flex-1 overflow-y-auto p-6 flex flex-col bg-[#fcfdfe]"
-                >
+                <div ref={scrollContainerRef} className="flex-1 overflow-y-auto p-6 flex flex-col bg-[#fcfdfe]">
                   <div ref={topItemRef} className="py-2 w-full flex justify-center h-8">
                     {isFetchingNextPage && <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />}
                   </div>
@@ -234,8 +230,7 @@ export default function Chat({ onClose, data }) {
                     return (
                       <div key={msg.id} className={`flex ${isMe ? "justify-end" : "justify-start"} mb-4`}>
                         <div className="group relative max-w-[70%]">
-                          <div className={`px-4 py-2.5 rounded-2xl shadow-sm ${isMe ? "bg-blue-600 text-white rounded-tr-none" : "bg-white text-gray-800 border border-gray-100 rounded-tl-none"
-                            }`}>
+                          <div className={`px-4 py-2.5 rounded-2xl shadow-sm ${isMe ? "bg-blue-600 text-white rounded-tr-none" : "bg-white text-gray-800 border border-gray-100 rounded-tl-none"}`}>
                             <p className="text-[14px] leading-relaxed whitespace-pre-wrap">{msg.text}</p>
                             <div className={`text-[9px] mt-1 flex items-center gap-1 ${isMe ? "text-blue-100" : "text-gray-400"}`}>
                               {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
@@ -243,10 +238,7 @@ export default function Chat({ onClose, data }) {
                             </div>
                           </div>
                           {isMe && (
-                            <button
-                              onClick={() => handleDelete(msg.id)}
-                              className="absolute -left-8 top-1 p-1.5 opacity-0 group-hover:opacity-100 text-gray-300 hover:text-red-500 transition-all"
-                            >
+                            <button onClick={() => handleDelete(msg.id)} className="absolute -left-8 top-1 p-1.5 opacity-0 group-hover:opacity-100 text-gray-300 hover:text-red-500 transition-all">
                               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2M10 11v6M14 11v6" /></svg>
                             </button>
                           )}
@@ -280,22 +272,32 @@ export default function Chat({ onClose, data }) {
                       <p className="text-[11px] text-gray-500 mt-0.5">The contract has been completed or is no longer active.</p>
                     </div>
                   ) : (
-                    <form onSubmit={handleSend} className="max-w-4xl mx-auto flex items-center gap-2">
-                      <input
-                        type="text"
-                        value={messageInput}
-                        onChange={handleInputChange}
-                        placeholder="Type a message..."
-                        className="flex-1 py-2.5 px-5 bg-gray-50 border-none rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm transition-all"
-                      />
-                      <button
-                        type="submit"
-                        disabled={!messageInput.trim() || !isConnected}
-                        className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-md hover:bg-blue-700 disabled:bg-gray-200"
-                      >
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
-                      </button>
-                    </form>
+                    <div className="max-w-4xl mx-auto">
+                      <form onSubmit={handleSubmit(onValidSubmit)} className="flex items-center gap-2">
+                        <div className="flex-1 relative">
+                          <input
+                            {...register("message")}
+                            type="text"
+                            autoComplete="off"
+                            placeholder="Type a message..."
+                            className={`w-full py-2.5 px-5 bg-gray-50 border rounded-xl focus:ring-2 outline-none text-sm transition-all ${errors.message ? "border-red-300 focus:ring-red-100" : "border-none focus:ring-blue-500"}`}
+                          />
+                        </div>
+                        <button
+                          type="submit"
+                          disabled={!isConnected}
+                          className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-md hover:bg-blue-700 disabled:bg-gray-200"
+                        >
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                        </button>
+                      </form>
+                      {errors.message && (
+                        <div className="mt-2 flex items-center gap-1.5 text-red-500 animate-in fade-in slide-in-from-top-1">
+                          <AlertCircle className="w-3.5 h-3.5" />
+                          <span className="text-[11px] font-medium">{errors.message.message}</span>
+                        </div>
+                      )}
+                    </div>
                   )}
                 </div>
               </>

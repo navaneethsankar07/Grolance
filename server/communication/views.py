@@ -48,7 +48,6 @@ class ChatRoomViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['get'])
     def messages(self, request, pk=None):
-        """Fetch message history for a specific room"""
         room = self.get_object()
         messages = room.messages.all().order_by('-created_at')
         
