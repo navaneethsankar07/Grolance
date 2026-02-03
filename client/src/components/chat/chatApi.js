@@ -17,5 +17,5 @@ export const getOrCreateRoom = async (userId) => {
 
 export const deleteMessage = async (messageId) => {
   const response = await axiosInstance.delete(`/communication/messages/${messageId}/`);
-  return response.data;
+  return response.data; 
 };
