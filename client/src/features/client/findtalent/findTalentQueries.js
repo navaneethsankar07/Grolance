@@ -1,14 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createInvitation, fetchEligibleJobs, getFreelancerList } from "./findTalentApi";
 
-export const useFreelancerList = (filters) => {
+export const useFreelancerList = (params) => {
   return useQuery({
-    queryKey: ["freelancers-list", filters],
-    queryFn: () => getFreelancerList(filters),
+    queryKey: ["freelancers-list", params],
+    queryFn: () => getFreelancerList(params),
     placeholderData: (previousData) => previousData,
   });
 };
-
 
 export const useEligibleProjects = (isOpen) => {
   return useQuery({

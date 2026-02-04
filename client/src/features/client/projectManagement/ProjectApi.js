@@ -14,6 +14,11 @@ export const fetchAllSkills = async () => {
   return res.data;
 };
 
+export const fetchAllCategories = async () => {
+  const res = await axiosInstance.get("/categories/", {params: {no_pagination: 'true'}});
+  
+  return res.data; 
+};
 
 export const createProject = async (data) => {
   const res = await axiosInstance.post("/projects/create/", data);
@@ -36,7 +41,11 @@ const [_key, { page, status, search }] = queryKey;
 };
 
 export const fetchProjectById = async (id) => {
+  console.log(id);
+  
   const res = await axiosInstance.get(`/projects/${id}/`);
+  console.log(res.data,'babu');
+  
   return res.data;
 };
 

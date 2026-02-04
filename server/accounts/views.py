@@ -318,7 +318,8 @@ class GoogleAuthView(APIView):
                 "email": user.email,
                 "full_name": user.full_name,
                 "profile_photo": user.profile_photo,
-                'current_role':user.current_role
+                'current_role':user.current_role,
+                'is_freelancer':user.is_freelancer
             }
         })
 
@@ -328,7 +329,7 @@ class GoogleAuthView(APIView):
             httponly=True,
             secure=not settings.DEBUG,
             samesite="Lax",
-            max_age=60,
+            max_age=7*24*3600,
         )
 
         return response

@@ -34,16 +34,18 @@ import Notifications from "../components/notifications/Notifications";
 import Chat from "../components/chat/Chat";
 export default function RootLayout() {
   const { modal, modalProps, closeModal } = useModal();
-  const { loading, initialized, accessToken } = useSelector((s) => s.auth);
+  const { loading, initialized, accessToken, user } = useSelector((s) => s.auth);
   const dispatch = useDispatch();
 
   useEffect(() => {
-    if (!accessToken) {
+    if (!accessToken && !user) {
       dispatch(fetchUser());
+    }else if(!accessToken){
+      dispatch({type:'auth/finishLoading'})
     }
-  }, []);
+  }, [accessToken,user,dispatch]);
 
-  if (!initialized) {
+  if (!initialized && accessToken) {
     return (
       <div className="h-screen flex items-center justify-center">
         <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />

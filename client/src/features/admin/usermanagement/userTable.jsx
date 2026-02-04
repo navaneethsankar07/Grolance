@@ -3,7 +3,7 @@ import { formatDateDMY } from "../../../utils/date";
 import { useSoftDeleteUser, useToggleUserActive } from "./usersMutations";
 import { MoreVertical, Ban, Unlock, Trash2, ExternalLink } from "lucide-react";
 
-export default function UserTable({ users, page, setPage, hasNext, hasPrev }) {
+export default function UserTable({ users, page, setPage, hasNext, hasPrev, totalUsers }) {
   const toggleMutation = useToggleUserActive();
   const deleteMutation = useSoftDeleteUser();
   const { openModal } = useModal();
@@ -136,7 +136,7 @@ export default function UserTable({ users, page, setPage, hasNext, hasPrev }) {
 
       <div className="px-6 py-4 bg-gray-50/50 border-t border-gray-200 flex items-center justify-between">
         <p className="text-xs text-gray-500 font-medium">
-          Showing <span className="text-gray-900">{users.length}</span> results
+          Showing <span className="text-gray-900">{users.length}</span> of <span className="text-gray-900">{totalUsers}</span> users
         </p>
         <div className="flex gap-2">
           <button

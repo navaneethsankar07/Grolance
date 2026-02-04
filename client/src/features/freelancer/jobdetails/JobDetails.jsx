@@ -1,5 +1,5 @@
 import React from 'react';
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { useProjectDetails } from './jobDetailsQueries';
 import { useModal } from '../../../hooks/modal/useModalStore';
 
@@ -9,6 +9,7 @@ export default function JobDetail() {
   const {openModal} = useModal()
   if (isLoading) return <div className="flex justify-center items-center h-screen text-gray-600">Loading Project details...</div>;
   if (isError) return <div className="flex justify-center items-center h-screen text-red-500">Error: {error.message}</div>;
+console.log(data);
 
   const formatList = (text) => {
     if (!text) return [];
@@ -46,7 +47,7 @@ export default function JobDetail() {
             <ul className="space-y-3">
               {formatList(data.expected_deliverables).map((item, index) => (
                 <li key={index} className="flex items-start gap-3 text-gray-600">
-                  <span className="text-blue-500 mt-1">•</span>
+                  <span className="text-primary mt-1">•</span>
                   <span>{item}</span>
                 </li>
               ))}
@@ -58,7 +59,7 @@ export default function JobDetail() {
             <ul className="space-y-3">
               {formatList(data.requirements).map((item, index) => (
                 <li key={index} className="flex items-start gap-3 text-gray-600">
-                  <span className="text-blue-500 mt-1">•</span>
+                  <span className="text-primary mt-1">•</span>
                   <span>{item}</span>
                 </li>
               ))}
@@ -100,7 +101,7 @@ export default function JobDetail() {
           <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
             <h3 className="text-lg font-bold text-gray-900 mb-4">Client</h3>
             <div className="flex items-center gap-4 mb-4">
-              <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold text-xl overflow-hidden">
+              <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center text-white font-bold text-xl overflow-hidden">
                 {data.profile_photo ? (
                   <img src={data.client_info.profile_photo} alt="" className="w-full h-full object-cover" />
                 ) : (
@@ -124,10 +125,15 @@ export default function JobDetail() {
               <span className="text-sm text-gray-500">({data.client_info?.total_jobs_posted} jobs posted)</span>
             </div>
           </div>
-
-          <button onClick={()=>openModal('job-proposal',id)} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl transition-colors shadow-lg shadow-blue-100">
+          {data?.is_applied?
+            <Link to='/freelancer/my-proposals/' className="flex justify-center w-full bg-primary hover:bg-blue-500 text-white font-bold py-4 rounded-xl transition-colors shadow-lg shadow-blue-100">
+            View Proposals
+          </Link>
+        :
+          <button onClick={()=>openModal('job-proposal',id)} className="w-full bg-primary hover:bg-blue-500  text-white font-bold py-4 rounded-xl transition-colors shadow-lg shadow-blue-100">
             Apply to This Job
           </button>
+          }
         </div>
 
       </div>

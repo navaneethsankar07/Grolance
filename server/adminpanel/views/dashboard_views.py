@@ -22,7 +22,7 @@ class AdminDashboardView(APIView):
             contract__completed_at__lte=withdrawal_threshold
         )
         stats = {
-            'total_users':User.objects.count(),
+            'total_users':User.objects.exclude(email=request.user.email).count(),
             'total_projects':Project.objects.count(),
             'active_contracts':Contract.objects.filter(status='active').count(),
             'total_proposals':Proposal.objects.count(),

@@ -9,6 +9,7 @@ export const useSubmitProposal = () => {
     mutationFn: createProposal,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['proposals'] });
+      queryClient.invalidateQueries({queryKey:['project']})
       toast.success('Proposal submitted successfully!');
     },
     onError: (error) => {

@@ -7,7 +7,6 @@ import { Link } from "react-router-dom";
 export default function Profile() {
   const { data: profile, isLoading, isError, error } = useFreelancerProfile();
 
-  console.log(profile);
   
   if (isLoading) {
     return (
@@ -90,11 +89,15 @@ export default function Profile() {
 
         <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
           <div className="flex flex-col md:flex-row gap-6 items-center md:items-start">
-            <img 
+            {profile?.profile_photo?
+
+              <img 
               src={profile.profile_photo}
               alt={profile.full_name} 
               className="w-24 h-24 md:w-32 md:h-32 rounded-full object-cover ring-4 ring-gray-50"
-            />
+              />:
+              <span style={{ fontFamily: 'MuseoModerno, sans-serif' }}  className="w-24 h-24 md:w-32 md:h-32 flex items-center justify-center text-5xl bg-primary text-white rounded-full object-cover ring-4 ring-gray-50">{profile?.full_name[0]}</span>
+            }
             <div className="flex-1 text-center md:text-left">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 mb-4">
                 <div>

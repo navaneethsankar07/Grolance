@@ -51,19 +51,45 @@ export function FreelancerCard({
       setIsFetching(false);
     }
   };
-console.log(packages)
+const getAvatarColor = (name) => {
+  const colors = [
+  "bg-slate-700",   
+  "bg-primary",   
+  "bg-indigo-900",  
+  "bg-teal-800",   
+  "bg-cyan-900",    
+  "bg-emerald-800", 
+  "bg-violet-800",  
+  "bg-zinc-700",   
+  "bg-sky-800",     
+];
+  if (!name) return 'bg-gray-500';
+  
+  const hash = name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  return colors[hash % colors.length];
+};
 
+const avatarBg = getAvatarColor(name);
   return (
     <div 
       onClick={handleCardClick}
       className="group flex flex-col lg:flex-row items-start gap-6 p-6 rounded-2xl bg-white border border-gray-200 hover:border-blue-300 hover:shadow-xl hover:shadow-blue-500/5 transition-all duration-300 cursor-pointer"
     >
       <div className="relative shrink-0">
-        <img
-          src={imageUrl || "/default-avatar.png"}
-          alt={name}
-          className="w-24 h-24 lg:w-32 lg:h-32 rounded-2xl object-cover shadow-inner"
-        />
+        <div className="w-24 h-24 lg:w-32 lg:h-32 rounded-2xl shadow-inner overflow-hidden">
+  {imageUrl ? (
+      <img
+        src={imageUrl}
+        alt={name}
+        className="w-full h-full object-cover"
+        onError={(e) => { e.target.src = "/default-avatar.png"; }}
+      />
+    ) : (
+      <div className={`w-full h-full ${avatarBg} flex items-center justify-center text-white text-3xl lg:text-4xl font-bold uppercase`}>
+        {name ? name[0] : "?"}
+      </div>
+    )}
+</div>
         <div className="absolute -bottom-2 -right-2 bg-green-500 border-4 border-white w-6 h-6 rounded-full" title="Available Now"></div>
       </div>
 

@@ -102,6 +102,10 @@ class ProjectListSerializer(serializers.ModelSerializer):
         source="category.name",
         read_only=True
     )
+    category = serializers.PrimaryKeyRelatedField(
+        source='category.id', 
+        read_only=True
+    )
     skills = serializers.SerializerMethodField()
     contract_id = serializers.SerializerMethodField()
     proposals_count = serializers.SerializerMethodField()
@@ -112,7 +116,7 @@ class ProjectListSerializer(serializers.ModelSerializer):
             'id', 'title', 'description', 'category_name',
             'pricing_type', 'fixed_price', 'min_budget',
             'max_budget', 'delivery_days', 'status',
-            'created_at', 'skills', 'contract_id', 'proposals_count'
+            'created_at', 'skills', 'contract_id', 'proposals_count','category'
         ]
 
     def get_skills(self, obj):
@@ -287,18 +291,28 @@ class ProjectDetailSerializer(ProjectListSerializer):
     requirements = serializers.CharField()
     expected_deliverables = serializers.CharField()
     client_info = serializers.SerializerMethodField()
-
+    is_applied = serializers.SerializerMethodField()
     class Meta(ProjectListSerializer.Meta):
         fields = ProjectListSerializer.Meta.fields + [
             'requirements',
             'expected_deliverables',
-            'client_info'
+            'client_info',
+            'is_applied'
         ]
 
     def get_client_info(self, obj):
         profile, created = ClientProfile.objects.get_or_create(user=obj.client)
         return ProjectClientSerializer(profile).data
 
+    def get_is_applied(self, obj):
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            try:
+                freelancer_profile = request.user.freelancer_profile
+                return obj.proposals.filter(freelancer=freelancer_profile).exists()
+            except AttributeError:
+                return False
+        return False
 
 class InvitationSerializer(serializers.ModelSerializer):
     client_name = serializers.ReadOnlyField(source='client.full_name')

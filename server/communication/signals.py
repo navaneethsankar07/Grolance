@@ -4,7 +4,7 @@ from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 from projects.models import Proposal, Invitation
 from contracts.models import Contract, ContractDeliverable, ContractRevision
-from .models import Notification
+from .models import Notification, Message
 from payments.models import Payment
 
 def send_realtime_notification(notification):
@@ -151,3 +151,33 @@ def payment_notifications(sender, instance, created, **kwargs):
             related_id=instance.contract.id
         )
         send_realtime_notification(notif)
+
+    
+@receiver(post_save, sender=Message)
+def message_notification(sender, instance, created, **kwargs):
+    if created:
+        if instance.is_read:
+            return
+        room = instance.room
+        sender_user = instance.sender
+        recipient = room.participants.exclude(id=sender_user.id).first()
+        
+        if recipient:
+            target_role = 'client' if recipient.current_role == 'client' else 'freelancer'
+            
+            unread_notif_exists = Notification.objects.filter(
+                recipient=recipient,
+                notification_type='new_message',
+                related_id=room.id,
+                is_read=False
+            ).exists()
+
+            if not unread_notif_exists:
+                notif = Notification.objects.create(
+                    recipient=recipient,
+                    target_role=target_role,
+                    notification_type='new_message',
+                    message=f"New message from {sender_user.full_name}",
+                    related_id=room.id
+                )
+                send_realtime_notification(notif)

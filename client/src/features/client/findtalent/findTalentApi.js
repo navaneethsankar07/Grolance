@@ -1,12 +1,11 @@
 import axiosInstance from "../../../api/axiosInstance";
 
-export const getFreelancerList = async (filters) => {
+export const getFreelancerList = async (params) => {
   const { data } = await axiosInstance.get("/profile/freelancers-list/", { 
-    params: filters 
+    params 
   });
   return data;
 };
-
 export const fetchEligibleJobs = async () =>{
   const {data} = await axiosInstance.get('/projects/invitations/my-eligible-projects/')
   return data;

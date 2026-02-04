@@ -16,6 +16,7 @@ class Notification(models.Model):
         ('revision_rejected', 'Revision Rejected'),
         ('contract_completed', 'Contract Completed'),
         ('payment_credited', 'Payment Credited'),
+        ('new_message', 'New Message Received'),
     ]
     ROLE_CHOICES = [
         ('client', 'Client'),

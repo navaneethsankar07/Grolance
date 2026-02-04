@@ -1,14 +1,36 @@
 import { useState } from "react";
-import { Search, Filter, ChevronDown } from "lucide-react";
+import { Search, Filter, ChevronDown, X } from "lucide-react";
 import { useAdminUsers } from "./usersQueries";
 import UserTable from "./userTable";
 
 export default function AdminUserList() {
-  const [search, setSearch] = useState("");
+  const [searchInput, setSearchInput] = useState("")
+  const [activeSearch, setActiveSearch] = useState("")
   const [page, setPage] = useState(1);
   const [status, setStatus] = useState("");
 
-  const { data, isLoading, isError } = useAdminUsers({ page, search, status });
+  const { data, isLoading, isError } = useAdminUsers({ 
+    page, 
+    search: activeSearch, 
+    status 
+  });
+
+  const handleSearchTrigger = () => {
+    setActiveSearch(searchInput);
+    setPage(1);
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      handleSearchTrigger();
+    }
+  };
+
+  const clearSearch = () => {
+    setSearchInput("");
+    setActiveSearch("");
+    setPage(1);
+  };
 
   return (
     <div className="max-w-7xl mx-auto">
@@ -22,17 +44,32 @@ export default function AdminUserList() {
       </div>
 
       <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-wrap items-center gap-4 mb-6">
-        <div className="relative flex-1 min-w-60">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-          <input
-            value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
-              setPage(1);
-            }}
-            placeholder="Search by name or email..."
-            className="w-full h-11 pl-10 pr-4 bg-gray-50 border-none rounded-lg text-sm focus:ring-2 focus:ring-primary transition-all"
-          />
+        <div className="flex flex-1 min-w-60 gap-2">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <input
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="Search by name or email..."
+              className="w-full h-11 pl-10 pr-10 bg-gray-50 border-none rounded-lg text-sm focus:ring-2 focus:ring-blue-500 transition-all"
+            />
+            {searchInput && (
+              <button
+                onClick={clearSearch}
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-200 rounded-full transition-colors"
+              >
+                <X className="w-3.5 h-3.5 text-gray-500" />
+              </button>
+            )}
+          </div>
+          
+          <button
+            onClick={handleSearchTrigger}
+            className="h-11 px-6 bg-primary hover:bg-blue-500 text-white rounded-lg text-sm font-semibold transition-colors flex items-center gap-2"
+          >
+            <Search className="w-4 h-4" />
+          </button>
         </div>
 
         <div className="relative">
@@ -43,7 +80,7 @@ export default function AdminUserList() {
               setStatus(e.target.value);
               setPage(1);
             }}
-            className="h-11 pl-10 pr-10 bg-gray-50 border-none rounded-lg text-sm focus:ring-2 focus:ring-blue-500 appearance-none cursor-pointer font-medium text-gray-700"
+            className="h-11 pl-10 pr-10 bg-gray-50 border-none rounded-lg text-sm focus:ring-2 focus:ring-blue-500 appearance-none cursor-pointer font-medium text-gray-700 min-w-[160px]"
           >
             <option value="">All Users</option>
             <option value="active">Active Only</option>
@@ -72,6 +109,7 @@ export default function AdminUserList() {
           setPage={setPage}
           hasNext={!!data?.next}
           hasPrev={!!data?.previous}
+          totalUsers={data?.count}
         />
       )}
     </div>

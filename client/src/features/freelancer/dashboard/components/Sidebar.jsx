@@ -54,11 +54,14 @@ export function Sidebar() {
 
       <div className="border-t border-[#E5E7EB] p-4 mb-20">
         <Link to="/freelancer/profile" className="flex items-center gap-3 w-full hover:bg-gray-50 p-2 rounded-xl transition-colors">
+          {user?.profile_photo?
           <img 
-            src={user?.profile_photo} 
-            alt="User" 
-            className="w-10 h-10 rounded-full bg-gray-100 object-cover"
-          />
+          src={user?.profile_photo} 
+          alt="User" 
+          className="w-10 h-10 rounded-full bg-gray-100 object-cover"
+          />:
+          <span style={{ fontFamily: 'MuseoModerno, sans-serif' }} className="w-10 h-10 flex items-center justify-center rounded-full bg-primary text-white  object-cover">{user?.full_name[0]}</span>
+        }
           <div className="flex flex-col min-w-0">
             <p className="text-sm font-semibold text-[#1A1A1A] truncate">
               {user?.full_name}

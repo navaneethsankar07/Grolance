@@ -48,7 +48,8 @@ useEffect(() => {
             accessToken: data.access,
           })
         );
-
+        console.log(data.user);
+        
         closeModal();
          if (data.user.current_role === 'freelancer') {
       navigate("/freelancer");
