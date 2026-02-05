@@ -19,7 +19,7 @@ export default function AdminStatsCard({
             {value}
           </h3>
         </div>
-
+    
         <div
           className={`w-10 h-10 rounded-lg flex items-center justify-center ${iconBgColor}`}
         >

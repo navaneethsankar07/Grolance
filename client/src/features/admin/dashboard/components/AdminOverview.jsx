@@ -19,8 +19,8 @@ export default function AdminOverview() {
         <AdminStatsCard
           title="Total Users"
           value={dashboardStats?.total_users}
-          change="12%"
-          changeType="positive"
+          change={`${dashboardStats?.users_change}%`}
+          changeType={dashboardStats?.users_change >= 0 ? "positive" : "negative"}
           icon={Users}
           iconBgColor="bg-blue-50"
           iconColor="text-blue-600"
@@ -28,8 +28,8 @@ export default function AdminOverview() {
         <AdminStatsCard
           title="Total Projects"
           value={dashboardStats?.total_projects}
-          change="8.5%"
-          changeType="positive"
+          change={`${dashboardStats?.projects_change}%`}
+          changeType={dashboardStats?.projects_change >= 0 ? "positive" : "negative"}
           icon={Briefcase}
           iconBgColor="bg-white"
           iconColor="text-gray-900"
@@ -37,8 +37,8 @@ export default function AdminOverview() {
         <AdminStatsCard
           title="Active Contracts"
           value={dashboardStats?.active_contracts}
-          change="3.2%"
-          changeType="positive"
+          change={`${dashboardStats?.contracts_change}%`}
+          changeType={dashboardStats?.contracts_change >= 0 ? "positive" : "negative"}
           icon={FileText}
           iconBgColor="bg-green-50"
           iconColor="text-gray-900"
@@ -46,8 +46,8 @@ export default function AdminOverview() {
         <AdminStatsCard
           title="Total Proposals"
           value={dashboardStats?.total_proposals}
-          change="5.4%"
-          changeType="negative"
+          change={`${dashboardStats?.proposals_change}%`}
+          changeType={dashboardStats?.proposals_change >= 0 ? "positive" : "negative"}
           icon={File}
           iconBgColor="bg-white"
           iconColor="text-gray-900"
@@ -67,8 +67,8 @@ export default function AdminOverview() {
         <AdminStatsCard
           title="Platform Revenue"
           value={`$${dashboardStats?.platform_revenue}`}
-          change="15.3%"
-          changeType="positive"
+          change={`${dashboardStats?.revenue_change}%`}
+          changeType={dashboardStats?.revenue_change >= 0 ? "positive" : "negative"}
           icon={DollarSign}
           iconBgColor="bg-white"
           iconColor="text-gray-900"
@@ -76,8 +76,8 @@ export default function AdminOverview() {
         <AdminStatsCard
           title="Pending Withdrawals"
           value={`$${dashboardStats?.pending_withdrawals}`}
-          change="12 pending"
-          changeType="positive"
+          change={`${dashboardStats?.pending_withdrawals_count} pending`}
+          changeType={dashboardStats?.pending_withdrawals_count  >= 0 ? "positive" : "negative"}
           icon={Wallet}
           iconBgColor="bg-white"
           iconColor="text-gray-900"
