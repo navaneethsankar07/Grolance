@@ -18,72 +18,73 @@ export default function ContractDetail() {
   const { data: contract, isLoading, isError } = useContractDetail(id);
   const submitWorkMutation = useSubmitWork();
   const revisionActionMutation = useRevisionAction();
-  
   const { getRoomMutation } = useChatActions();
+  const { openModal } = useModal();
 
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, percentage: 0 });
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
-  const [isChatOpen, setIsChatOpen] = useState(false);
-  const [selectedRoomId, setSelectedRoomId] = useState(null);
   const [subType, setSubType] = useState('file');
   const [formData, setFormData] = useState({ title: '', file: null, link_url: '', notes: '' });
-  
   const [activeRevisionId, setActiveRevisionId] = useState(null);
   const [rejectionNote, setRejectionNote] = useState("");
-  const { openModal } = useModal();
 
   useEffect(() => {
-    if (contract?.status === 'completed') {
+    if (!contract) return;
+
+    if (contract.status === 'completed') {
       setTimeLeft({ days: 0, hours: 0, percentage: 100 });
       return;
     }
 
-    if (contract?.freelancer_signed_at && contract?.delivery_days) {
+    const signedAt = contract.freelancer_signed_at || contract.created_at;
+    const days = Number(contract.delivery_days) || 0;
+
+    if (signedAt && days > 0) {
       const calculateTime = () => {
-        const start = new Date(contract.freelancer_signed_at).getTime();
-        const durationMs = contract.delivery_days * 24 * 60 * 60 * 1000;
+        const start = new Date(signedAt).getTime();
+        const durationMs = days * 24 * 60 * 60 * 1000;
         const end = start + durationMs;
         const now = new Date().getTime();
         const difference = end - now;
-        const totalDuration = end - start;
         
         if (difference > 0) {
-          const days = Math.floor(difference / (1000 * 60 * 60 * 24));
-          const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+          const d = Math.floor(difference / (1000 * 60 * 60 * 24));
+          const h = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+          
+          const totalDuration = end - start;
           const elapsed = now - start;
           const percentage = Math.min(Math.max((elapsed / totalDuration) * 100, 0), 100);
-          setTimeLeft({ days, hours, percentage });
+          
+          setTimeLeft({ days: d, hours: h, percentage });
         } else {
           setTimeLeft({ days: 0, hours: 0, percentage: 100 });
         }
       };
+
       calculateTime();
       const timer = setInterval(calculateTime, 60000);
       return () => clearInterval(timer);
     }
-  }, [contract]);
+  }, [contract?.freelancer_signed_at, contract?.delivery_days, contract?.status]);
 
 const handleOpenChat = async () => {
-  try {
-    const targetId = contract.client_id || contract.client; 
-    
-    if (!targetId) {
-      toast.error("Client information missing.");
-      return;
+    try {
+      const targetId = contract.client_id || contract.client; 
+      if (!targetId) {
+        toast.error("Client information missing.");
+        return;
+      }
+      
+      const room = await getRoomMutation.mutateAsync(targetId);
+      
+      // We only use the global modal store now
+      openModal("messages", { initialRoomId: room.id });
+      
+    } catch (error) {
+      toast.error("Could not open chat. Please try again.");
     }
-
-    const room = await getRoomMutation.mutateAsync(targetId);
-    
-    openModal("messages", { initialRoomId: room.id });
-    
-    setSelectedRoomId(room.id);
-    setIsChatOpen(true);
-  } catch (error) {
-    console.error("Chat Error:", error);
-    toast.error("Could not open chat. Please try again.");
-  }
-};
+  };
 
   const handleRevisionDecision = (revisionId, action) => {
     if (action === 'reject') {
@@ -91,7 +92,6 @@ const handleOpenChat = async () => {
       setIsRejectModalOpen(true);
       return;
     }
-
     revisionActionMutation.mutate({ revisionId, action }, {
       onSuccess: () => toast.success("Revision accepted. Status updated to Active."),
       onError: (err) => alert(err.response?.data?.error || "Error updating revision")
@@ -100,7 +100,6 @@ const handleOpenChat = async () => {
 
   const confirmRejection = () => {
     if (!rejectionNote.trim()) return alert("Please provide a reason for rejection");
-
     revisionActionMutation.mutate({ 
       revisionId: activeRevisionId, 
       action: 'reject', 
@@ -119,7 +118,6 @@ const handleOpenChat = async () => {
     data.append('deliverable_type', subType); 
     data.append('title', formData.title);
     data.append('notes', formData.notes || ""); 
-
     if (subType === 'file') {
       if (!formData.file) return alert("Please select a file");
       data.append('file', formData.file);
@@ -127,7 +125,6 @@ const handleOpenChat = async () => {
       if (!formData.link_url) return alert("Please enter a URL");
       data.append('link_url', formData.link_url);
     }
-
     submitWorkMutation.mutate({ id, formData: data }, {
       onSuccess: () => {
         setIsModalOpen(false);
@@ -139,7 +136,13 @@ const handleOpenChat = async () => {
   if (isLoading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
   if (isError || !contract) return <div className="min-h-screen flex items-center justify-center text-red-500">Error loading contract details.</div>;
 
-  const dueDate = contract?.freelancer_signed_at ? new Date(new Date(contract.freelancer_signed_at).getTime() + (contract.delivery_days * 24 * 60 * 60 * 1000)) : null;
+  const getDueDateDisplay = () => {
+    const signedAt = contract.freelancer_signed_at || contract.created_at;
+    if (!signedAt) return '---';
+    const date = new Date(signedAt);
+    date.setDate(date.getDate() + Number(contract.delivery_days || 0));
+    return formatDateDMY(date.toISOString());
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
@@ -153,7 +156,8 @@ const handleOpenChat = async () => {
           <div className="flex items-center justify-between mb-10">
             <h2 className="text-xl font-bold text-[#111827]">Order Summary</h2>
             <span className={`px-4 py-1.5 text-xs font-semibold rounded-full border uppercase ${
-              contract.status === 'active' ? 'bg-blue-50 text-blue-600 border-blue-100' : 'bg-green-50 text-green-600 border-green-100'
+              contract.status === 'active' ? 'bg-blue-50 text-blue-600 border-blue-100' : 
+              ['disputed', 'dispute'].includes(contract.status) ? 'bg-amber-50 text-amber-600 border-amber-100' : 'bg-green-50 text-green-600 border-green-100'
             }`}>
               {contract.status === 'active' ? 'In Progress' : contract.status}
             </span>
@@ -221,42 +225,61 @@ const handleOpenChat = async () => {
               <div>
                 <p className="text-sm text-gray-400 font-medium mb-1">Due Date</p>
                 <p className="text-lg font-bold text-gray-900">
-                  {dueDate ? formatDateDMY(dueDate) : '---'}
+                  {getDueDateDisplay()}
                 </p>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-8 mb-6">
+       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-8 mb-6">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-2">
               <Clock className="w-5 h-5 text-blue-600" />
               <h2 className="text-[17px] font-bold text-gray-900">
-                {contract.status === 'completed' ? 'Order Completed' : 'Delivery Countdown'}
+                {contract.status === 'completed' ? 'Order Completed' : 
+                 ['disputed', 'dispute'].includes(contract.status) ? 'Timeline Paused' : 'Delivery Countdown'}
               </h2>
             </div>
           </div>
-          {contract.status !== 'completed' ? (
+          {contract.status !== 'completed' && !['disputed', 'dispute'].includes(contract.status) ? (
             <div className="flex items-baseline gap-2 mb-4">
               <span className="text-3xl font-bold text-gray-900">{timeLeft.days}</span>
               <span className="text-sm font-semibold text-gray-500 mr-2">days</span>
               <span className="text-3xl font-bold text-gray-900">{timeLeft.hours}</span>
               <span className="text-sm font-semibold text-gray-500">hours remaining</span>
             </div>
-          ) : (
+          ) : contract.status === 'completed' ? (
             <div className="flex items-center gap-2 mb-4 text-green-600">
               <CheckCircle2 className="w-6 h-6" />
-              <span className="text-xl font-bold">The work has been successfully delivered and approved.</span>
+              <span className="text-xl font-bold">Work delivered and approved.</span>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2 mb-4 text-amber-600">
+              <AlertCircle className="w-6 h-6" />
+              <span className="text-xl font-bold">Countdown hidden during dispute.</span>
             </div>
           )}
           <div className="relative w-full h-2.5 bg-gray-100 rounded-full overflow-hidden">
             <div 
-              className={`absolute left-0 top-0 h-full transition-all duration-1000 ease-linear rounded-full ${contract.status === 'completed' ? 'bg-green-500' : 'bg-blue-600'}`} 
+              className={`absolute left-0 top-0 h-full transition-all duration-1000 ease-linear rounded-full ${
+                contract.status === 'completed' ? 'bg-green-500' : 
+                ['disputed', 'dispute'].includes(contract.status) ? 'bg-amber-400' : 'bg-blue-600'
+              }`} 
               style={{ width: `${timeLeft.percentage}%` }} 
             />
           </div>
         </div>
+
+        {['disputed', 'dispute'].includes(contract.status) && (
+          <div className="mb-6 p-5 bg-amber-50 border border-amber-200 rounded-2xl flex gap-4">
+            <ShieldAlert className="w-6 h-6 text-amber-600 shrink-0" />
+            <div>
+              <p className="text-sm font-bold text-amber-900">Order in Dispute</p>
+              <p className="text-xs text-amber-700 mt-1">Our support team is currently reviewing this order. Communication and deliverables are locked until resolution.</p>
+            </div>
+          </div>
+        )}
 
         {contract.revisions?.length > 0 && (
           <div className="bg-white rounded-xl border border-red-100 shadow-sm overflow-hidden mb-6">
@@ -284,7 +307,7 @@ const handleOpenChat = async () => {
                   <div>
                     <p className="text-sm text-gray-700 leading-relaxed font-medium">"{rev.reason}"</p>
                   </div>
-                  {rev.status === 'pending' && contract.status !== 'completed' && (
+                  {rev.status === 'pending' && !['completed', 'disputed', 'dispute'].includes(contract.status) && (
                     <div className="flex gap-3 pt-2">
                       <button 
                         disabled={revisionActionMutation.isPending}
@@ -300,12 +323,6 @@ const handleOpenChat = async () => {
                       >
                         Reject
                       </button>
-                    </div>
-                  )}
-                  {rev.status === 'rejected' && rev.rejection_message && (
-                    <div className="p-3 bg-red-50 rounded-lg border border-red-100">
-                      <p className="text-[10px] font-bold text-red-700 uppercase mb-1">Rejection Reason:</p>
-                      <p className="text-xs text-red-600 italic">"{rev.rejection_message}"</p>
                     </div>
                   )}
                 </div>
@@ -374,19 +391,24 @@ const handleOpenChat = async () => {
             <MessageSquare className="w-5 h-5" strokeWidth={2.5}/>
             {getRoomMutation?.isPending ? "Connecting..." : "Message Client"}
           </button>
-          <button className="flex items-center justify-center gap-2 px-6 py-3.5 bg-white border border-red-300 text-red-600 text-sm font-medium rounded-lg hover:bg-red-50 transition-colors">
-            <ShieldAlert className="w-5 h-5" strokeWidth={2.5}/>
-            Raise Dispute
-          </button>
+          {['disputed', 'dispute'].includes(contract.status) ? (
+            <div className="flex items-center justify-center gap-2 px-6 py-3.5 bg-amber-50 border border-amber-200 text-amber-600 text-sm font-bold rounded-lg">
+              <ShieldAlert className="w-5 h-5" strokeWidth={2.5}/>
+              Dispute Investigation Active
+            </div>
+          ) : (
+            <button 
+              onClick={() => openModal("raise-dispute", { contractId: id })}
+              className="flex items-center justify-center gap-2 px-6 py-3.5 bg-white border border-red-300 text-red-600 text-sm font-medium rounded-lg hover:bg-red-50 transition-colors"
+            >
+              <ShieldAlert className="w-5 h-5" strokeWidth={2.5}/>
+              Raise Dispute
+            </button>
+          )}
         </div>
       </div>
 
-      {isChatOpen && (
-        <Chat 
-          onClose={() => setIsChatOpen(false)} 
-          data={{ initialRoomId: selectedRoomId }} 
-        />
-      )}
+     
 
       {isRejectModalOpen && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[60] p-4">

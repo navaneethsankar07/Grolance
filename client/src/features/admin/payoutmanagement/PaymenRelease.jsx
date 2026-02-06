@@ -1,10 +1,21 @@
 import { CheckCircle, XCircle, CreditCard, Clock, ChevronRight, Loader2 } from 'lucide-react';
 import { usePendingPayouts } from './payoutQueries';
 import { useModal } from '../../../hooks/modal/useModalStore';
+import { useRefundPayment } from './payoutMutations';
 
 export default function PaymentRelease() {
   const { data: payments = [], isLoading } = usePendingPayouts();
   const { openModal } = useModal();
+  const refundMutation = useRefundPayment();
+console.log(payments);
+
+
+  const handleRefund = (paymentId) => {
+    const numericId = paymentId.replace('PAY-', '');
+    if (window.confirm("Are you sure you want to refund this payment to the client?")) {
+      refundMutation.mutate(numericId);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -69,10 +80,12 @@ export default function PaymentRelease() {
                             Release
                           </button>
                           <button 
-                            className="text-rose-600 border border-rose-200 hover:bg-rose-50 px-5 py-2 rounded-lg text-sm font-semibold transition-all active:scale-95"
-                          >
-                            Refund
-                          </button>
+                        disabled={refundMutation.isPending}
+                        onClick={() => handleRefund(pay.payment_id)}
+                        className="text-rose-600 border border-rose-200 hover:bg-rose-50 px-5 py-2 rounded-lg text-sm font-semibold disabled:opacity-50"
+                      >
+                        {refundMutation.isPending ? 'Processing...' : 'Refund'}
+                      </button>
                         </div>
                       </td>
                     </tr>
@@ -111,10 +124,12 @@ export default function PaymentRelease() {
                       Release Payment
                     </button>
                     <button 
-                      className="flex-1 border border-rose-200 text-rose-600 py-3 rounded-xl font-bold text-sm hover:bg-rose-50"
-                    >
-                      Refund
-                    </button>
+                        disabled={refundMutation.isPending}
+                        onClick={() => handleRefund(pay.payment_id)}
+                        className="text-rose-600 border border-rose-200 hover:bg-rose-50 px-5 py-2 rounded-lg text-sm font-semibold disabled:opacity-50"
+                      >
+                        {refundMutation.isPending ? 'Processing...' : 'Refund'}
+                      </button>
                   </div>
                 </div>
               ))}

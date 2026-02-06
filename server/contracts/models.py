@@ -87,3 +87,58 @@ class ContractRevision(models.Model):
 
     def __str__(self):
         return f"Revision for Contract {self.contract.id} at {self.created_at}"
+    
+
+class Dispute(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('under_review', 'Under Review'),
+        ('resolved', 'Resolved'),
+        ('rejected', 'Rejected'),
+    ]
+
+    REASON_CHOICES = [
+        ('scope_creep', 'Client requesting extra work outside scope'),
+        ('no_feedback', 'Client is unresponsive'),
+        ('Unlimited Revisions','contract does not limit the number of revisions included in the price, leading to endless edits.'),
+        ('poor_quality', 'Work quality does not match proposal'),
+        ('missed_deadline', 'Freelancer missed final deadline'),
+        ('incomplete_work', 'Freelancer submitted unfinished work'),
+        ('communication_issue', 'Communication breakdown'),
+        ('other', 'Other'),
+    ]
+
+    contract = models.ForeignKey('contracts.Contract', on_delete=models.CASCADE, related_name='disputes')
+    
+    opened_by_client = models.ForeignKey(
+        'profiles.ClientProfile', 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True
+    )
+    opened_by_freelancer = models.ForeignKey(
+        'profiles.FreelancerProfile', 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True
+    )
+
+    reason = models.CharField(max_length=50, choices=REASON_CHOICES)
+    description = models.TextField()
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    
+    admin_notes = models.TextField(blank=True, null=True)
+    resolved_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    @property
+    def opener(self):
+        return self.opened_by_client or self.opened_by_freelancer
+
+    def __str__(self):
+        role = "Client" if self.opened_by_client else "Freelancer"
+        return f"Dispute by {role} on Contract {self.contract.id}"
+
+class DisputeFile(models.Model):
+    dispute = models.ForeignKey(Dispute, on_delete=models.CASCADE, related_name='evidence')
+    file_url = models.URLField(max_length=500)

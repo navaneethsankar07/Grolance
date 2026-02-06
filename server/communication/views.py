@@ -69,7 +69,6 @@ class ChatRoomViewSet(viewsets.ModelViewSet):
             room = self.get_object()
             messages = room.messages.all().order_by('-created_at')
             
-            # Update read status
             messages.exclude(sender=request.user).update(is_read=True)
 
             Notification.objects.filter(
@@ -81,10 +80,10 @@ class ChatRoomViewSet(viewsets.ModelViewSet):
             
             page = self.paginate_queryset(messages)
             if page is not None:
-                serializer = self.get_serializer(page, many=True)
+                serializer = MessageSerializer(page, many=True,context={'request': request})
                 return self.get_paginated_response(serializer.data)
 
-            serializer = self.get_serializer(messages, many=True)
+            serializer = MessageSerializer(messages, many=True,context={'request': request},)
             return Response(serializer.data)
         except ObjectDoesNotExist:
             return Response({"error": "Chat room not found."}, status=status.HTTP_404_NOT_FOUND)
@@ -133,6 +132,9 @@ class MessageViewSet(viewsets.ModelViewSet):
             logger.error(f"Error fetching messages: {str(e)}")
             return Message.objects.none()
     
+    def get_serializer_class(self):
+        return MessageSerializer
+
     def perform_create(self, serializer):
         try:
             room = serializer.validated_data['room']

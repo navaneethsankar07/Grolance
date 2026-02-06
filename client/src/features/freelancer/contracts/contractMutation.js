@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import {  postRevisionAction, submitContractWork } from "./contractsApi";
+import {  createDispute, postRevisionAction, submitContractWork } from "./contractsApi";
+import { toast } from "react-toastify";
 
 
 export const useSubmitWork = () => {
@@ -23,6 +24,22 @@ export const useRevisionAction = () => {
     onError: (err) => {
       const errorMsg = err.response?.data?.error || "Failed to update revision status";
       console.error("Revision Action Error:", errorMsg);
+    }
+  });
+};
+
+
+export const useDisputeMutation = () => {
+  return useMutation({
+    mutationFn: createDispute,
+    onSuccess: () => {
+      queryClient.invalidateQueries(["contractDetail"]);      
+      toast.success("Dispute raised successfully!");
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.error || error.response?.data?.detail|| "Failed to raise dispute");
+      console.log(error);
+      
     }
   });
 };

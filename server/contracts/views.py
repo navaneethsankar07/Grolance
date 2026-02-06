@@ -4,11 +4,14 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.utils import timezone
 from django.db.models import Q
+from adminpanel.permissions import IsAdminUser
+from projects.permissions import IsClientUser, IsFreelancerUser
 from django.core.exceptions import ObjectDoesNotExist
-from .models import Contract, ContractRevision
-from .serializers import ContractSerializer, ContractOfferSerializer, ContractAcceptSerializer, ContractDeliverableSerializer
+from .models import Contract, ContractRevision, Dispute, DisputeFile
+from .serializers import ContractSerializer, ContractOfferSerializer, ContractAcceptSerializer, ContractDeliverableSerializer,DisputeSerializer, AdminDisputeListSerializer, AdminDisputeDetailSerializer
 import logging
 from .utils import generate_contract_pdf
+from django.db import transaction
 from projects.models import Proposal
 
 logger = logging.getLogger('contracts')
@@ -28,7 +31,7 @@ class ContractViewSet(viewsets.ModelViewSet):
             user = self.request.user
             queryset = Contract.objects.filter(Q(client=user) | Q(freelancer=user)).select_related(
                 'project', 'project__category', 'client', 'package', 'freelancer'
-            ).prefetch_related('deliverables', 'revisions')
+            ).prefetch_related('deliverables', 'revisions','disputes')
             
             status_param = self.request.query_params.get('status')
             if status_param and status_param != 'All':
@@ -231,3 +234,71 @@ class FreelancerRevisionActionView(APIView):
         except Exception as e:
             logger.error(f"Error in FreelancerRevisionActionView: {str(e)}")
             return Response({"error": "Internal error occurred"}, status=500)
+        
+
+
+class RaiseDisputeView(APIView):
+    permission_classes = [IsClientUser | IsFreelancerUser]
+
+    def post(self, request):
+        serializer = DisputeSerializer(data=request.data, context={'request': request})
+        
+        if serializer.is_valid():
+            dispute = serializer.save()
+            return Response({
+                "message": "Dispute raised successfully", 
+                "id": dispute.id
+            }, status=201)
+        
+        return Response(serializer.errors, status=400)
+    
+class AdminDisputeViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAdminUser]
+    
+    def get_queryset(self):
+        return Dispute.objects.select_related(
+            'contract', 'contract__client', 'contract__freelancer', 'contract__project',
+            'opened_by_client__user', 'opened_by_freelancer__user'
+        ).prefetch_related('evidence', 'contract__deliverables', 'contract__revisions').all().order_by('-created_at')
+
+    def get_serializer_class(self):
+        if self.action == 'retrieve':
+            return AdminDisputeDetailSerializer
+        return AdminDisputeListSerializer
+
+    @action(detail=True, methods=['post'])
+    def resolve(self, request, pk=None):
+        dispute = self.get_object()
+        if dispute.status != 'pending':
+            return Response(
+                {"error": f"This case is already {dispute.status} and cannot be modified."}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        new_status = request.data.get('status')
+        admin_notes = request.data.get('admin_notes')
+        contract_status = request.data.get('contract_status') 
+
+        valid_statuses = [choice[0] for choice in Dispute.STATUS_CHOICES]
+        if new_status not in valid_statuses:
+            return Response({"error": "Invalid dispute status"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            with transaction.atomic():
+                dispute.status = new_status
+                dispute.admin_notes = admin_notes
+                if new_status == 'resolved':
+                    dispute.resolved_at = timezone.now()
+                
+                if contract_status:
+                    dispute.contract.status = contract_status
+                    dispute.contract.save()
+                
+                dispute.save()
+
+            return Response({
+                "message": "Dispute updated successfully",
+                "current_dispute_status": dispute.status,
+                "current_contract_status": dispute.contract.status
+            })
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

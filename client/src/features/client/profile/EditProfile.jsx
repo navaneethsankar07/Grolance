@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useSelector } from "react-redux";
 import { profileSchema } from "./profileSchema";
-import { uploadToCloudinary } from "./cloudinaryHelper";
+import { uploadToCloudinary } from "../../../utils/cloudinaryHelper";
 import { useUpdateProfile } from "./profileMutations";
 import { useNavigate } from "react-router-dom";
 import { useProfile } from "./profileQueries";

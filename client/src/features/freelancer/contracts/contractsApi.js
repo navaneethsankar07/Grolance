@@ -1,4 +1,5 @@
 import axiosInstance from "../../../api/axiosInstance";
+import { uploadToCloudinary } from "../../../utils/cloudinaryHelper";
 
 export const fetchAllContracts = async (params) => {
   const { data } = await axiosInstance.get("/contracts/", { params });
@@ -28,5 +29,23 @@ export const submitContractWork = async ({ id, formData }) => {
       },
     }
   );
+  return data;
+};
+
+
+
+export const createDispute = async ({ contract, reason, description, files }) => {
+  const uploadPromises = files.map(file => uploadToCloudinary(file));
+  const uploadResults = await Promise.all(uploadPromises);
+  const evidence_urls = uploadResults.map(result => result.secure_url);
+
+  const { data } = await axiosInstance.post("/contracts/dispute/", {
+    contract,
+    reason,
+    description,
+    evidence_urls,
+  });
+  console.log(data);
+  
   return data;
 };

@@ -11,7 +11,7 @@ class PendingPayoutListView(APIView):
     permission_classes = [IsAdminUser]
 
     def get(self, request):
-        safety_window = timezone.now() - timedelta(minutes=1)
+        safety_window = timezone.now() - timedelta(seconds=1)
 
         pending_contracts = Contract.objects.filter(
             status='completed',

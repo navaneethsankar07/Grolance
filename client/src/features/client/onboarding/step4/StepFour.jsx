@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import OnboardingLayout from '../../../../layouts/OnBoardingLayout';
 import { useOnBoarding } from '../OnBoardingContext';
 import { stepFourSchema } from "./stepFourSchema";
-import { uploadToCloudinary } from '../../profile/cloudinaryHelper';
+import { uploadToCloudinary } from '../../../../utils/cloudinaryHelper';
 
 function StepFour() {
   const { formData, updateFormData, nextStep } = useOnBoarding();

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Camera, X } from "lucide-react";
-import { uploadToCloudinary } from "../../client/profile/cloudinaryHelper";
+import { uploadToCloudinary } from "../../../utils/cloudinaryHelper";
 
 export default function PortfolioModal({ isOpen, onClose, onSave, initialData }) {
   const [item, setItem] = useState({ title: "", description: "", image_url: "" });

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Contract, ContractDeliverable, ContractRevision
+from .models import Contract, ContractDeliverable, ContractRevision, Dispute, DisputeFile
 import cloudinary.uploader
 from django.conf import settings
 
@@ -78,6 +78,7 @@ class ContractSerializer(serializers.ModelSerializer):
     deliverables = ContractDeliverableSerializer(many=True, read_only=True)
     revisions = ContractRevisionSerializer(many=True, read_only=True)
     legal_document_url = serializers.SerializerMethodField()
+    dispute_details = serializers.SerializerMethodField()
 
     class Meta:
         model = Contract
@@ -86,7 +87,7 @@ class ContractSerializer(serializers.ModelSerializer):
             'client_name', 'freelancer_name', 'total_amount', 'status', 'freelancer_signed_at',
             'skills', 'profile_photo', 'package_name', 'delivery_days', 'deliverables', 'revisions',
             'legal_document_url', 'client_signature', 'freelancer_signature', 
-            'client_signed_at', 'client_ip', 'freelancer_ip','freelancer_id','client_id'
+            'client_signed_at', 'client_ip', 'freelancer_ip','freelancer_id','client_id','dispute_details'
         ]
 
     def get_skills(self, obj):
@@ -98,6 +99,23 @@ class ContractSerializer(serializers.ModelSerializer):
     def get_legal_document_url(self, obj):
         if obj.legal_document:
             return obj.legal_document.url
+        return None
+
+    def get_dispute_details(self, obj):
+        dispute = getattr(obj, 'dispute', None) 
+        
+        if not dispute and hasattr(obj, 'disputes'):
+            dispute = obj.disputes.order_by('-created_at').first()
+
+        if dispute:
+            return {
+                "id": dispute.id,
+                "status": dispute.status,
+                "reason": dispute.reason,
+                "admin_notes": dispute.admin_notes,
+                "created_at": dispute.created_at,
+                "resolved_at": dispute.resolved_at
+            }
         return None
 
 class ContractOfferSerializer(serializers.ModelSerializer):
@@ -124,3 +142,93 @@ class ContractListSerializer(serializers.ModelSerializer):
             return obj.escrow_details.freelancer_share
         except AttributeError:
             return 0.00
+        
+
+from django.db import transaction
+
+class DisputeSerializer(serializers.ModelSerializer):
+    contract = serializers.PrimaryKeyRelatedField(queryset=Contract.objects.all())
+    evidence_urls = serializers.ListField(child=serializers.URLField(), write_only=True, required=False)
+
+    class Meta:
+        model = Dispute
+        fields = ['contract', 'reason', 'description', 'evidence_urls']
+
+    def create(self, validated_data):
+        request = self.context.get('request')
+        user = request.user
+        contract = validated_data['contract']
+        evidence_urls = validated_data.pop('evidence_urls', [])
+
+        if contract.status == 'disputed' or Dispute.objects.filter(contract=contract).exists():
+            raise serializers.ValidationError({"detail": "A dispute has already been raised for this contract."})
+
+        opened_by_client = None
+        opened_by_freelancer = None
+
+        if user.current_role == 'client':
+            if user != contract.client:
+                raise serializers.ValidationError("You are not the client on this contract")
+            opened_by_client = user.client_profile
+        else:
+            if user != contract.freelancer:
+                raise serializers.ValidationError("You are not the freelancer on this contract")
+            opened_by_freelancer = user.freelancer_profile
+
+        with transaction.atomic():
+            dispute = Dispute.objects.create(
+                opened_by_client=opened_by_client,
+                opened_by_freelancer=opened_by_freelancer,
+                **validated_data
+            )
+
+            for url in evidence_urls:
+                DisputeFile.objects.create(dispute=dispute, file_url=url)
+
+            contract.status = 'disputed'
+            contract.save()
+
+        return dispute
+    
+
+class AdminDisputeListSerializer(serializers.ModelSerializer):
+    client_name = serializers.CharField(source='contract.client.full_name', read_only=True)
+    freelancer_name = serializers.CharField(source='contract.freelancer.full_name', read_only=True)
+    
+    opened_by = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Dispute
+        fields = [
+            'id', 
+            'contract', 
+            'reason', 
+            'status', 
+            'client_name', 
+            'freelancer_name', 
+            'opened_by',
+            'created_at'
+        ]
+
+    def get_opened_by(self, obj):
+        if obj.opened_by_client:
+            return "Client"
+        return "Freelancer"
+
+class AdminDisputeDetailSerializer(serializers.ModelSerializer):
+    client_name = serializers.CharField(source='opened_by_client.user.full_name', read_only=True)
+    freelancer_name = serializers.CharField(source='opened_by_freelancer.user.full_name', read_only=True)
+    evidence_files = serializers.SerializerMethodField()
+    contract_details = ContractSerializer(source='contract', read_only=True)
+
+    class Meta:
+        model = Dispute
+        fields = [
+            'id', 'status', 'reason', 'description', 'client_name', 
+            'freelancer_name', 'admin_notes', 'created_at', 'resolved_at',
+            'evidence_files', 'contract_details'
+        ]
+
+    def get_evidence_files(self, obj):
+        return obj.evidence.values_list('file_url', flat=True)
+    

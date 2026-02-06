@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
-import { releasePayout } from './payoutApi';
+import { refundPayment, releasePayout } from './payoutApi';
 
 export const useReleasePayout = () => {
   const queryClient = useQueryClient();
@@ -16,4 +16,19 @@ export const useReleasePayout = () => {
       toast.error(msg);
     }
   });
+};
+
+
+export const useRefundPayment = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: refundPayment,
+        onSuccess: () => {
+            queryClient.invalidateQueries(['pending-payouts']);
+            toast.success("Refund processed successfully");
+        },
+        onError: (error) => {
+            toast.error(error.response?.data?.error || "Refund failed");
+        }
+    });
 };

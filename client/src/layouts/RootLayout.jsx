@@ -32,6 +32,8 @@ import PayoutReleaseModal from "../features/admin/payoutmanagement/PayoutRelease
 import EditPaymentModal from "../features/freelancer/profile/EditPaymentModal";
 import Notifications from "../components/notifications/Notifications";
 import Chat from "../components/chat/Chat";
+import DisputeModal from "../features/freelancer/contracts/components/DisputeModal";
+import ClientDisputeModal from "../features/client/contract/components/ClientDisputeModal";
 export default function RootLayout() {
   const { modal, modalProps, closeModal } = useModal();
   const { loading, initialized, accessToken, user } = useSelector((s) => s.auth);
@@ -91,7 +93,8 @@ export default function RootLayout() {
         </div>
       </>}
       {modal === 'messages' && <Chat onClose={closeModal} />}
-
+      {modal === 'raise-dispute' && <DisputeModal onClose={closeModal} contractId={modalProps.contractId}/>}
+      {modal === 'client-raise-dispute' && <ClientDisputeModal onClose={closeModal} contractId={modalProps.contractId} />}
     </>
   );
 }

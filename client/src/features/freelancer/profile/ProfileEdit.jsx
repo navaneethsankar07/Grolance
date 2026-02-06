@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Plus, Pencil, Trash2, Camera, X, Check, Loader2 } from "lucide-react";
-import { uploadToCloudinary } from "../../client/profile/cloudinaryHelper";
+import { uploadToCloudinary } from "../../../utils/cloudinaryHelper";
 import { useFreelancerProfile } from "./profileQueries";
 import { useUpdateFreelancerProfile } from "./profileMutation";
 import PortfolioModal from "./PortfolioModal"; 

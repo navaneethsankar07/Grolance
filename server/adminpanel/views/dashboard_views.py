@@ -92,7 +92,6 @@ class AdminRevenueChartView(APIView):
         period = request.query_params.get('range', 'this_year')
         now = timezone.now()
 
-        # Mock data for frontend testing
         MOCK_DATA = {
             'this_year': [
                 {"month": "Jan", "revenue": 1200}, {"month": "Feb", "revenue": 2100},
@@ -118,12 +117,10 @@ class AdminRevenueChartView(APIView):
             ]
         }
 
-        # Return Mock data if database is empty or specifically for testing
         use_mock = True  
         if use_mock:
             return Response(MOCK_DATA.get(period, MOCK_DATA['this_year']))
 
-        # --- Real Database Logic ---
         if period == 'all_time':
             db_data = (
                 Payment.objects.filter(status__in=['completed', 'released'])
@@ -166,7 +163,6 @@ class AdminProposalsChartView(APIView):
         now = timezone.now()
         data = []
 
-        # Real Database Query
         for i in range(6, -1, -1):
             day_date = now - timedelta(days=i)
             
@@ -188,10 +184,6 @@ class AdminProposalsChartView(APIView):
                 "proposals": proposals_count
             })
 
-        # --- TEMPORARY FIX FOR TESTING ---
-        # While you have very little data, use this logic:
-        # If the total sum of projects AND proposals is low (e.g., < 5), 
-        # force mock data so the UI doesn't look empty.
         total_activity = sum(d['projects'] for d in data) + sum(d['proposals'] for d in data)
         
         if total_activity <= 14: 

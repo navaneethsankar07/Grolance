@@ -12,3 +12,8 @@ export const releasePayout = async ({ contractId, platformEmail }) => {
   });
   return response.data;
 };
+
+export const refundPayment = async (paymentId) => {
+    const { data } = await axiosInstance.post('/payments/refund-payment/', { payment_id: paymentId });
+    return data;
+};
