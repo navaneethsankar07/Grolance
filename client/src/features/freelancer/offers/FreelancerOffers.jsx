@@ -1,6 +1,7 @@
 import { Tag, Calendar, Banknote, ArrowRight, FileCheck } from "lucide-react";
 import { useMyOffers } from "./offersQuries";
 import { useModal } from "../../../hooks/modal/useModalStore";
+import { formatDateDMY } from "../../../utils/date";
 
 export default function FreelancerOffers() {
   const { data: offers, isLoading, isError } = useMyOffers();
@@ -10,7 +11,7 @@ export default function FreelancerOffers() {
   if (isError) return <div className="p-10 text-center text-red-500">Error loading offers.</div>;
 
   const offerList = offers || [];
-
+  
   return (
     <div className="min-h-screen bg-gray-50/50 p-4 sm:p-8">
       <div className="max-w-5xl mx-auto">
@@ -30,7 +31,7 @@ export default function FreelancerOffers() {
                         New Offer
                       </span>
                       <span className="text-xs text-gray-400 font-medium">
-                        Received {new Date(offer.created_at).toLocaleDateString()}
+                        Received {formatDateDMY(offer.client_signed_at)}
                       </span>
                     </div>
                     <h3 className="text-lg font-bold text-gray-900">{offer.project_title}</h3>

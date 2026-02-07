@@ -34,7 +34,7 @@ class PendingPayoutListView(APIView):
                 "freelancer_share": payment.freelancer_share if payment else 0,
                 "platform_fee": payment.platform_fee if payment else 0,
                 "completed_at": contract.completed_at,
-                "status": "Ready to Release",
+                "status": contract.status,
                 "gateway": "PayPal"
             })
 

@@ -3,7 +3,7 @@ from .models import Project, ProjectSkill, Invitation, Proposal
 from categories.models import Skill
 from profiles.models import ClientProfile, FreelancerProfile, FreelancerPackage
 from contracts.models import Contract
-
+from django.core.exceptions import ObjectDoesNotExist
 
 class ProjectCreateSerializer(serializers.ModelSerializer):
     skills = serializers.ListField(
@@ -381,34 +381,50 @@ class ProposalsSerializer(serializers.ModelSerializer):
         project = data.get('project')
         package = data.get('package')
 
+    # 1. Ensure the user has a freelancer profile
         try:
             freelancer_profile = user.freelancer_profile
-        except AttributeError:
-            raise serializers.ValidationError("Freelancer profile not found.")
-        if Proposal.objects.filter(project=project, freelancer=freelancer_profile).exists():
-            raise serializers.ValidationError(
-                "You have already submitted a proposal for this project.")
+        except (AttributeError, ObjectDoesNotExist):
+            raise serializers.ValidationError("Freelancer profile not found. You must be a freelancer to bid.")
 
+    # 2. Check for duplicate proposals
+        if Proposal.objects.filter(project=project, freelancer=freelancer_profile).exists():
+            raise serializers.ValidationError("You have already submitted a proposal for this project.")
+
+    # 3. Check for existing invitations
         if Invitation.objects.filter(
             project=project,
             freelancer=freelancer_profile,
             status__in=['pending', 'accepted']
-        ).exists():
+    ).exists():
             raise serializers.ValidationError(
-                "You have already been invited to this project. Please respond to the invitation in your dashboard."
-            )
+            "An active invitation exists for this project. Please manage it via your dashboard."
+        )
+
+    # 4. Project logic checks
         if project.status != 'open':
-            raise serializers.ValidationError(
-                "This project is no longer accepting bids.")
+            raise serializers.ValidationError("This project is no longer accepting bids.")
 
         if project.client == user:
-            raise serializers.ValidationError(
-                "You cannot bid on your own project.")
+            raise serializers.ValidationError("You cannot bid on your own project.")
 
-        if package.user != user:
-            raise serializers.ValidationError(
-                "You must use one of your own packages to bid.")
+    # 5. Package Ownership Check
+    # Ensure a package was actually selected
+        if not package:
+            raise serializers.ValidationError("A valid package must be selected for the proposal.")
 
+    # Verify that the package belongs to the freelancer making the bid
+    # Adjust 'package.freelancer' if your Package model uses a different field name
+        if hasattr(package, 'freelancer'):
+            if package.freelancer.user != user:
+                raise serializers.ValidationError("The selected package does not belong to your profile.")
+        elif hasattr(package, 'user'):
+            if package.user != user:
+                raise serializers.ValidationError("The selected package does not belong to your profile.")
+
+    # 6. Success: Add the profile to the data so create() can use it
+        data['freelancer'] = freelancer_profile
+    
         return data
 
     def create(self, validated_data):

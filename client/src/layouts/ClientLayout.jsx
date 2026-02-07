@@ -7,7 +7,7 @@ export default function ClientLayout() {
     <div className="min-h-screen flex flex-col">
       <ClientHeader />
 
-      <main className="flex-1 bg-gray-50 px-4 py-6">
+      <main className="flex-1 bg-gray-50 px-4 ">
         <Outlet />
       </main>
 

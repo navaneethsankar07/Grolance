@@ -6,7 +6,6 @@ import { Link } from 'react-router-dom';
 
 function Invitations() {
   const { data, isLoading, isError } = useReceivedInvitations();
-  console.log(data);
   const invitations = data?.results || [];
   const displayInvitations = invitations.status === 'pending'? invitations.slice(0, 5) : [];
 

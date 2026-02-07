@@ -18,8 +18,6 @@ export default function DisputeList() {
     switch (status) {
       case "pending":
         return "bg-slate-100 text-slate-600 border-slate-200";
-      case "under_review":
-        return "bg-amber-50 text-amber-600 border-amber-200";
       case "resolved":
         return "bg-emerald-50 text-emerald-600 border-emerald-200";
       default:
@@ -92,7 +90,7 @@ export default function DisputeList() {
         </div>
 
         <div className="flex gap-2 mb-8 overflow-x-auto pb-2">
-          {["All", "pending", "under_review", "resolved"].map((f) => (
+          {["All", "pending", "resolved"].map((f) => (
             <button
               key={f}
               onClick={() => setActiveFilter(f)}

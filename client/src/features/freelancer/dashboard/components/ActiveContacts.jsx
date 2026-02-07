@@ -8,9 +8,10 @@ function ActiveContacts() {
   const { data, isLoading } = useMyContracts()
   const contracts = data?.results || []
   const activeContracts = contracts
-    .filter(contract => contract.status === 'active')
+    .filter(contract => contract.status === 'active' || contract.status === 'disputed')
     .slice(0, 4)
-
+  console.log(data);
+  
   const getDueDate = (signedAt, days) => {
     if (!signedAt || !days) return 'N/A';
     

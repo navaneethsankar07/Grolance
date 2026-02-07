@@ -66,6 +66,8 @@ class ContractSerializer(serializers.ModelSerializer):
     project_title = serializers.CharField(source='project.title', read_only=True)
     project_id = serializers.CharField(source='project.id', read_only=True)
     project_description = serializers.CharField(source='project.description', read_only=True)
+    expected_deliverables = serializers.CharField(source='project.expected_deliverables', read_only=True)
+    requirements = serializers.CharField(source='project.requirements', read_only=True)
     client_name = serializers.CharField(source='client.full_name', read_only=True)
     client_id = serializers.CharField(source='client.id', read_only=True)
     project_category = serializers.CharField(source='project.category.name', read_only=True)
@@ -83,7 +85,7 @@ class ContractSerializer(serializers.ModelSerializer):
     class Meta:
         model = Contract
         fields = [
-            'id', 'project_title', 'project_description', 'project_category', 'project_id',
+            'id', 'project_title', 'project_description', 'expected_deliverables','requirements', 'project_category', 'project_id',
             'client_name', 'freelancer_name', 'total_amount', 'status', 'freelancer_signed_at',
             'skills', 'profile_photo', 'package_name', 'delivery_days', 'deliverables', 'revisions',
             'legal_document_url', 'client_signature', 'freelancer_signature', 
@@ -108,17 +110,28 @@ class ContractSerializer(serializers.ModelSerializer):
             dispute = obj.disputes.order_by('-created_at').first()
 
         if dispute:
+            if hasattr(dispute, 'opened_by_client') and dispute.opened_by_client:
+                raised_by = "Client"
+                raised_by_id = str(dispute.opened_by_client.user.id)
+            else:
+                raised_by = "Freelancer"
+                raised_by_id = str(dispute.opened_by_freelancer.user.id)
+
             return {
                 "id": dispute.id,
                 "status": dispute.status,
                 "reason": dispute.reason,
                 "admin_notes": dispute.admin_notes,
                 "created_at": dispute.created_at,
-                "resolved_at": dispute.resolved_at
+                "resolved_at": dispute.resolved_at,
+                "raised_by": raised_by, 
+                "raised_by_id":raised_by_id
             }
         return None
+    
 
 class ContractOfferSerializer(serializers.ModelSerializer):
+    
     class Meta:
         model = Contract
         fields = ['project', 'freelancer', 'total_amount', 'client_signature', 'client_signature_type']
@@ -226,7 +239,7 @@ class AdminDisputeDetailSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'status', 'reason', 'description', 'client_name', 
             'freelancer_name', 'admin_notes', 'created_at', 'resolved_at',
-            'evidence_files', 'contract_details'
+            'evidence_files', 'contract_details','opened_by_client','opened_by_freelancer'
         ]
 
     def get_evidence_files(self, obj):

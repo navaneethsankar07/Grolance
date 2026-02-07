@@ -30,17 +30,17 @@ class ContractViewSet(viewsets.ModelViewSet):
         try:
             user = self.request.user
             queryset = Contract.objects.filter(Q(client=user) | Q(freelancer=user)).select_related(
-                'project', 'project__category', 'client', 'package', 'freelancer'
-            ).prefetch_related('deliverables', 'revisions','disputes')
-            
+            'project', 'project__category', 'client', 'package', 'freelancer'
+            ).prefetch_related('deliverables', 'revisions', 'disputes')
+        
             status_param = self.request.query_params.get('status')
             if status_param and status_param != 'All':
                 status_map = {
-                    'In Progress': 'active',
-                    'Submitted': 'submitted',
-                    'Completed': 'completed',
-                    'Disputed': 'disputed'
-                }
+                'In Progress': 'active',
+                'Submitted': 'submitted',
+                'Completed': 'completed',
+                'Disputed': 'disputed'
+            }
                 db_status = status_map.get(status_param, status_param.lower())
                 queryset = queryset.filter(status=db_status)
 
@@ -50,9 +50,24 @@ class ContractViewSet(viewsets.ModelViewSet):
             elif role_param == 'freelancer':
                 queryset = queryset.filter(freelancer=user)
 
+            search_param = self.request.query_params.get('search')
+            if search_param:
+                search_query = Q(project__title__icontains=search_param) | \
+                           Q(freelancer__full_name__icontains=search_param) 
+            
+                if "ORD-" in search_param.upper():
+                    try:
+                        raw_id = search_param.upper().replace("#ORD-", "").replace("ORD-", "")
+                        actual_id = int(raw_id) - 8000
+                        search_query |= Q(id=actual_id)
+                    except (ValueError, TypeError):
+                        pass
+            
+                queryset = queryset.filter(search_query)
+
             if self.action == 'list':
                 return queryset.exclude(status='offered').order_by('-client_signed_at')
-            
+        
             return queryset
         except Exception as e:
             logger.error(f"Error in get_queryset: {str(e)}")
@@ -276,7 +291,6 @@ class AdminDisputeViewSet(viewsets.ModelViewSet):
             )
         new_status = request.data.get('status')
         admin_notes = request.data.get('admin_notes')
-        contract_status = request.data.get('contract_status') 
 
         valid_statuses = [choice[0] for choice in Dispute.STATUS_CHOICES]
         if new_status not in valid_statuses:
@@ -290,8 +304,12 @@ class AdminDisputeViewSet(viewsets.ModelViewSet):
                     dispute.resolved_at = timezone.now()
                 
                 if contract_status:
-                    dispute.contract.status = contract_status
+                    dispute.contract.status = "completed"
+                    project = dispute.contract.project
+                    project.status = 'completed'
+                    project.save()
                     dispute.contract.save()
+                    
                 
                 dispute.save()
 

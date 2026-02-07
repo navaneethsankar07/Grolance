@@ -6,34 +6,26 @@ import {
   Download,
   AlertCircle,
   Loader2,
-  ExternalLink,
   ShieldCheck,
-  ChevronRight,
   Scale,
   CheckCircle2,
   Lock,
   User,
-  Briefcase
+  Briefcase,
+  Paperclip,
+  Info,
+  Calendar
 } from "lucide-react";
 import { useAdminDisputeDetail } from "./disputeQueries";
-import { resolveDispute } from "./disputeApi";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useResolveDispute } from "./disputeMutations";
 
 export default function DisputeDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
   const [adminNote, setAdminNote] = useState("");
 
   const { data: dispute, isLoading, isError } = useAdminDisputeDetail(id);
-
-  const mutation = useMutation({
-    mutationFn: resolveDispute,
-    onSuccess: () => {
-      queryClient.invalidateQueries(["admin", "disputes", id]);
-      alert("Arbitration finalized and contract status updated.");
-    },
-  });
+  const mutation = useResolveDispute();
 
   if (isLoading) return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50">
@@ -54,31 +46,23 @@ export default function DisputeDetail() {
 
   const contract = dispute.contract_details;
   const isPending = dispute.status === 'pending';
-  
-  // Logic to determine labels and values based on the "Opener"
-  const opener = dispute.opened_by; // "Client" or "Freelancer"
+  const opener = dispute.opened_by_client ? 'client':'freelancer'; 
 
   const handleDecision = (action) => {
     if (!adminNote.trim()) return alert("Internal review notes are required for the audit trail.");
     
     let finalDisputeStatus;
-    let finalContractStatus;
 
     if (action === 'APPROVE_OPENER') {
       finalDisputeStatus = 'resolved';
-      // If client is right, refund. If freelancer is right, complete/pay.
-      finalContractStatus = opener === 'Client' ? 'refunded' : 'completed';
     } else {
       finalDisputeStatus = 'rejected';
-      // If client is wrong, complete/pay freelancer. If freelancer is wrong, refund client.
-      finalContractStatus = opener === 'Client' ? 'completed' : 'refunded';
     }
 
     mutation.mutate({ 
       id, 
       status: finalDisputeStatus, 
       admin_notes: adminNote, 
-      contract_status: finalContractStatus 
     });
   };
 
@@ -110,14 +94,13 @@ export default function DisputeDetail() {
       <main className="max-w-[1440px] mx-auto p-6 grid grid-cols-12 gap-8">
         <div className="col-span-12 lg:col-span-8 space-y-6">
           
-          {/* Dispute Origin Indicator */}
           <div className="flex items-center gap-3 p-4 bg-white border border-slate-200 rounded-xl shadow-sm">
             <div className="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center">
-              {opener === 'Client' ? <User className="w-5 h-5 text-slate-600" /> : <Briefcase className="w-5 h-5 text-slate-600" />}
+              {opener === 'client' ? <User className="w-5 h-5 text-slate-600" /> : <Briefcase className="w-5 h-5 text-slate-600" />}
             </div>
             <div>
               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">Dispute Raised By</p>
-              <p className="text-sm font-bold text-slate-900">{opener} — <span className="font-medium text-slate-500">{opener === 'Client' ? dispute.client_name : dispute.freelancer_name}</span></p>
+              <p className="text-sm font-bold text-slate-900">{opener === 'client' ? 'Client' : 'Freelancer'} — <span className="font-medium text-slate-500">{opener === 'client' ? dispute.client_name : dispute.freelancer_name}</span></p>
             </div>
           </div>
 
@@ -140,7 +123,7 @@ export default function DisputeDetail() {
                   <div key={index} className="flex items-center justify-between p-3 border border-slate-200 rounded-lg hover:border-primary transition-all group">
                     <div className="flex items-center gap-3 min-w-0">
                       <FileText className="w-4 h-4 text-slate-400 group-hover:text-primary" />
-                      <span className="text-xs font-semibold text-slate-700 truncate">Exhibit_{index + 1}.pdf</span>
+                      <span className="text-xs font-semibold text-slate-700 truncate">Exhibit_{index + 1}</span>
                     </div>
                     <a href={file} target="_blank" rel="noreferrer" className="text-slate-400 hover:text-primary">
                       <Download className="w-4 h-4" />
@@ -151,7 +134,6 @@ export default function DisputeDetail() {
             </div>
           </section>
 
-          {/* Decision Panel */}
           <section className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden border-t-4 border-t-primary/20">
             <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
               <h2 className="text-xs font-bold text-slate-500 uppercase tracking-widest">Administrative Determination</h2>
@@ -171,20 +153,20 @@ export default function DisputeDetail() {
                     <button 
                       onClick={() => handleDecision('APPROVE_OPENER')}
                       disabled={mutation.isPending}
-                      className="bg-primary text-white font-bold text-[11px] py-4 rounded-xl uppercase tracking-widest hover:opacity-90 disabled:bg-slate-200 transition-all shadow-md shadow-primary/10"
+                      className="bg-white hover:bg-primary  hover:text-white text-primary border-2 border-primary font-bold text-[11px] py-4 rounded-xl uppercase tracking-widest hover:opacity-90 disabled:bg-slate-200 transition-all shadow-md shadow-primary/10"
                     >
                       {mutation.isPending ? "Updating..." : `Resolve in Favor of ${opener}`}
                     </button>
                     <button 
                       onClick={() => handleDecision('REJECT_OPENER')}
                       disabled={mutation.isPending}
-                      className="bg-white border-2 border-slate-900 text-slate-900 font-bold text-[11px] py-4 rounded-xl uppercase tracking-widest hover:bg-slate-900 hover:text-white transition-all"
+                      className="bg-white border-2 border-red-700 text-red-700 font-bold text-[11px] py-4 rounded-xl uppercase tracking-widest hover:bg-red-600 hover:text-white  transition-all"
                     >
                       Reject Claim
                     </button>
                   </div>
                   <p className="text-[10px] text-slate-400 mt-4 text-center italic">
-                    Note: Resolving in favor of {opener} will set contract to <strong>{opener === 'Client' ? 'Refunded' : 'Completed'}</strong>.
+                    Note: Resolving in favor of {opener} will set contract to <strong>{opener === 'client' ? 'Refunded' : 'Completed'}</strong>.
                   </p>
                 </>
               ) : (
@@ -203,22 +185,88 @@ export default function DisputeDetail() {
           </section>
         </div>
 
-        {/* Sidebar */}
         <div className="col-span-12 lg:col-span-4 space-y-6">
           <aside className="bg-white border border-slate-200 rounded-xl shadow-sm p-6">
-            <h2 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-6">Contract Registry</h2>
+            <h2 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-6">Contract & Project Registry</h2>
+            
             <div className="p-4 bg-slate-50 rounded-xl mb-6 border border-slate-100">
               <span className="text-[10px] font-bold text-slate-400 uppercase">Escrow Amount</span>
               <div className="text-2xl font-black text-slate-900">${contract?.total_amount}</div>
             </div>
             
-            <div className="space-y-4 px-1">
+            <div className="space-y-6 px-1">
               <div className="flex flex-col">
-                <span className="text-[10px] font-bold text-slate-400 uppercase">Project Title</span>
+                <span className="text-[10px] font-bold text-slate-400 uppercase flex items-center gap-1.5 mb-1.5">
+                  <Briefcase className="w-3 h-3" /> Project Title
+                </span>
                 <span className="text-sm font-semibold text-slate-700">{contract?.project_title}</span>
               </div>
+
+              <div className="flex flex-col">
+                <span className="text-[10px] font-bold text-slate-400 uppercase flex items-center gap-1.5 mb-1.5">
+                  <Info className="w-3 h-3" /> Description
+                </span>
+                <span className="text-[11px] leading-relaxed text-slate-600 line-clamp-4 bg-white p-2 rounded border border-slate-100">
+                  {contract?.project_description}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="flex flex-col">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase mb-1">Category</span>
+                  <span className="text-[11px] font-bold text-slate-600 px-2 py-1 bg-slate-100 rounded w-fit capitalize">
+                    {contract?.project_category}
+                  </span>
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase mb-1">Duration</span>
+                  <div className="flex items-center gap-1 text-[11px] font-bold text-slate-600">
+                    <Calendar className="w-3 h-3" /> {contract?.delivery_days} Days
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex flex-col">
+                <span className="text-[10px] font-bold text-slate-400 uppercase mb-1.5">Skills Required</span>
+                <div className="flex flex-wrap gap-1">
+                  {contract?.skills?.map((skill, i) => (
+                    <span key={i} className="text-[9px] font-bold bg-white border border-slate-200 px-1.5 py-0.5 rounded text-slate-500">
+                      {skill}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
               <div className="pt-4 border-t border-slate-100">
-                <span className="text-[10px] font-bold text-slate-400 uppercase">Current Status</span>
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-3">Project Deliverables</span>
+                <div className="space-y-2">
+                    {contract?.deliverables?.length > 0 ? (
+                        contract.deliverables.map((item) => (
+                            <div key={item.id} className="flex items-center justify-between p-2.5 bg-white border border-slate-200 rounded-lg group hover:border-primary transition-colors">
+                                <div className="flex items-center gap-2 min-w-0">
+                                    <Paperclip className="w-3 h-3 text-slate-400 group-hover:text-primary" />
+                                    <span className="text-[11px] font-medium text-slate-600 truncate">{item.title}</span>
+                                </div>
+                                <a href={item.file_url} target="_blank" rel="noreferrer" className="p-1 hover:bg-slate-100 rounded">
+                                    <Download className="w-3 h-3 text-slate-400 hover:text-primary" />
+                                </a>
+                            </div>
+                        ))
+                    ) : (
+                        <p className="text-[10px] text-slate-400 italic">No files submitted yet.</p>
+                    )}
+                </div>
+              </div>
+
+              <div className="pt-4 border-t border-slate-100">
+                <span className="text-[10px] font-bold text-slate-400 uppercase mb-2 block tracking-widest">Expected Deliverables List</span>
+                <p className="text-[11px] text-slate-600 leading-relaxed whitespace-pre-wrap bg-slate-50 p-2.5 rounded border border-slate-100">
+                  {contract?.expected_deliverables}
+                </p>
+              </div>
+
+              <div className="pt-4 border-t border-slate-100">
+                <span className="text-[10px] font-bold text-slate-400 uppercase">Current Contract Status</span>
                 <div className="mt-1">
                     <span className="px-2 py-0.5 bg-slate-900 text-white text-[9px] font-bold rounded uppercase">
                         {contract?.status}

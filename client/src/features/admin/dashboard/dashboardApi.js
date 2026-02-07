@@ -15,8 +15,3 @@ export const fetchProposalsChart = async () =>{
     return data;
 }
 
-export const disputes = async () => {
-    const {data} = await axiosInstance.get('/contracts/admin/disputes')
-    console.log(data);
-    
-}

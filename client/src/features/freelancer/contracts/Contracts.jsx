@@ -7,163 +7,234 @@ import {
   Package, 
   Hash, 
   ChevronLeft, 
-  ChevronRight 
+  ChevronRight,
+  Search,
+  X,
+  Filter
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 export default function Contracts() {
   const [activeTab, setActiveTab] = useState('All');
   const [page, setPage] = useState(1);
+  const [searchInput, setSearchInput] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  
   const navigate = useNavigate();
 
   const { data, isLoading } = useMyContracts({ 
     status: activeTab, 
     page: page,
-    role: 'freelancer' 
+    role: 'freelancer',
+    search: searchTerm 
   });
 
   const tabs = ['All', 'In Progress', 'Submitted', 'Completed', 'Disputed'];
 
-  if (isLoading) return <div className="p-10 text-center animate-pulse">Loading Panel...</div>;
+  const handleSearchTrigger = () => {
+    setSearchTerm(searchInput);
+    setPage(1);
+  };
 
-  const contractList = data?.results || [];
-  const totalCount = data?.count || 0;
-  const totalPages = Math.ceil(totalCount / 10);
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      handleSearchTrigger();
+    }
+  };
+
+  const clearSearch = () => {
+    setSearchInput('');
+    setSearchTerm('');
+    setPage(1);
+  };
 
   const handleTabChange = (tab) => {
     setActiveTab(tab);
     setPage(1);
   };
-console.log(data);
+
+  if (isLoading) return (
+    <div className="min-h-screen bg-[#f3f4f6] flex items-center justify-center">
+      <div className="flex flex-col items-center gap-3">
+        <div className="w-10 h-10 border-4 border-[#3b82f6] border-t-transparent rounded-full animate-spin"></div>
+        <p className="text-sm font-medium text-gray-500">Loading your workspace...</p>
+      </div>
+    </div>
+  );
+
+  const contractList = data?.results || [];
+  const totalCount = data?.count || 0;
+  const totalPages = Math.ceil(totalCount / 10);
 
   return (
-    <div className="min-h-screen bg-[#f3f4f6] p-4 sm:p-8 font-sans">
+    <div className="min-h-screen bg-[#f3f4f6] p-4 sm:p-8 font-sans text-[#1e293b]">
       <div className="max-w-6xl mx-auto">
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-[#1e293b] mb-1">My Contracts</h1>
-          <p className="text-sm text-gray-500">
-            Manage your active and completed freelance projects. Track progress and communicate with clients.
-          </p>
-        </div>
+        
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
+          <div>
+            <h1 className="text-3xl font-extrabold tracking-tight mb-2">My Contracts</h1>
+            <p className="text-sm text-gray-500 max-w-md leading-relaxed">
+              Professional management of your freelance portfolio. Track milestones, manage deliverables, and communicate with clients.
+            </p>
+          </div>
 
-        <div className="flex flex-wrap gap-2 mb-8">
-          {tabs.map((tab) => (
-            <button
-              key={tab}
-              onClick={() => handleTabChange(tab)}
-              className={`px-5 py-1.5 rounded-full text-xs font-semibold transition-all ${
-                activeTab === tab 
-                ? 'bg-[#3b82f6] text-white shadow-md' 
-                : 'bg-white text-gray-600 hover:bg-gray-100'
-              }`}
+          <div className="relative flex items-center gap-2">
+            <div className="relative group">
+              <input 
+                type="text"
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="Search Project or ID..."
+                className="w-full sm:w-72 pl-10 pr-10 py-2.5 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#3b82f6]/20 focus:border-[#3b82f6] transition-all shadow-sm"
+              />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-[#3b82f6]" />
+              {searchInput && (
+                <button 
+                  onClick={clearSearch}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 hover:bg-gray-100 rounded-full transition-colors"
+                >
+                  <X className="w-3.5 h-3.5 text-gray-400" />
+                </button>
+              )}
+            </div>
+            <button 
+              onClick={handleSearchTrigger}
+              className="bg-[#3b82f6] text-white p-2.5 rounded-lg hover:bg-blue-600 transition-all shadow-md active:scale-95"
             >
-              {tab}
+              <Search className="w-5 h-5" />
             </button>
-          ))}
+          </div>
         </div>
 
-        <div className="space-y-6">
+        <div className="flex items-center gap-2 mb-8 overflow-x-auto pb-2 scrollbar-hide">
+          <div className="flex bg-white p-1 rounded-lg border border-gray-200 shadow-sm">
+            {tabs.map((tab) => (
+              <button
+                key={tab}
+                onClick={() => handleTabChange(tab)}
+                className={`px-6 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
+                  activeTab === tab 
+                  ? 'bg-[#3b82f6] text-white shadow-sm' 
+                  : 'text-gray-500 hover:text-gray-800 hover:bg-gray-50'
+                }`}
+              >
+                {tab}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="space-y-4">
           {contractList.length > 0 ? (
             contractList.map((contract) => (
-              <div key={contract.id} className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-                <div className="p-6">
-                  <div className="flex justify-between items-start mb-4">
-                    <div>
-                      <h2 className="text-lg font-bold text-[#1e293b] mb-1">{contract.project_title}</h2>
-                      <p className="text-xs text-gray-500">
-                        Client: <span className="text-blue-600 font-medium">{contract.client_name}</span>
+              <div 
+                key={contract.id} 
+                className="group bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-xl hover:border-blue-100 transition-all duration-300 overflow-hidden"
+              >
+                <div className="p-6 sm:p-8">
+                  <div className="flex flex-col lg:flex-row justify-between lg:items-center gap-6">
+                    
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-3">
+                        <span className={`px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-widest ${
+                          contract.status === 'active' 
+                          ? 'bg-blue-50 text-blue-600 border border-blue-100' 
+                          : 'bg-green-50 text-green-600 border border-green-100'
+                        }`}>
+                          {contract.status === 'active' ? 'In Progress' : contract.status}
+                        </span>
+                        <span className="text-[10px] font-bold text-gray-500 uppercase tracking-tighter italic">
+                          Contract: #ORD-{contract.id + 8000}
+                        </span>
+                      </div>
+                      
+                      <h2 className="text-xl font-bold text-[#1e293b] mb-1 group-hover:text-[#3b82f6] transition-colors cursor-pointer">
+                        {contract.project_title}
+                      </h2>
+                      <p className="text-xs text-gray-500 mb-4">
+                        Client Partner: <span className="text-[#3b82f6] font-semibold">{contract.client_name}</span>
+                      </p>
+                      
+                      <p className="text-sm text-gray-500 leading-relaxed line-clamp-2 max-w-2xl">
+                        {contract.project_description || "Consultancy and implementation services for the aforementioned project scope."}
                       </p>
                     </div>
-                    <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                      contract.status === 'active' ? 'bg-blue-50 text-blue-600' : 'bg-green-50 text-green-600'
-                    }`}>
-                      {contract.status === 'active' ? 'In Progress' : contract.status}
-                    </span>
-                  </div>
 
-                  <p className="text-xs text-gray-500 leading-relaxed mb-6 line-clamp-2">
-                    {contract.project_description || "Detailed project implementation and milestone tracking for this contract."}
-                  </p>
+                    <div className="flex flex-col sm:flex-row lg:flex-col xl:flex-row items-center gap-4 lg:min-w-[300px]">
+                      <div className="grid grid-cols-2 gap-x-8 gap-y-2 w-full lg:mb-4 xl:mb-0">
+                        <div className="space-y-0.5">
+                          <p className="text-[10px] text-gray-400 font-bold uppercase">Package</p>
+                          <p className="text-xs font-bold text-gray-700">{contract.package_name || 'Professional'}</p>
+                        </div>
+                        <div className="space-y-0.5 text-right">
+                          <p className="text-[10px] text-gray-400 font-bold uppercase">Budget</p>
+                          <p className="text-sm font-black text-gray-900">${Number(contract.total_amount).toLocaleString()}</p>
+                        </div>
+                        <div className="space-y-0.5">
+                          <p className="text-[10px] text-gray-400 font-bold uppercase">Timeline</p>
+                          <p className="text-xs font-bold text-gray-700">{contract.delivery_days || 14} Days</p>
+                        </div>
+                      </div>
 
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6 py-4 border-y border-gray-50">
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-1.5 text-gray-400">
-                        <Hash className="w-3.5 h-3.5" />
-                        <span className="text-[10px] font-bold uppercase">Order ID</span>
+                      <div className="flex gap-2 w-full">
+                        <button 
+                          onClick={() => navigate(`/freelancer/contracts/${contract.id}`)}
+                          className="flex-1 flex items-center justify-center gap-2 bg-[#3b82f6] text-white px-4 py-3 rounded-xl text-xs font-bold hover:bg-blue-600 transition-all hover:shadow-lg hover:shadow-blue-100"
+                        >
+                          <ExternalLink className="w-4 h-4" />
+                          Details
+                        </button>
                       </div>
-                      <p className="text-xs font-bold text-gray-800">#ORD-{contract.id + 8000}</p>
                     </div>
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-1.5 text-gray-400">
-                        <Package className="w-3.5 h-3.5" />
-                        <span className="text-[10px] font-bold uppercase">Package</span>
-                      </div>
-                      <p className="text-xs font-bold text-gray-800">{contract.package_name? contract.package_name : 'pro'}</p>
-                    </div>
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-1.5 text-gray-400">
-                        <Clock className="w-3.5 h-3.5" />
-                        <span className="text-[10px] font-bold uppercase">Delivery</span>
-                      </div>
-                      <p className="text-xs font-bold text-gray-800">{contract.delivery_days || 14} Days</p>
-                    </div>
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-1.5 text-gray-400">
-                        <span className="text-[10px] font-bold uppercase">Price</span>
-                      </div>
-                      <p className="text-lg font-black text-gray-900">${Number(contract.total_amount).toLocaleString()}</p>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-3">
-                    <button 
-                      onClick={() => navigate(`/freelancer/contracts/${contract.id}`)}
-                      className="flex items-center gap-2 bg-[#3b82f6] text-white px-5 py-2 rounded-lg text-xs font-bold hover:bg-blue-600 transition-colors"
-                    >
-                      <ExternalLink className="w-3.5 h-3.5" />
-                      View Order
-                    </button>
-                    <button className="flex items-center gap-2 bg-white border border-gray-200 text-gray-600 px-5 py-2 rounded-lg text-xs font-bold hover:bg-gray-50 transition-colors">
-                      <MessageSquare className="w-3.5 h-3.5" />
-                      Message Client
-                    </button>
                   </div>
                 </div>
               </div>
             ))
           ) : (
-            <div className="bg-white rounded-2xl p-20 text-center border-2 border-dashed border-gray-200">
-              <p className="text-gray-400 font-medium">No contracts found in this category.</p>
+            <div className="bg-white rounded-3xl p-24 text-center border-2 border-dashed border-gray-200">
+              <div className="flex justify-center mb-4 text-gray-200">
+                <Filter className="w-12 h-12" />
+              </div>
+              <h3 className="text-lg font-bold text-gray-800 mb-1">No contracts found</h3>
+              <p className="text-sm text-gray-400">Try adjusting your filters or search keywords.</p>
             </div>
           )}
         </div>
 
+        {/* Pagination */}
         {totalPages > 1 && (
-          <div className="mt-8 flex justify-center items-center gap-2">
+          <div className="mt-12 flex justify-center items-center gap-3">
             <button 
               disabled={page === 1}
               onClick={() => setPage(prev => prev - 1)}
-              className="p-2 rounded-lg border border-gray-200 bg-white text-gray-400 hover:text-gray-600 disabled:opacity-50"
+              className="p-3 rounded-xl border border-gray-200 bg-white text-gray-400 hover:text-[#3b82f6] hover:border-[#3b82f6] disabled:opacity-40 transition-all shadow-sm"
             >
-              <ChevronLeft className="w-4 h-4" />
+              <ChevronLeft className="w-5 h-5" />
             </button>
-            {[...Array(totalPages)].map((_, i) => (
-              <button 
-                key={i + 1} 
-                onClick={() => setPage(i + 1)}
-                className={`w-8 h-8 rounded-lg text-xs font-bold transition-all ${
-                  page === i + 1 ? 'bg-[#3b82f6] text-white' : 'bg-white text-gray-400 border border-gray-200'
-                }`}
-              >
-                {i + 1}
-              </button>
-            ))}
+            
+            <div className="flex gap-2">
+              {[...Array(totalPages)].map((_, i) => (
+                <button 
+                  key={i + 1} 
+                  onClick={() => setPage(i + 1)}
+                  className={`w-10 h-10 rounded-xl text-xs font-bold transition-all ${
+                    page === i + 1 
+                    ? 'bg-[#3b82f6] text-white shadow-lg' 
+                    : 'bg-white text-gray-400 border border-gray-200 hover:bg-gray-50'
+                  }`}
+                >
+                  {i + 1}
+                </button>
+              ))}
+            </div>
+
             <button 
               disabled={page === totalPages}
               onClick={() => setPage(prev => prev + 1)}
-              className="p-2 rounded-lg border border-gray-200 bg-white text-gray-400 hover:text-gray-600 disabled:opacity-50"
+              className="p-3 rounded-xl border border-gray-200 bg-white text-gray-400 hover:text-[#3b82f6] hover:border-[#3b82f6] disabled:opacity-40 transition-all shadow-sm"
             >
-              <ChevronRight className="w-4 h-4" />
+              <ChevronRight className="w-5 h-5" />
             </button>
           </div>
         )}

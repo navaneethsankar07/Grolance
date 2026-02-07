@@ -12,11 +12,10 @@ export const fetchAdminDisputeDetail = async (id) => {
   return data;
 };
 
-export const resolveDispute = async ({ id, status, admin_notes, contract_status }) => {
+export const resolveDispute = async ({ id, status, admin_notes }) => {
   const { data } = await axiosInstance.post(`/contracts/admin/disputes/${id}/resolve/`, {
     status,
     admin_notes,
-    contract_status
   });
   return data;
 };

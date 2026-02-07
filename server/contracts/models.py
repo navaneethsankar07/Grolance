@@ -10,6 +10,7 @@ class Contract(models.Model):
         ('completed', 'Completed'), 
         ('cancelled', 'Cancelled'), 
         ('disputed', 'In Dispute'),
+        ('refunded', 'Refunded')
     ]
 
     project = models.OneToOneField('projects.Project', on_delete=models.CASCADE, related_name='contract')

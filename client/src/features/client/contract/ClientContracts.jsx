@@ -6,17 +6,29 @@ import {
   Package, 
   Hash, 
   ChevronLeft, 
-  ChevronRight 
+  ChevronRight,
+  ShieldCheck,
+  Search,
+  ArrowUpRight,
+  User,
+  CreditCard,
+  Filter,
+  Calendar,
+  X
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useMyContracts } from '../../freelancer/contracts/contractsQueries';
 import { useChatActions } from '../../../components/chat/chatMutations';
 import { useModal } from "../../../hooks/modal/useModalStore";
 import { toast } from "react-toastify";
+import { formatDateDMY } from '../../../utils/date';
 
 export default function ClientContracts() {
   const [activeTab, setActiveTab] = useState('All');
   const [page, setPage] = useState(1);
+  const [search, setSearch] = useState('');
+  const [searchInput, setSearchInput] = useState('');
+  
   const navigate = useNavigate();
   const { getRoomMutation } = useChatActions();
   const { openModal } = useModal();
@@ -24,10 +36,28 @@ export default function ClientContracts() {
   const { data, isLoading } = useMyContracts({ 
     status: activeTab, 
     page: page,
-    role: 'client' 
+    role: 'client',
+    search: search 
   });
 
   const tabs = ['All', 'In Progress', 'Submitted', 'Completed', 'Disputed'];
+
+  const handleSearchTrigger = () => {
+    setSearch(searchInput);
+    setPage(1);
+  };
+
+  const handleClearSearch = () => {
+    setSearchInput('');
+    setSearch('');
+    setPage(1);
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      handleSearchTrigger();
+    }
+  };
 
   const handleMessageFreelancer = async (freelancerId) => {
     try {
@@ -38,7 +68,21 @@ export default function ClientContracts() {
     }
   };
 
-  if (isLoading) return <div className="p-10 text-center animate-pulse">Loading Panel...</div>;
+  const calculateDeadline = (signedAt, deliveryDays) => {
+    if (!signedAt) return "Pending Signature";
+    const date = new Date(signedAt);
+    date.setDate(date.getDate() + (Number(deliveryDays) || 0));
+    return formatDateDMY(date.toISOString());
+  };
+
+  if (isLoading) return (
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+      <div className="flex flex-col items-center gap-4">
+        <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+        <p className="text-slate-500 font-bold tracking-widest text-xs uppercase">Initializing Registry</p>
+      </div>
+    </div>
+  );
 
   const contractList = data?.results || [];
   const totalCount = data?.count || 0;
@@ -50,137 +94,206 @@ export default function ClientContracts() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f3f4f6] p-4 sm:p-8 font-sans">
-      <div className="max-w-6xl mx-auto">
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-[#1e293b] mb-1">My Contracts</h1>
-          <p className="text-sm text-gray-500">
-            Manage your active and completed freelance projects. Track progress and communicate with clients.
-          </p>
+    <div className="min-h-screen bg-[#f8fafc] pb-20 font-sans">
+      <div className="bg-white border-b border-slate-200">
+        <div className="max-w-7xl mx-auto px-6 py-8">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <ShieldCheck className="w-4 h-4 text-blue-600" />
+                <span className="text-[10px] font-black text-blue-600 uppercase tracking-[0.2em]">Secure Escrow Management</span>
+              </div>
+              <h1 className="text-3xl font-black text-slate-900 tracking-tight">Project Portfolio</h1>
+              <p className="text-sm text-slate-500 mt-1 font-medium">Monitoring {totalCount} agreements.</p>
+            </div>
+            
+            <div className="flex items-center gap-3">
+              <div className="relative group">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
+                <input 
+                  type="text" 
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  placeholder="Search project or ID..." 
+                  className="pl-10 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 w-full sm:w-80 transition-all"
+                />
+                {searchInput && (
+                  <button 
+                    onClick={handleClearSearch}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-slate-200 rounded-full transition-colors"
+                  >
+                    <X className="w-3 h-3 text-slate-500" />
+                  </button>
+                )}
+              </div>
+              <button 
+                onClick={handleSearchTrigger}
+                className="bg-primary text-white p-2.5 rounded-xl hover:bg-blue-600 transition-all shadow-lg shadow-blue-100"
+              >
+                <Search className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-6 mt-10">
+        <div className="flex items-center gap-2 mb-6 overflow-x-auto pb-2 scrollbar-hide">
+          <div className="flex items-center gap-2 p-1 bg-white border border-slate-200 rounded-xl">
+            {tabs.map((tab) => (
+              <button
+                key={tab}
+                onClick={() => handleTabChange(tab)}
+                className={`px-6 py-2.5 rounded-lg text-[11px] font-black uppercase tracking-wider transition-all whitespace-nowrap ${
+                  activeTab === tab 
+                  ? 'bg-primary text-white shadow-lg shadow-blue-200' 
+                  : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
+                }`}
+              >
+                {tab}
+              </button>
+            ))}
+          </div>
         </div>
 
-        <div className="flex flex-wrap gap-2 mb-8">
-          {tabs.map((tab) => (
-            <button
-              key={tab}
-              onClick={() => handleTabChange(tab)}
-              className={`px-5 py-1.5 rounded-full text-xs font-semibold transition-all ${
-                activeTab === tab 
-                ? 'bg-[#3b82f6] text-white shadow-md' 
-                : 'bg-white text-gray-600 hover:bg-gray-100'
-              }`}
-            >
-              {tab}
-            </button>
-          ))}
-        </div>
-
-        <div className="space-y-6">
+        <div className="grid grid-cols-1 gap-6">
           {contractList.length > 0 ? (
             contractList.map((contract) => (
-              <div key={contract.id} className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-                <div className="p-6">
-                  <div className="flex justify-between items-start mb-4">
-                    <div>
-                      <h2 className="text-lg font-bold text-[#1e293b] mb-1">{contract.project_title}</h2>
-                      <p className="text-xs text-gray-500">
-                        Freelancer: <span className="text-blue-600 font-medium">{contract.freelancer_name}</span>
-                      </p>
-                    </div>
-                    <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                      contract.status === 'active' ? 'bg-blue-50 text-blue-600' : 'bg-green-50 text-green-600'
-                    }`}>
-                      {contract.status === 'active' ? 'In Progress' : contract.status}
-                    </span>
-                  </div>
+              <div key={contract.id} className="group bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-xl hover:border-blue-200 transition-all duration-300 overflow-hidden">
+                <div className="p-0">
+                  <div className="flex flex-col lg:flex-row">
+                    <div className="lg:w-2/3 p-8 border-r border-slate-100">
+                      <div className="flex justify-between items-start mb-6">
+                        <div className="space-y-1">
+                          <h2 className="text-xl font-extrabold text-slate-900 group-hover:text-blue-600 transition-colors">{contract.project_title}</h2>
+                          <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-1.5">
+                              <User className="w-3.5 h-3.5 text-slate-400" />
+                              <span className="text-xs text-slate-500 font-bold uppercase tracking-tight">Contractor: <span className="text-slate-900">{contract.freelancer_name}</span></span>
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                              <Hash className="w-3.5 h-3.5 text-slate-400" />
+                              <span className="text-xs text-slate-500 font-bold uppercase tracking-tight">Ref: #ORD-{contract.id + 8000}</span>
+                            </div>
+                          </div>
+                        </div>
+                        <span className={`px-4 py-1.5 rounded-md text-[10px] font-black uppercase tracking-[0.1em] border ${
+                          contract.status === 'active'
+                          ? 'bg-blue-50 text-blue-600 border-blue-100' 
+                          : contract.status === 'completed'
+                          ? 'bg-emerald-50 text-emerald-600 border-emerald-100'
+                          : 'bg-slate-50 text-slate-600 border-slate-100'
+                        }`}>
+                          {contract.status || 'Execution Phase'}
+                        </span>
+                      </div>
 
-                  <p className="text-xs text-gray-500 leading-relaxed mb-6 line-clamp-2">
-                    {contract.project_description || "Detailed project implementation and milestone tracking for this contract."}
-                  </p>
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-8 py-6 bg-slate-50/50 rounded-xl px-6 border border-slate-100">
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2 text-slate-400">
+                            <Package className="w-3.5 h-3.5" />
+                            <span className="text-[10px] font-black uppercase tracking-widest">Selected Package</span>
+                          </div>
+                          <p className="text-sm font-bold text-slate-900 uppercase">{contract.package_name || 'Standard Pro'}</p>
+                        </div>
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2 text-slate-400">
+                            <Calendar className="w-3.5 h-3.5" />
+                            <span className="text-[10px] font-black uppercase tracking-widest">Due Date</span>
+                          </div>
+                          <p className="text-sm font-bold text-slate-900">
+                            {calculateDeadline(contract.freelancer_signed_at, contract.delivery_days)}
+                          </p>
+                        </div>
+                        <div className="space-y-1 hidden md:block">
+                          <div className="flex items-center gap-2 text-slate-400">
+                            <Clock className="w-3.5 h-3.5" />
+                            <span className="text-[10px] font-black uppercase tracking-widest">Deliver In </span>
+                          </div>
+                          <p className="text-sm font-bold text-slate-900">{contract.delivery_days || 0} Working Days</p>
+                        </div>
+                      </div>
+                    </div>
 
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6 py-4 border-y border-gray-50">
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-1.5 text-gray-400">
-                        <Hash className="w-3.5 h-3.5" />
-                        <span className="text-[10px] font-bold uppercase">Order ID</span>
+                    <div className="lg:w-1/3 p-8 bg-slate-50/30 flex flex-col justify-between gap-8">
+                      <div>
+                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">Contract Valuation</span>
+                        <div className="flex items-baseline gap-1">
+                          <span className="text-3xl font-bold text-slate-600">$</span>
+                          <span className="text-3xl font-black text-slate-900 tracking-tighter">
+                            {Number(contract.total_amount).toLocaleString()}
+                          </span>
+                        </div>
                       </div>
-                      <p className="text-xs font-bold text-gray-800">#ORD-{contract.id + 8000}</p>
-                    </div>
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-1.5 text-gray-400">
-                        <Package className="w-3.5 h-3.5" />
-                        <span className="text-[10px] font-bold uppercase">Package</span>
-                      </div>
-                      <p className="text-xs font-bold text-gray-800">{contract.package_name ? contract.package_name : 'pro'}</p>
-                    </div>
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-1.5 text-gray-400">
-                        <Clock className="w-3.5 h-3.5" />
-                        <span className="text-[10px] font-bold uppercase">Delivery</span>
-                      </div>
-                      <p className="text-xs font-bold text-gray-800">{contract.delivery_days || 14} Days</p>
-                    </div>
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-1.5 text-gray-400">
-                        <span className="text-[10px] font-bold uppercase">Price</span>
-                      </div>
-                      <p className="text-lg font-black text-gray-900">${Number(contract.total_amount).toLocaleString()}</p>
-                    </div>
-                  </div>
 
-                  <div className="flex gap-3">
-                    <button 
-                      onClick={() => navigate(`/contracts/${contract.id}`)}
-                      className="flex items-center gap-2 bg-[#3b82f6] text-white px-5 py-2 rounded-lg text-xs font-bold hover:bg-blue-600 transition-colors"
-                    >
-                      <ExternalLink className="w-3.5 h-3.5" />
-                      View Order
-                    </button>
-                    <button 
-                      onClick={() => handleMessageFreelancer(contract.freelancer_id)}
-                      disabled={getRoomMutation.isPending}
-                      className="flex items-center gap-2 bg-white border border-gray-200 text-gray-600 px-5 py-2 rounded-lg text-xs font-bold hover:bg-gray-50 transition-colors disabled:opacity-50"
-                    >
-                      <MessageSquare className="w-3.5 h-3.5" />
-                      {getRoomMutation.isPending ? "Connecting..." : "Message Freelancer"}
-                    </button>
+                      <div className="flex flex-col gap-3">
+                        <button 
+                          onClick={() => navigate(`/contracts/${contract.id}`)}
+                          className="w-full flex items-center justify-center gap-2 bg-primary text-white px-6 py-3.5 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-[#2563eb] transition-all shadow-lg shadow-slate-200 hover:shadow-blue-100"
+                        >
+                          Workspace Console
+                          <ArrowUpRight className="w-4 h-4" />
+                        </button>
+                        <button 
+                          onClick={() => handleMessageFreelancer(contract.freelancer_id)}
+                          disabled={getRoomMutation.isPending}
+                          className="w-full flex items-center justify-center gap-2 bg-white border border-slate-200 text-slate-600 px-6 py-3.5 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-slate-50 hover:text-slate-900 transition-all disabled:opacity-50"
+                        >
+                          <MessageSquare className="w-4 h-4" />
+                          {getRoomMutation.isPending ? "Connecting..." : "Open Channel"}
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
             ))
           ) : (
-            <div className="bg-white rounded-2xl p-20 text-center border-2 border-dashed border-gray-200">
-              <p className="text-gray-400 font-medium">No contracts found in this category.</p>
+            <div className="bg-white rounded-3xl py-32 text-center border-2 border-dashed border-slate-200">
+              <div className="max-w-xs mx-auto">
+                <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                  <Filter className="w-8 h-8 text-slate-300" />
+                </div>
+                <h3 className="text-lg font-bold text-slate-900 mb-2">No Records Found</h3>
+                <p className="text-sm text-slate-400 font-medium">Try adjusting your search or filters.</p>
+              </div>
             </div>
           )}
         </div>
 
         {totalPages > 1 && (
-          <div className="mt-8 flex justify-center items-center gap-2">
+          <div className="mt-12 flex justify-center items-center gap-3">
             <button 
               disabled={page === 1}
               onClick={() => setPage(prev => prev - 1)}
-              className="p-2 rounded-lg border border-gray-200 bg-white text-gray-400 hover:text-gray-600 disabled:opacity-50"
+              className="p-3 rounded-xl border border-slate-200 bg-white text-slate-400 hover:text-blue-600 hover:border-blue-200 disabled:opacity-30 transition-all shadow-sm"
             >
-              <ChevronLeft className="w-4 h-4" />
+              <ChevronLeft className="w-5 h-5" />
             </button>
-            {[...Array(totalPages)].map((_, i) => (
-              <button 
-                key={i + 1} 
-                onClick={() => setPage(i + 1)}
-                className={`w-8 h-8 rounded-lg text-xs font-bold transition-all ${
-                  page === i + 1 ? 'bg-[#3b82f6] text-white' : 'bg-white text-gray-400 border border-gray-200'
-                }`}
-              >
-                {i + 1}
-              </button>
-            ))}
+            
+            <div className="flex items-center gap-2">
+              {[...Array(totalPages)].map((_, i) => (
+                <button 
+                  key={i + 1} 
+                  onClick={() => setPage(i + 1)}
+                  className={`w-11 h-11 rounded-xl text-xs font-black transition-all shadow-sm ${
+                    page === i + 1 
+                    ? 'bg-blue-600 text-white shadow-blue-100' 
+                    : 'bg-white text-slate-400 border border-slate-200 hover:border-slate-300'
+                  }`}
+                >
+                  {i + 1}
+                </button>
+              ))}
+            </div>
+
             <button 
               disabled={page === totalPages}
               onClick={() => setPage(prev => prev + 1)}
-              className="p-2 rounded-lg border border-gray-200 bg-white text-gray-400 hover:text-gray-600 disabled:opacity-50"
+              className="p-3 rounded-xl border border-slate-200 bg-white text-slate-400 hover:text-blue-600 hover:border-blue-200 disabled:opacity-30 transition-all shadow-sm"
             >
-              <ChevronRight className="w-4 h-4" />
+              <ChevronRight className="w-5 h-5" />
             </button>
           </div>
         )}

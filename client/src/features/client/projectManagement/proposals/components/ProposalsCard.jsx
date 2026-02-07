@@ -25,6 +25,24 @@ export default function ProposalCard({ freelancer, proposal, isInvitation = fals
     ? `${proposal.description.substring(0, MAX_LENGTH)}...` 
     : proposal.description;
 
+  // Reusable Avatar Component
+  const FreelancerAvatar = ({ size = "h-12 w-12", textSize = "text-xl" }) => (
+    <>
+      {freelancer?.image ? (
+        <img 
+          src={freelancer.image} 
+          referrerPolicy="no-referrer" 
+          className={`${size} rounded-full object-cover bg-gray-100 shadow-sm`} 
+          alt={freelancer.name} 
+        />
+      ) : (
+        <div className={`${size} rounded-full bg-primary flex items-center justify-center text-white font-bold ${textSize} shadow-sm`}>
+          {freelancer?.name?.charAt(0).toUpperCase() || 'U'}
+        </div>
+      )}
+    </>
+  );
+
   const handleHire = () => {
     openModal('contract-offer', {
       projectName: proposal.title,
@@ -46,7 +64,7 @@ export default function ProposalCard({ freelancer, proposal, isInvitation = fals
         </div>
         <div className="p-6 max-h-[70vh] overflow-y-auto">
           <div className="flex items-center gap-4 mb-6">
-             <img src={freelancer.image} referrerPolicy="no-referrer" className="h-12 w-12 rounded-full object-cover" alt="" />
+             <FreelancerAvatar size="h-14 w-14" textSize="text-2xl" />
              <div>
                 <Link to={`/find-talents/${freelancer.id}`}>
                 <p className="font-bold text-gray-900 hover:text-primary">{freelancer.name}</p>
@@ -140,12 +158,12 @@ export default function ProposalCard({ freelancer, proposal, isInvitation = fals
         </div>
 
         <div className="flex items-start gap-4">
-          <img src={freelancer.image} alt="" referrerPolicy='no-referrer' className="h-16 w-16 shrink-0 rounded-full object-cover bg-gray-100" />
+          <FreelancerAvatar size="h-16 w-16" textSize="text-2xl" />
           <div className="flex min-w-0 flex-col gap-1">
-        <Link to={`/find-talents/${freelancer.id}`}>
-            <h3 className="text-[15px] font-semibold text-gray-900 hover:text-primary">{freelancer.name}</h3>
-            <p className="text-xs font-medium text-gray-600 hover:text-primary">{freelancer.title}</p>
-              </Link>
+            <Link to={`/find-talents/${freelancer.id}`}>
+              <h3 className="text-[15px] font-semibold text-gray-900 hover:text-primary">{freelancer.name}</h3>
+              <p className="text-xs font-medium text-gray-600 hover:text-primary">{freelancer.title}</p>
+            </Link>
             <div className="mt-1">
               <p className="text-xs text-gray-500 italic">"{displayDescription}"</p>
               {isLongMessage && (
@@ -183,7 +201,7 @@ export default function ProposalCard({ freelancer, proposal, isInvitation = fals
 
       <div className="flex flex-col gap-6 lg:flex-row">
         <div className="flex gap-4">
-          <img src={freelancer.image} referrerPolicy="no-referrer" alt="" className="h-[100px] w-[100px] shrink-0 rounded-full object-cover bg-gray-100" />
+          <FreelancerAvatar size="h-[100px] w-[100px]" textSize="text-4xl" />
           <div className="flex flex-col gap-1">
             <Link to={`/find-talents/${freelancer.id}` }>
             <h3 className="text-lg font-bold text-gray-900 hover:text-primary">{freelancer.name}</h3>

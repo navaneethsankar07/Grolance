@@ -125,9 +125,9 @@ class Invitation(models.Model):
     project = models.ForeignKey('Project', on_delete=models.CASCADE)
     package = models.ForeignKey(
         'profiles.FreelancerPackage', 
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
+        on_delete=models.CASCADE,
+        null=False,
+        blank=False,
         related_name='invitations'
     )
     message = models.TextField(blank=True, null=True)
@@ -156,7 +156,7 @@ class Proposal(models.Model):
         on_delete=models.CASCADE, 
         related_name='proposals'
     )    
-    package = models.ForeignKey('profiles.FreelancerPackage', on_delete=models.SET_NULL, null=True)
+    package = models.ForeignKey('profiles.FreelancerPackage', on_delete=models.CASCADE, null=False,blank=False)
     cover_letter = models.TextField()
     bid_amount = models.DecimalField(max_digits=10, decimal_places=2)
     delivery_days = models.IntegerField(validators=[MinValueValidator(1)])

@@ -72,7 +72,7 @@ export default function ProposalsIndex() {
                     id: inv.freelancer,
                     name: inv.freelancer_name, 
                     title: inv.freelancer_tagline || "Invited Talent",
-                    image: inv.freelancer_image || "https://via.placeholder.com/150",
+                    image: inv.freelancer_image ,
                   }}
                   proposal={{
                     title: project?.title,       
@@ -120,7 +120,7 @@ export default function ProposalsIndex() {
                   id: prop.freelancer_id,
                   name: prop.freelancer_name,
                   title: prop.freelancer_tagline || "Freelancer",
-                  image: prop.freelancer_photo || "https://via.placeholder.com/150",
+                  image: prop.freelancer_photo ,
                   rating: 4.8, 
                 }}
                 proposal={{

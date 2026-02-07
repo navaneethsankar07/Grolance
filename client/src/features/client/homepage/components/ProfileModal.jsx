@@ -58,12 +58,12 @@ const handleSwitchToFreelancer = async() => {
     >
       <div className="menu-content flex flex-col gap-4 px-[17px] pb-5 pt-[17px]">
         <Link
-          to="/profile/settings"
+          to="/profile"
           onClick={onClose}
           className="menu-item flex items-center gap-3 rounded-lg px-4 py-3 transition-colors hover:bg-gray-200"
           style={{ backgroundColor: "#F1F1F1" }}
         >
-          <span className="text-sm font-medium text-gray-700">Settings</span>
+          <span className="text-sm font-medium text-gray-700">Profile</span>
         </Link>
 
         <Link
@@ -76,12 +76,12 @@ const handleSwitchToFreelancer = async() => {
         </Link>
 
         <Link
-          to=""
+          to="/profile/settings"
           onClick={onClose}
           className="menu-item flex items-center gap-3 rounded-lg px-4 py-3 transition-colors hover:bg-gray-200"
           style={{ backgroundColor: "#F1F1F1" }}
         >
-          <span className="text-sm font-medium text-gray-700">Help Center</span>
+          <span className="text-sm font-medium text-gray-700">Settings</span>
         </Link>
 
         <Link

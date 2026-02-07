@@ -21,7 +21,7 @@ const navigation = [
 export default function ProfileSidebar({ onNavigate }) {
   const { openModal } = useModal()
   return (
-    <div className="h-full px-6 pt-6 overflow-y-auto">
+    <div className="h-full mt-8 px-6 pt-6 overflow-y-auto">
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-gray-900 mb-1">
           Client Account

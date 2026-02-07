@@ -6,7 +6,7 @@ import { useChatActions } from "../../../components/chat/chatMutations";
 import { 
   FileText, Clock, Download, MessageSquare, ShieldAlert, 
   ExternalLink, X, AlertCircle, CheckCircle2, ShieldCheck,
-  Scale, Info, History, Landmark
+  Scale, Info, History, Landmark, User, Tag, ListChecks, Target, Layers
 } from "lucide-react";
 import { toast } from "react-toastify";
 import { useModal } from "../../../hooks/modal/useModalStore";
@@ -96,218 +96,245 @@ export default function ClientContractDetail() {
   const pendingRevision = contract.revisions?.find(r => r.status === 'pending');
   const acceptedRevision = contract.revisions?.find(r => r.status === 'accepted');
   const dispute = contract.dispute_details;
+  
+  const isFreelancerDisputed = dispute && dispute?.raised_by_id === contract.freelancer_id;
 
   return (
-    <div className="min-h-screen bg-[#f9fafb] pb-20">
-      {/* Container width increased to 1400px */}
-      <div className="max-w-[1400px] mx-auto px-4 sm:px-8 lg:px-12 py-8 lg:py-16">
+    <div className="min-h-screen bg-[#f8fafc] pb-20">
+      <div className="max-w-[1400px] mx-auto px-6 lg:px-12 py-10 lg:py-14">
         
-        {/* Header section */}
-        <div className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-gray-200 pb-8">
           <div>
-            <div className="flex items-center gap-3 mb-3">
-              <Landmark className="w-6 h-6 text-blue-600" />
-              <span className="text-[12px] font-black text-blue-600 uppercase tracking-[0.25em]">Escrow Protected</span>
+            <div className="flex items-center gap-2 mb-2">
+              <Landmark className="w-5 h-5 text-blue-600" />
+              <span className="text-xs font-bold text-blue-600 uppercase tracking-widest">Escrow Protected</span>
             </div>
-            <h1 className="text-5xl font-black text-gray-900 tracking-tight">Contract Management</h1>
-            <p className="text-xl text-gray-500 mt-2 font-medium">Project scope and delivery oversight for #ORD-{contract.id + 8000}</p>
+            <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight">Contract Management</h1>
+            <p className="text-lg text-slate-500 mt-1">Order #ORD-{contract.id + 8000} • {contract.project_title}</p>
           </div>
-          <Link to={`/my-projects/${contract.project_id}`} className="group inline-flex items-center gap-3 px-7 py-3.5 bg-white border border-gray-200 rounded-2xl text-base font-bold text-gray-700 hover:border-blue-600 hover:text-blue-600 transition-all shadow-sm">
-            View Project Brief <ExternalLink className="w-5 h-5 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+          <Link to={`/my-projects/${contract.project_id}`} className="group inline-flex items-center gap-2 px-6 py-3 bg-white border border-slate-200 rounded-lg text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-all shadow-sm">
+            View Project Brief <ExternalLink className="w-4 h-4" />
           </Link>
         </div>
 
-        {/* Resolution Center Audit Section */}
         {dispute && (
-          <div className="mb-10 overflow-hidden bg-white border border-amber-200 rounded-[2.5rem] shadow-sm">
-            <div className="bg-amber-50/50 px-8 py-6 border-b border-amber-100 flex items-center justify-between">
+          <div className="mb-10 bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+            <div className="bg-slate-50 px-8 py-5 border-b border-slate-200 flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <div className="p-3 bg-amber-100 rounded-xl">
-                  <Scale className="w-6 h-6 text-amber-700" />
+                <div className="p-2.5 bg-amber-100 rounded-lg text-amber-700">
+                  <Scale className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-amber-900">Resolution Center Audit</h3>
-                  <p className="text-xs text-amber-700 font-bold uppercase tracking-widest">Case Reference: #{dispute.id}</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <span className={`px-5 py-2 rounded-full text-xs font-black uppercase tracking-widest border ${
-                  dispute.status === 'rejected' ? 'bg-red-50 text-red-600 border-red-100' : 'bg-amber-100 text-amber-700 border-amber-200'
-                }`}>
-                  Status: {dispute.status}
-                </span>
-              </div>
-            </div>
-            <div className="p-10 grid grid-cols-1 md:grid-cols-2 gap-12">
-              <div>
-                <h4 className="text-xs font-bold text-gray-400 uppercase tracking-[0.2em] mb-4">Dispute Origin</h4>
-                <div className="space-y-4">
-                  <div className="flex items-start gap-4">
-                    <Info className="w-5 h-5 text-gray-400 mt-1" />
-                    <div>
-                      <p className="text-lg font-bold text-gray-900">{dispute.reason}</p>
-                      <p className="text-sm text-gray-500 mt-1 uppercase font-semibold">Opened on {new Date(dispute.created_at).toLocaleDateString()}</p>
-                    </div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-base font-bold text-slate-900">Resolution Center Audit</h3>
+                    <span className={`text-[10px] px-2 py-0.5 rounded border font-bold uppercase ${isFreelancerDisputed ? 'bg-purple-50 text-purple-700 border-purple-100' : 'bg-blue-50 text-blue-700 border-blue-100'}`}>
+                      {isFreelancerDisputed ? "Raised by Freelancer" : "Raised by You"}
+                    </span>
                   </div>
+                  <p className="text-xs text-slate-500 font-medium">Case ID: #{dispute.id}</p>
                 </div>
               </div>
-              <div className="bg-slate-50 rounded-[2rem] p-8 border border-slate-100">
-                <div className="flex items-center gap-3 mb-4">
-                  <Landmark className="w-5 h-5 text-slate-400" />
-                  <h4 className="text-xs font-bold text-gray-400 uppercase tracking-[0.2em]">Administrator Determination</h4>
+              <span className={`px-4 py-1.5 rounded-md text-xs font-bold uppercase tracking-wider border ${
+                dispute.status === 'rejected' ? 'bg-red-50 text-red-700 border-red-200' : 'bg-amber-50 text-amber-700 border-amber-200'
+              }`}>
+                {dispute.status}
+              </span>
+            </div>
+            <div className="p-8 grid grid-cols-1 md:grid-cols-2 gap-10">
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 text-slate-400">
+                  <User className="w-4 h-4" />
+                  <h4 className="text-xs font-bold uppercase tracking-widest">Dispute Statement</h4>
                 </div>
-                <p className="text-base text-slate-700 leading-relaxed font-medium italic">
-                  "{dispute.admin_notes || "Determination pending administrative review."}"
+                <div className="p-5 bg-slate-50 border border-slate-100 rounded-lg">
+                  <p className="text-sm font-semibold text-slate-800 leading-relaxed">{dispute.reason}</p>
+                  <p className="text-[11px] text-slate-400 mt-3 font-bold uppercase italic">Log Date: {new Date(dispute.created_at).toLocaleDateString()}</p>
+                </div>
+              </div>
+              <div className="space-y-4 border-l border-slate-100 pl-10">
+                <div className="flex items-center gap-2 text-slate-400">
+                  <Landmark className="w-4 h-4" />
+                  <h4 className="text-xs font-bold uppercase tracking-widest">Arbitration Notes</h4>
+                </div>
+                <p className="text-sm text-slate-600 leading-relaxed font-medium">
+                  {dispute.admin_notes || "Determination pending administrative review. Both parties will be notified upon a final decision."}
                 </p>
                 {dispute.resolved_at && (
-                  <p className="mt-6 text-xs font-bold text-slate-400 uppercase">Resolved: {new Date(dispute.resolved_at).toLocaleDateString()}</p>
+                  <div className="flex items-center gap-2 mt-4 text-green-600">
+                    <CheckCircle2 className="w-4 h-4" />
+                    <span className="text-xs font-bold uppercase">Resolved on {new Date(dispute.resolved_at).toLocaleDateString()}</span>
+                  </div>
                 )}
               </div>
             </div>
           </div>
         )}
 
-        {/* Quick Stats Grid - Expanded Height */}
-        <div className="bg-white rounded-[2.5rem] border border-gray-100 shadow-sm overflow-hidden mb-10">
-          <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-y md:divide-y-0 divide-gray-50">
-            <div className="p-10">
-              <p className="text-xs font-bold text-gray-400 uppercase tracking-[0.2em] mb-3">Order ID</p>
-              <p className="text-2xl font-black text-gray-900">#ORD-{contract.id + 8000}</p>
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden mb-10">
+          <div className="grid grid-cols-1 md:grid-cols-4 divide-x divide-slate-100">
+            <div className="p-8">
+              <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2">Reference</p>
+              <p className="text-xl font-bold text-slate-900">#ORD-{contract.id + 8000}</p>
             </div>
-            <div className="p-10">
-              <p className="text-xs font-bold text-gray-400 uppercase tracking-[0.2em] mb-3">Freelancer</p>
-              <p className="text-2xl font-black text-gray-900">{contract.freelancer_name}</p>
+            <div className="p-8">
+              <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2">Vendor</p>
+              <p className="text-xl font-bold text-slate-900">{contract.freelancer_name}</p>
             </div>
-            <div className="p-10">
-              <p className="text-xs font-bold text-gray-400 uppercase tracking-[0.2em] mb-3">Package Level</p>
-              <p className="text-2xl font-black text-blue-600">{contract.package_name || "Enterprise"}</p>
+            <div className="p-8">
+              <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2">Service Tier</p>
+              <p className="text-xl font-bold text-blue-600">{contract.package_name || "Enterprise"}</p>
             </div>
-            <div className="p-10 bg-gray-50/50">
-              <p className="text-xs font-bold text-gray-400 uppercase tracking-[0.2em] mb-3">Current Lifecycle</p>
-              <div className="flex items-center gap-3">
-                <span className="w-3 h-3 rounded-full bg-green-500 animate-pulse" />
-                <p className="text-2xl font-black text-green-600 uppercase tracking-tighter">{contract.status}</p>
+            <div className="p-8 bg-slate-50/50">
+              <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2">Contract Status</p>
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-green-500" />
+                <p className="text-xl font-bold text-green-700 uppercase">{contract.status}</p>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Notifications */}
-        <div className="space-y-5 mb-10">
+        <div className="space-y-4 mb-10">
           {contract.revisions?.some(r => r.status === 'rejected') && (
-            <div className="p-6 bg-red-50 border border-red-100 rounded-[1.5rem] flex gap-5 animate-in fade-in slide-in-from-top-2">
-              <AlertCircle className="w-8 h-8 text-red-600 shrink-0" />
+            <div className="p-5 bg-red-50 border border-red-200 rounded-lg flex gap-4">
+              <AlertCircle className="w-6 h-6 text-red-600 shrink-0" />
               <div>
-                <p className="text-base font-black text-red-900">Revision Requirements Rejected</p>
-                <p className="text-sm text-red-700 mt-1 font-medium leading-relaxed">
-                  {contract.revisions.find(r => r.status === 'rejected')?.rejection_message}
-                </p>
+                <p className="text-sm font-bold text-red-900">Modification Request Declined</p>
+                <p className="text-xs text-red-700 mt-1 font-medium">{contract.revisions.find(r => r.status === 'rejected')?.rejection_message}</p>
               </div>
             </div>
           )}
           {acceptedRevision && (
-            <div className="p-6 bg-green-50 border border-green-100 rounded-[1.5rem] flex gap-5 animate-in fade-in slide-in-from-top-2">
-              <CheckCircle2 className="w-8 h-8 text-green-600 shrink-0" />
+            <div className="p-5 bg-green-50 border border-green-200 rounded-lg flex gap-4">
+              <CheckCircle2 className="w-6 h-6 text-green-600 shrink-0" />
               <div>
-                <p className="text-base font-black text-green-900">Revision Protocol Accepted</p>
-                <p className="text-sm text-green-700 mt-1 font-medium">The freelancer has validated your request and is processing the updates.</p>
+                <p className="text-sm font-bold text-green-900">Revision Request Accepted</p>
+                <p className="text-xs text-green-700 mt-1 font-medium">The vendor has accepted the modifications and is processing the update.</p>
               </div>
             </div>
           )}
         </div>
 
-        {/* Project Content Section - Grid Adjusted for wider view */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
           <div className="lg:col-span-8 space-y-10">
-            <div className="bg-white rounded-[2.5rem] border border-gray-100 shadow-sm p-10">
-              <div className="flex items-center justify-between mb-10">
-                <h2 className="text-2xl font-black text-gray-900 flex items-center gap-3 uppercase tracking-tighter">
-                  <FileText className="w-8 h-8 text-gray-300" />
-                  Scope of Work
+            <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-10">
+              <div className="flex items-center justify-between mb-8 border-b border-slate-50 pb-6">
+                <h2 className="text-xl font-bold text-slate-900 flex items-center gap-3 uppercase tracking-tight">
+                  <FileText className="w-6 h-6 text-slate-300" />
+                  Service Specifications
                 </h2>
-                <div className="h-px flex-1 mx-8 bg-gray-50" />
+                <div className="flex items-center gap-2 px-3 py-1 bg-slate-100 rounded-full text-slate-600">
+                  <Tag className="w-3.5 h-3.5" />
+                  <span className="text-[10px] font-bold uppercase">{contract.project_category}</span>
+                </div>
               </div>
               <div className="space-y-8">
-                <h3 className="text-2xl font-bold text-gray-800">{contract.project_title}</h3>
-                <div className="p-8 bg-gray-50 rounded-[2rem] text-base text-gray-600 leading-[2] whitespace-pre-line border border-gray-100/50 shadow-inner">
-                  {contract.project_description}
+                <div>
+                   <h3 className="text-xl font-bold text-slate-800">{contract.project_title}</h3>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2 text-slate-400">
+                    <Info className="w-4 h-4" />
+                    <h4 className="text-xs font-bold uppercase tracking-widest">Description</h4>
+                  </div>
+                  <div className="p-8 bg-slate-50 border border-slate-100 rounded-lg text-slate-600 leading-relaxed whitespace-pre-line text-base">
+                    {contract.project_description}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                   <div className="space-y-4">
+                      <div className="flex items-center gap-2 text-slate-400">
+                        <ListChecks className="w-4 h-4" />
+                        <h4 className="text-xs font-bold uppercase tracking-widest">Requirements</h4>
+                      </div>
+                      <div className="p-6 bg-slate-50/50 border border-slate-100 rounded-lg text-sm text-slate-600 leading-relaxed whitespace-pre-line">
+                        {contract.requirements || "No specific requirements provided."}
+                      </div>
+                   </div>
+                   <div className="space-y-4">
+                      <div className="flex items-center gap-2 text-slate-400">
+                        <Target className="w-4 h-4" />
+                        <h4 className="text-xs font-bold uppercase tracking-widest">Expected Deliverables</h4>
+                      </div>
+                      <div className="p-6 bg-slate-50/50 border border-slate-100 rounded-lg text-sm text-slate-600 leading-relaxed whitespace-pre-line">
+                        {contract.expected_deliverables || "No specific deliverables stated."}
+                      </div>
+                   </div>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2 text-slate-400">
+                    <Layers className="w-4 h-4" />
+                    <h4 className="text-xs font-bold uppercase tracking-widest">Required Technologies</h4>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {contract.skills?.map((skill, i) => (
+                      <span key={i} className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-700 shadow-sm">
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12 pt-10 border-t border-gray-50">
-                <div className="space-y-2">
-                  <p className="text-xs text-gray-400 font-bold uppercase tracking-[0.2em]">Contract Start</p>
-                  <p className="text-lg font-bold text-gray-700">{new Date(contract.freelancer_signed_at).toLocaleDateString()}</p>
+              <div className="grid grid-cols-3 gap-8 mt-12 pt-8 border-t border-slate-100">
+                <div>
+                  <p className="text-[11px] text-slate-400 font-bold uppercase tracking-widest">Effective Date</p>
+                  <p className="text-base font-bold text-slate-700 mt-1">{new Date(contract.freelancer_signed_at).toLocaleDateString()}</p>
                 </div>
-                <div className="space-y-2">
-                  <p className="text-xs text-gray-400 font-bold uppercase tracking-[0.2em]">Maturity Date</p>
-                  <p className="text-lg font-bold text-gray-700">{dueDate.toLocaleDateString()}</p>
+                <div>
+                  <p className="text-[11px] text-slate-400 font-bold uppercase tracking-widest">Target Completion</p>
+                  <p className="text-base font-bold text-slate-700 mt-1">{dueDate.toLocaleDateString()}</p>
                 </div>
-                <div className="space-y-2">
-                  <p className="text-xs text-gray-400 font-bold uppercase tracking-[0.2em]">Time Remaining</p>
-                  <p className={`text-lg font-black ${timeLeft.days < 2 ? 'text-red-500' : 'text-blue-600'}`}>
-                    {contract.status === 'completed' ? 'Delivered' : `${timeLeft.days}D ${timeLeft.hours}H`}
+                <div>
+                  <p className="text-[11px] text-slate-400 font-bold uppercase tracking-widest">Countdown</p>
+                  <p className={`text-base font-bold mt-1 ${timeLeft.days < 2 ? 'text-red-600' : 'text-blue-600'}`}>
+                    {contract.status === 'completed' ? 'Delivered' : `${timeLeft.days}D : ${timeLeft.hours}H`}
                   </p>
                 </div>
               </div>
             </div>
 
-            {/* Delivery Status */}
-            <div className="bg-white rounded-[2.5rem] border border-gray-100 shadow-sm overflow-hidden">
-              <div className="p-10 border-b border-gray-50 flex justify-between items-center bg-gray-50/30">
-                <h2 className="text-xl font-black text-gray-900 uppercase tracking-tighter">Deliverable History</h2>
+            <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+              <div className="px-10 py-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/30">
+                <h2 className="text-lg font-bold text-slate-900 uppercase tracking-tight">Project Deliverables</h2>
                 {contract.status === 'active' && (
-                  <span className="flex items-center gap-2 text-xs bg-blue-50 text-blue-600 px-6 py-2.5 rounded-full font-black border border-blue-100 uppercase tracking-[0.2em]">
-                    <Clock className="w-4 h-4" /> In Production
+                  <span className="flex items-center gap-2 text-[10px] bg-blue-50 text-blue-700 px-4 py-1.5 rounded-md font-bold border border-blue-100 uppercase tracking-widest">
+                    <Clock className="w-3.5 h-3.5" /> Work in Progress
                   </span>
                 )}
               </div>
               <div className="p-10">
-                {contract.deliverables && contract.deliverables.length > 0 ? (
-                  <div className="space-y-6">
+                {contract.deliverables?.length > 0 ? (
+                  <div className="space-y-4">
                     {contract.deliverables.map((item, index) => (
-                      <div key={item.id} className="flex items-center justify-between p-6 bg-white rounded-[1.5rem] border border-gray-100 hover:border-blue-100 transition-all group shadow-sm">
-                        <div className="flex items-center gap-6">
-                          <div className="p-5 bg-blue-50 text-blue-600 rounded-[1.2rem] group-hover:scale-110 transition-transform">
-                            <FileText className="w-8 h-8" />
+                      <div key={item.id} className="flex items-center justify-between p-6 bg-white rounded-lg border border-slate-100 hover:border-slate-200 transition-all shadow-sm">
+                        <div className="flex items-center gap-5">
+                          <div className="p-4 bg-slate-50 text-slate-400 rounded-lg border border-slate-100">
+                            <FileText className="w-6 h-6" />
                           </div>
                           <div>
-                            <p className="text-lg font-bold text-gray-900 group-hover:text-blue-600 transition-colors">{item.title || `Asset Submission #${index + 1}`}</p>
-                            <p className="text-xs text-gray-400 font-bold uppercase tracking-[0.15em] mt-1">{item.deliverable_type} • {new Date(item.created_at).toLocaleDateString()}</p>
+                            <p className="text-base font-bold text-slate-900">{item.title || `Asset Submission #${index + 1}`}</p>
+                            <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">{item.deliverable_type} • {new Date(item.created_at).toLocaleDateString()}</p>
                           </div>
                         </div>
-                        <a 
-                          href={item.file_url} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-3 px-8 py-4 bg-gray-900 text-white text-sm font-bold rounded-2xl hover:bg-gray-800 transition-colors shadow-lg shadow-gray-200"
-                        >
-                          <Download className="w-5 h-5" /> Download
+                        <a href={item.file_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-6 py-3 bg-slate-900 text-white text-xs font-bold rounded-md hover:bg-slate-800 transition-colors">
+                          <Download className="w-4 h-4" /> Download
                         </a>
                       </div>
                     ))}
                     
                     {contract.status === 'submitted' && (
-                      <div className="flex flex-wrap gap-6 pt-10">
-                        <button 
-                          onClick={handleApproveOrder}
-                          disabled={updateStatusMutation.isPending}
-                          className="px-10 py-5 bg-green-600 text-white text-base font-black rounded-[1.5rem] hover:bg-green-700 transition-all flex items-center gap-3 shadow-xl shadow-green-100"
-                        >
-                          <CheckCircle2 className="w-6 h-6" />
-                          Approve Deliverables
+                      <div className="flex gap-4 pt-10">
+                        <button onClick={handleApproveOrder} disabled={updateStatusMutation.isPending} className="px-10 py-4 bg-green-600 text-white text-sm font-bold rounded-md hover:bg-green-700 transition-all flex items-center gap-2 shadow-lg shadow-green-100">
+                          <CheckCircle2 className="w-5 h-5" /> Approve Submissions
                         </button>
-                        
                         {pendingRevision ? (
-                          <div className="flex items-center gap-3 px-8 py-5 bg-amber-50 text-amber-700 border border-amber-200 rounded-[1.5rem] text-xs font-black uppercase tracking-widest">
-                            <Clock className="w-5 h-5" />
-                            Revision Pending
-                          </div>
+                          <div className="px-8 py-4 bg-slate-50 text-slate-500 border border-slate-200 rounded-md text-xs font-bold uppercase tracking-widest">Revision Pending</div>
                         ) : (
-                          <button 
-                            onClick={() => setIsRevisionModalOpen(true)}
-                            className="px-10 py-5 bg-white border border-red-100 text-red-600 text-base font-black rounded-[1.5rem] hover:bg-red-50 transition-colors"
-                          >
+                          <button onClick={() => setIsRevisionModalOpen(true)} className="px-10 py-4 bg-white border border-slate-200 text-slate-700 text-sm font-bold rounded-md hover:bg-slate-50 transition-colors">
                             Request Modification
                           </button>
                         )}
@@ -315,133 +342,104 @@ export default function ClientContractDetail() {
                     )}
                   </div>
                 ) : (
-                  <div className="text-center py-20">
-                    <div className="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-8">
-                      <History className="w-10 h-10 text-gray-200" />
-                    </div>
-                    <p className="text-lg font-bold text-gray-900">Awaiting Submissions</p>
-                    <p className="text-sm text-gray-400 mt-3 max-w-[320px] mx-auto leading-relaxed">The production pipeline is currently active. Files will appear here upon freelancer submission.</p>
+                  <div className="text-center py-20 bg-slate-50/30 rounded-lg border border-dashed border-slate-200">
+                    <History className="w-12 h-12 text-slate-200 mx-auto mb-4" />
+                    <p className="text-base font-bold text-slate-900">No deliverables found</p>
+                    <p className="text-sm text-slate-400 mt-1 max-w-xs mx-auto">Assets will appear here once submitted by the vendor.</p>
                   </div>
                 )}
               </div>
             </div>
           </div>
 
-          {/* Sidebar - Spanning 4 columns */}
           <div className="lg:col-span-4 space-y-8">
-            <div className="bg-white rounded-[2.5rem] border border-gray-100 shadow-sm p-10">
-              <h2 className="text-xs font-black text-gray-400 uppercase tracking-[0.25em] mb-10">Financial Summary</h2>
+            <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-10">
+              <h2 className="text-[11px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-10">Financial Overview</h2>
               <div className="space-y-6">
-                <div className="flex justify-between text-sm font-bold text-gray-500">
-                  <span>Gross Subtotal</span>
-                  <span className="text-gray-900">${Number(contract.total_amount).toLocaleString()}</span>
+                <div className="flex justify-between text-sm font-semibold text-slate-500">
+                  <span>Agreement Subtotal</span>
+                  <span className="text-slate-900">${Number(contract.total_amount).toLocaleString()}</span>
                 </div>
-                <div className="flex justify-between text-sm font-bold text-gray-500">
-                  <span>Processing Fee</span>
-                  <span className="text-gray-900">$0.00</span>
+                <div className="flex justify-between text-sm font-semibold text-slate-500">
+                  <span>Transaction Fees</span>
+                  <span className="text-slate-900">$0.00</span>
                 </div>
-                <div className="pt-8 border-t border-gray-50 flex justify-between items-end">
-                  <span className="text-xs font-black text-gray-900 uppercase tracking-[0.2em]">Net Paid</span>
-                  <span className="text-4xl font-black text-gray-900 tracking-tighter">${(contract.total_amount).toLocaleString()}</span>
+                <div className="pt-8 border-t border-slate-100 flex justify-between items-end">
+                  <span className="text-xs font-bold text-slate-900 uppercase tracking-widest">Total Paid</span>
+                  <span className="text-3xl font-black text-slate-900 tracking-tighter">${(contract.total_amount).toLocaleString()}</span>
                 </div>
               </div>
-              
-              <div className="mt-10 flex items-start gap-4 p-5 bg-blue-50/50 rounded-[1.5rem] border border-blue-50">
-                <ShieldCheck className="w-5 h-5 text-blue-600 shrink-0 mt-1" />
-                <p className="text-xs text-blue-800 leading-relaxed font-bold">
-                  Funds are secured in our neutral holding account until project completion.
-                </p>
+              <div className="mt-10 p-4 bg-blue-50/50 rounded-lg border border-blue-100 flex items-start gap-3">
+                <ShieldCheck className="w-5 h-5 text-blue-600 mt-0.5" />
+                <p className="text-xs text-blue-800 font-semibold leading-relaxed">Funds are held securely by our platform and disbursed only upon deliverable approval.</p>
               </div>
             </div>
 
             {contract.legal_document_url && (
-              <div className="bg-white rounded-[2.5rem] border border-gray-100 shadow-sm p-8 group hover:border-blue-200 transition-colors">
+              <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-8 hover:border-blue-200 transition-colors group">
                 <div className="flex items-center gap-5 mb-8">
-                  <div className="p-4 bg-blue-50 text-blue-600 rounded-2xl">
+                  <div className="p-3 bg-slate-50 text-slate-400 rounded-lg group-hover:text-blue-600 group-hover:bg-blue-50 transition-colors">
                     <Landmark className="w-6 h-6" />
                   </div>
                   <div>
-                    <h3 className="text-xs font-black text-gray-900 uppercase tracking-[0.2em]">Service Agreement</h3>
-                    <p className="text-[10px] text-gray-400 font-bold">LEGALLY BINDING PDF</p>
+                    <h3 className="text-xs font-bold text-slate-900 uppercase tracking-widest">Service Agreement</h3>
+                    <p className="text-[10px] text-slate-400 font-bold">LEGALLY BINDING DOCUMENT</p>
                   </div>
                 </div>
-                <a 
-                  href={contract.legal_document_url} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="w-full flex items-center justify-center gap-3 py-4 bg-gray-50 text-gray-700 text-xs font-black rounded-2xl hover:bg-gray-100 transition-all uppercase tracking-widest shadow-inner border border-gray-100"
-                >
+                <a href={contract.legal_document_url} target="_blank" rel="noopener noreferrer" className="w-full flex items-center justify-center gap-3 py-4 bg-slate-50 text-slate-700 text-xs font-bold rounded-lg hover:bg-slate-100 border border-slate-100 uppercase tracking-widest transition-all">
                   <Download className="w-4 h-4" /> Download Agreement
                 </a>
               </div>
             )}
-
-            <div className="grid grid-cols-1 gap-4">
-              <button 
-                onClick={handleMessageFreelancer}
-                disabled={getRoomMutation.isPending}
-                className="w-full flex items-center justify-center gap-4 py-6 bg-white border border-gray-200 text-gray-900 text-sm font-black rounded-[1.5rem] hover:bg-gray-50 shadow-sm transition-all uppercase tracking-[0.15em]"
-              >
-                <MessageSquare className="w-5 h-5" />
-                {getRoomMutation.isPending ? "Connecting..." : "Open Channel"}
-              </button>
-              
-              {contract.status === 'disputed' || contract.status === 'dispute' ? (
-                <div className="w-full flex items-center justify-center gap-4 py-6 bg-gray-50 border border-gray-200 text-gray-400 text-xs font-black rounded-[1.5rem] uppercase tracking-[0.15em]">
-                  <ShieldAlert className="w-5 h-5" />
-                  Dispute Active
-                </div>
-              ) : (
-                <button 
-                  onClick={() => openModal("client-raise-dispute", { contractId: contract.id })}
-                  className="w-full flex items-center justify-center gap-4 py-6 bg-white border border-red-50 text-red-500 text-xs font-black rounded-[1.5rem] hover:bg-red-50 shadow-sm transition-all uppercase tracking-[0.15em]"
-                >
-                  <ShieldAlert className="w-5 h-5" />
-                  Raise Dispute
+            
+            {!dispute?.id && (
+              <div className="grid grid-cols-1 gap-4">
+                <button onClick={handleMessageFreelancer} disabled={getRoomMutation.isPending} className="w-full flex items-center justify-center gap-4 py-5 bg-white border border-slate-200 text-slate-900 text-sm font-bold rounded-lg hover:bg-slate-50 shadow-sm uppercase tracking-widest transition-all">
+                  <MessageSquare className="w-5 h-5 text-slate-400" /> {getRoomMutation.isPending ? "Connecting..." : "Open Workspace Chat"}
                 </button>
-              )}
-            </div>
+                
+                {contract.status === 'disputed' || contract.status === 'dispute' ? (
+                  <div className="w-full flex items-center justify-center gap-4 py-5 bg-slate-50 border border-slate-200 text-slate-400 text-xs font-bold rounded-lg uppercase tracking-widest">
+                    <ShieldAlert className="w-5 h-5" /> Dispute Under Review
+                  </div>
+                ) : (
+                  <button onClick={() => openModal("client-raise-dispute", { contractId: contract.id })} className="w-full flex items-center justify-center gap-4 py-5 bg-white border border-red-50 text-red-600 text-[10px] font-bold rounded-lg hover:bg-red-50 transition-all uppercase tracking-widest">
+                    <ShieldAlert className="w-4 h-4" /> Raise Dispute
+                  </button>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>
-            {isRevisionModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-md animate-in fade-in duration-300">
-          <div className="bg-white rounded-[2.5rem] w-full max-w-lg shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
-            <div className="p-10 border-b border-gray-50 flex justify-between items-start">
+
+      {isRevisionModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+          <div className="bg-white rounded-xl w-full max-w-lg shadow-2xl overflow-hidden">
+            <div className="px-10 py-8 border-b border-slate-50 flex justify-between items-start">
               <div>
-                <h3 className="text-2xl font-black text-gray-900 tracking-tight">Request Modification</h3>
-                <p className="text-xs text-gray-400 font-bold uppercase tracking-widest mt-1">Refine Production Deliverables</p>
+                <h3 className="text-xl font-bold text-slate-900 tracking-tight">Request Modification</h3>
+                <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">Order #ORD-{contract.id + 8000}</p>
               </div>
-              <button onClick={() => setIsRevisionModalOpen(false)} className="p-2 text-gray-300 hover:text-gray-900 transition-colors">
+              <button onClick={() => setIsRevisionModalOpen(false)} className="p-2 text-slate-300 hover:text-slate-900">
                 <X className="w-6 h-6" />
               </button>
             </div>
             <div className="p-10">
-              <div className="mb-6 p-5 bg-blue-50/50 rounded-2xl flex gap-4 border border-blue-100">
-                <Info className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
-                <p className="text-xs text-blue-900 font-medium leading-relaxed italic">
-                  Clearly articulate the required changes. Specific instructions accelerate the revision turnaround.
-                </p>
+              <div className="mb-6 p-5 bg-blue-50 border border-blue-100 rounded-lg flex gap-4">
+                <Info className="w-5 h-5 text-blue-600 shrink-0" />
+                <p className="text-xs text-blue-900 font-semibold leading-relaxed">Provide specific feedback regarding the changes required to meet the original brief.</p>
               </div>
               <textarea 
-                className="w-full h-40 p-6 bg-gray-50 border border-gray-100 rounded-3xl text-sm focus:ring-4 focus:ring-blue-100 focus:bg-white focus:outline-none transition-all resize-none font-medium placeholder:text-gray-300 shadow-inner"
-                placeholder="Detail the necessary adjustments..."
+                className="w-full h-40 p-5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:bg-white focus:outline-none transition-all resize-none font-medium"
+                placeholder="State the specific deliverables that need adjustment..."
                 value={revisionReason}
                 onChange={(e) => setRevisionReason(e.target.value)}
               />
             </div>
-            <div className="p-10 bg-gray-50/50 flex gap-4">
-              <button 
-                onClick={() => setIsRevisionModalOpen(false)}
-                className="flex-1 px-6 py-5 bg-white border border-gray-200 text-gray-600 text-xs font-black rounded-2xl uppercase tracking-widest hover:bg-gray-100 transition-colors"
-              >
-                Cancel
-              </button>
-              <button 
-                onClick={handleRevisionSubmit}
-                disabled={requestRevisionMutation.isPending || revisionReason.length < 10}
-                className="flex-1 px-6 py-5 bg-red-600 text-white text-xs font-black rounded-2xl uppercase tracking-widest hover:bg-red-700 transition-all shadow-lg shadow-red-100 disabled:opacity-50"
-              >
+            <div className="px-10 py-8 bg-slate-50 flex gap-4">
+              <button onClick={() => setIsRevisionModalOpen(false)} className="flex-1 px-6 py-4 bg-white border border-slate-200 text-slate-600 text-xs font-bold rounded-lg uppercase tracking-widest hover:bg-slate-100 transition-colors">Cancel</button>
+              <button onClick={handleRevisionSubmit} disabled={requestRevisionMutation.isPending || revisionReason.length < 10} className="flex-1 px-6 py-4 bg-red-600 text-white text-xs font-bold rounded-lg uppercase tracking-widest hover:bg-red-700 transition-all disabled:opacity-50">
                 {requestRevisionMutation.isPending ? "Submitting..." : "Submit Request"}
               </button>
             </div>

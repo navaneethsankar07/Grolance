@@ -7,7 +7,7 @@ export default function HowItWorks() {
       <section className="relative w-full px-4 sm:px-8 md:px-16 lg:px-20 xl:px-24 pt-4 pb-12 md:pb-16">
         <div className="relative w-full h-[500px] md:h-[635px] rounded-[80px] md:rounded-[100px] overflow-hidden">
           <img
-            src="https://api.builder.io/api/v1/image/assets/TEMP/280b6ff0f948485c91943a6af802870b524ac937?width=3114"
+            src="how-it-works.jpg"
             alt="Team collaboration"
             className="absolute inset-0 w-full h-full object-cover"
           />
@@ -106,7 +106,7 @@ export default function HowItWorks() {
             <div className="rounded-xl overflow-hidden shadow-lg bg-white p-4">
               <div className="rounded-lg overflow-hidden aspect-[4/3]">
                 <img
-                  src="https://api.builder.io/api/v1/image/assets/TEMP/0db69197b8aa14932d7eb5d1c1ae6d80cd78a4cc?width=1077"
+                  src="how-it-works2.png"
                   alt="Team collaboration on project"
                   className="w-full h-full object-cover"
                 />

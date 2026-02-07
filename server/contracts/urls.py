@@ -8,8 +8,8 @@ router.register(r'',ContractViewSet,basename='contract')
 
 
 urlpatterns = [
-    path('',include(router.urls)),
     path('dispute/', RaiseDisputeView.as_view(), name='raise-dispute'),
+    path('',include(router.urls)),
     path('<int:contract_id>/submit-work/', SubmitDeliverableView.as_view(), name='submit-deliverable'),
     path('<int:contract_id>/request-revision/',RequestRevisionView.as_view()),
     path('revisions/<int:revision_id>/action/', FreelancerRevisionActionView.as_view()), 

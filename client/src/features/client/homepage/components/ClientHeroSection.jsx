@@ -4,7 +4,7 @@ export default function ClientHeroSection() {
   return (
     <section className="relative mx-auto mt-8 w-full max-w-[1546px] overflow-hidden rounded-[100px]">
       <img
-        src="https://api.builder.io/api/v1/image/assets/TEMP/7698e59ab3a82e2b519c51d34120ccb7d1cc4710?width=3092"
+        src="hero-banner.jpg"
         alt="Hero background"
         className="h-[500px] w-full object-cover md:h-[722px]"
       />
