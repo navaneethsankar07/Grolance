@@ -9,6 +9,7 @@ from projects.models import Project, Proposal
 from contracts.models import Contract
 from payments.models import Payment
 from django.db.models.functions import TruncMonth, TruncYear
+from contracts.models import Dispute
 import calendar
 User = get_user_model()
 
@@ -50,6 +51,7 @@ class AdminDashboardView(APIView):
                     status__in=['completed', 'released'],
                     created_at__range=(start, end)
                 ).aggregate(total=Sum('platform_fee'))['total'] or 0,
+                'disputes': Dispute.objects.filter(created_at__range=(start,end)).count()
             }
             
         curr_metrics = get_stats_for_period(start_of_current_month, now)
@@ -74,6 +76,9 @@ class AdminDashboardView(APIView):
 
             'total_proposals': Proposal.objects.count(),
             'proposals_change': self.get_percentage_change(curr_metrics['proposals'], prev_metrics['proposals']),
+            
+            'total_disputes':Dispute.objects.count(),
+            'dispute_change':self.get_percentage_change(curr_metrics['disputes'], prev_metrics['disputes']),
 
             'platform_revenue': float(Payment.objects.filter(status__in=['completed', 'released']).aggregate(total=Sum('platform_fee'))['total'] or 0),
             'revenue_change': self.get_percentage_change(curr_metrics['revenue'], prev_metrics['revenue']),

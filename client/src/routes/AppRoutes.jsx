@@ -10,6 +10,7 @@ import AdminLayout from '../layouts/AdminLayout'
 import Landingpage from '../features/client/landingPage/Landingpage'
 import FreelancerRoutes from './FreelancerRoutes'
 import FreelancerProtectedRoute from './FreelancerProtectedRoutes'
+import ContactPage from '../components/common/ContactUs'
 
 
 function AppRoutes() {
@@ -27,6 +28,7 @@ function AppRoutes() {
             </Route>
           </Route>
           <Route path="/reset-password" element={<ResetPasswordPage />} />
+          <Route path='/contact-us' element={<ContactPage/>}/>
           <Route
             path="/*"
             element={

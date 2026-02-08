@@ -8,12 +8,11 @@ export default function Footer() {
 
         <div className="pt-8 border-t border-[#8F8F8F] flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="font-grotesk font-bold text-sm leading-5 text-[#6C757D]">
-            © 2024 Freelancer. All rights reserved.
+            © 2026 Freelancer. All rights reserved.
           </p>
 
           <div className="flex items-center gap-4">
-            <div className="text-[#6C757D] hover:text-[#3B82F6] cursor-pointer">
-              {/* Twitter Icon */}
+            <div className="text-[hsl(208,7%,46%)] hover:text-[#3B82F6] cursor-pointer">
               <svg
                 width="20"
                 height="20"
@@ -29,7 +28,6 @@ export default function Footer() {
             </div>
 
             <div className="text-[#6C757D] hover:text-[#3B82F6] cursor-pointer">
-              {/* LinkedIn Icon */}
               <svg
                 width="20"
                 height="20"

@@ -57,9 +57,9 @@ export default function AdminOverview() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <AdminStatsCard
           title="Open Disputes"
-          value="18"
-          change="2 new"
-          changeType="negative"
+          value={dashboardStats?.total_disputes}
+          change={`${dashboardStats?.dispute_change}%`}
+          changeType={dashboardStats?.dispute_change >= 0 ? "positive" : "negative"}
           icon={AlertCircle}
           iconBgColor="bg-red-50"
           iconColor="text-red-600"
