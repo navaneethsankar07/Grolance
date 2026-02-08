@@ -6,6 +6,7 @@ import PaymentRelease from '../features/admin/payoutmanagement/PaymenRelease'
 import AdminTransactions from '../features/admin/transactions/AdminTransactions'
 import DisputeList from '../features/admin/disputemanagement/DisputeList'
 import DisputeDetail from '../features/admin/disputemanagement/DisputeDetail'
+import AdminSettings from '../features/admin/settings/AdminSettings'
 
 function AdminRoutes() {
   return (
@@ -19,6 +20,7 @@ function AdminRoutes() {
         <Route path='transactions' element={<AdminTransactions/>}/>
         <Route path='disputes' element={<DisputeList/>}/>
         <Route path='disputes/:id' element={<DisputeDetail/>}/>
+        <Route path='settings/' element={<AdminSettings/>}/>
     </Routes>
     </>
   )
