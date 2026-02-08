@@ -1,4 +1,4 @@
-import { CheckCircle, XCircle, CreditCard, Clock, ChevronRight, Loader2 } from 'lucide-react';
+import { CheckCircle, XCircle, CreditCard, Clock, ChevronRight, Loader2, AlertCircle, User, Briefcase } from 'lucide-react';
 import { usePendingPayouts } from './payoutQueries';
 import { useModal } from '../../../hooks/modal/useModalStore';
 import { useRefundPayment } from './payoutMutations';
@@ -7,8 +7,6 @@ export default function PaymentRelease() {
   const { data: payments = [], isLoading } = usePendingPayouts();
   const { openModal } = useModal();
   const refundMutation = useRefundPayment();
-console.log(payments);
-
 
   const handleRefund = (paymentId) => {
     const numericId = paymentId.replace('PAY-', '');
@@ -46,93 +44,150 @@ console.log(payments);
                 <thead className="bg-slate-50 border-b border-slate-200">
                   <tr>
                     <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Payment ID</th>
-                    <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Client</th>
-                    <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Freelancer</th>
+                    <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Client / Freelancer</th>
                     <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Amount</th>
+                    <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Dispute Info</th>
                     <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Status</th>
-                    <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Gateway</th>
                     <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider text-center">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
-                  {payments.map((pay) => (
-                    <tr key={pay.contract_id} className="hover:bg-slate-50/50 transition-colors">
-                      <td className="px-6 py-5 font-medium text-slate-700">{pay.payment_id}</td>
-                      <td className="px-6 py-5 text-slate-600">{pay.client_name}</td>
-                      <td className="px-6 py-5 text-slate-600">{pay.freelancer_name}</td>
-                      <td className="px-6 py-5 font-bold text-slate-900">${pay.amount.toLocaleString()}</td>
-                      <td className="px-6 py-5">
-                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-100">
-                          <Clock className="w-3 h-3 mr-1" /> {pay.status}
-                        </span>
-                      </td>
-                      <td className="px-6 py-5">
-                        <div className="flex items-center text-slate-500">
-                          <CreditCard className="w-4 h-4 mr-2" /> {pay.gateway}
-                        </div>
-                      </td>
-                      <td className="px-6 py-5">
-                        <div className="flex items-center justify-center gap-3">
-                          <button 
-                            onClick={() => openModal('release-payout', { id: pay.contract_id, total_amount: pay.amount })}
-                            className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg text-sm font-semibold transition-all shadow-sm active:scale-95"
-                          >
-                            Release
-                          </button>
-                          <button 
-                        disabled={refundMutation.isPending}
-                        onClick={() => handleRefund(pay.payment_id)}
-                        className="text-rose-600 border border-rose-200 hover:bg-rose-50 px-5 py-2 rounded-lg text-sm font-semibold disabled:opacity-50"
-                      >
-                        {refundMutation.isPending ? 'Processing...' : 'Refund'}
-                      </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
+                  {payments.map((pay) => {
+                    const hasDispute = !!pay.dispute_status;
+                    const isRefundingThis = refundMutation.isPending && refundMutation.variables === pay.payment_id.replace('PAY-', '');
+                    
+                    const shouldShowRelease = !hasDispute || 
+                      (pay.dispute_raised_by === 'freelancer' && pay.dispute_status === 'resolved') || 
+                      (pay.dispute_raised_by === 'client' && pay.dispute_status === 'rejected');
+
+                    const shouldShowRefund = hasDispute && (
+                      (pay.dispute_raised_by === 'client' && pay.dispute_status === 'resolved') || 
+                      (pay.dispute_raised_by === 'freelancer' && pay.dispute_status === 'rejected')
+                    );
+
+                    return (
+                      <tr key={pay.contract_id} className="hover:bg-slate-50/50 transition-colors">
+                        <td className="px-6 py-5">
+                          <span className="font-medium text-slate-700 block">{pay.payment_id}</span>
+                          <span className="text-[10px] text-slate-400 uppercase font-bold">{pay.gateway}</span>
+                        </td>
+                        <td className="px-6 py-5">
+                          <div className="text-sm text-wrap max-w-[200px] break-words">
+                            <p className="text-slate-900 font-semibold">{pay.client_name} <span className="text-slate-400 font-normal text-xs">(C)</span></p>
+                            <p className="text-slate-500">{pay.freelancer_name} <span className="text-slate-400 font-normal text-xs">(F)</span></p>
+                          </div>
+                        </td>
+                        <td className="px-6 py-5 font-bold text-slate-900">${pay.amount.toLocaleString()}</td>
+                        <td className="px-6 py-5">
+                          {hasDispute ? (
+                            <div className="flex flex-col gap-1 break-words max-w-[150px]">
+                              <span className={`inline-flex items-center gap-1 text-[10px] font-bold uppercase px-2 py-0.5 rounded w-fit ${pay.dispute_status === 'resolved' ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'}`}>
+                                <AlertCircle className="w-3 h-3 shrink-0" /> {pay.dispute_status}
+                              </span>
+                              <span className="text-[10px] text-slate-500 flex items-center gap-1">
+                                {pay.dispute_raised_by === 'client' ? <User className="w-3 h-3 shrink-0" /> : <Briefcase className="w-3 h-3 shrink-0" />}
+                                Raised by {pay.dispute_raised_by}
+                              </span>
+                            </div>
+                          ) : (
+                            <span className="text-xs text-slate-400 italic">No Dispute</span>
+                          )}
+                        </td>
+                        <td className="px-6 py-5">
+                          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-100 capitalize">
+                            {pay.status}
+                          </span>
+                        </td>
+                        <td className="px-6 py-5">
+                          <div className="flex items-center justify-center gap-3">
+                            {shouldShowRelease && (
+                              <button 
+                                onClick={() => openModal('release-payout', { id: pay.contract_id, total_amount: pay.amount })}
+                                className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg text-sm font-semibold transition-all shadow-sm active:scale-95 whitespace-nowrap"
+                              >
+                                Release
+                              </button>
+                            )}
+                            {shouldShowRefund && (
+                              <button 
+                                disabled={refundMutation.isPending}
+                                onClick={() => handleRefund(pay.payment_id)}
+                                className="text-rose-600 border border-rose-200 hover:bg-rose-50 px-5 py-2 rounded-lg text-sm font-semibold disabled:opacity-50 whitespace-nowrap min-w-[100px]"
+                              >
+                                {isRefundingThis ? 'Processing...' : 'Refund'}
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
 
             <div className="lg:hidden space-y-4">
-              {payments.map((pay) => (
-                <div key={pay.contract_id} className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-                  <div className="flex justify-between items-start mb-4">
-                    <div>
-                      <span className="text-xs font-bold text-blue-600 uppercase">{pay.payment_id}</span>
-                      <h3 className="font-bold text-slate-900 text-lg">${pay.amount.toLocaleString()}</h3>
+              {payments.map((pay) => {
+                const hasDispute = !!pay.dispute_status;
+                const isRefundingThis = refundMutation.isPending && refundMutation.variables === pay.payment_id.replace('PAY-', '');
+                
+                const shouldShowRelease = !hasDispute || 
+                      (pay.dispute_raised_by === 'freelancer' && pay.dispute_status === 'resolved') || 
+                      (pay.dispute_raised_by === 'client' && pay.dispute_status === 'rejected');
+
+                const shouldShowRefund = hasDispute && (
+                      (pay.dispute_raised_by === 'client' && pay.dispute_status === 'resolved') || 
+                      (pay.dispute_raised_by === 'freelancer' && pay.dispute_status === 'rejected')
+                    );
+
+                return (
+                  <div key={pay.contract_id} className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm break-words overflow-hidden">
+                    <div className="flex justify-between items-start mb-4 gap-2">
+                      <div className="min-w-0">
+                        <span className="text-xs font-bold text-blue-600 uppercase block truncate">{pay.payment_id}</span>
+                        <h3 className="font-bold text-slate-900 text-lg break-all">${pay.amount.toLocaleString()}</h3>
+                      </div>
+                      <div className="flex flex-col items-end gap-2 shrink-0">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-100">
+                          {pay.status}
+                        </span>
+                        {hasDispute && (
+                           <span className="text-[9px] font-black uppercase text-rose-600 text-right">Disputed By {pay.dispute_raised_by}</span>
+                        )}
+                      </div>
                     </div>
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-100">
-                      {pay.status}
-                    </span>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4 mb-6">
-                    <div>
-                      <p className="text-xs text-slate-400 uppercase font-bold tracking-tighter">Client</p>
-                      <p className="text-sm text-slate-700 font-medium">{pay.client_name}</p>
+                    <div className="grid grid-cols-2 gap-4 mb-6">
+                      <div className="min-w-0">
+                        <p className="text-xs text-slate-400 uppercase font-bold tracking-tighter">Client</p>
+                        <p className="text-sm text-slate-700 font-medium break-words">{pay.client_name}</p>
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-xs text-slate-400 uppercase font-bold tracking-tighter">Freelancer</p>
+                        <p className="text-sm text-slate-700 font-medium break-words">{pay.freelancer_name}</p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-xs text-slate-400 uppercase font-bold tracking-tighter">Freelancer</p>
-                      <p className="text-sm text-slate-700 font-medium">{pay.freelancer_name}</p>
+                    <div className="flex flex-col sm:flex-row gap-3">
+                      {shouldShowRelease && (
+                        <button 
+                          onClick={() => openModal('release-payout', { id: pay.contract_id, total_amount: pay.amount })}
+                          className="flex-1 bg-blue-600 text-white py-3 rounded-xl font-bold text-sm transition-all active:scale-95"
+                        >
+                          Release Payment
+                        </button>
+                      )}
+                      {shouldShowRefund && (
+                        <button 
+                          disabled={refundMutation.isPending}
+                          onClick={() => handleRefund(pay.payment_id)}
+                          className={`flex-1 text-rose-600 border border-rose-200 hover:bg-rose-50 py-3 rounded-xl font-bold text-sm disabled:opacity-50 transition-all`}
+                        >
+                          {isRefundingThis ? 'Processing...' : 'Refund Client'}
+                        </button>
+                      )}
                     </div>
                   </div>
-                  <div className="flex flex-col sm:flex-row gap-3">
-                    <button 
-                      onClick={() => openModal('release-payout', { id: pay.contract_id, total_amount: pay.amount })}
-                      className="flex-1 bg-blue-600 text-white py-3 rounded-xl font-bold text-sm"
-                    >
-                      Release Payment
-                    </button>
-                    <button 
-                        disabled={refundMutation.isPending}
-                        onClick={() => handleRefund(pay.payment_id)}
-                        className="text-rose-600 border border-rose-200 hover:bg-rose-50 px-5 py-2 rounded-lg text-sm font-semibold disabled:opacity-50"
-                      >
-                        {refundMutation.isPending ? 'Processing...' : 'Refund'}
-                      </button>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </>
         )}

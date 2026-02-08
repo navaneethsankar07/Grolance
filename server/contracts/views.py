@@ -31,7 +31,7 @@ class ContractViewSet(viewsets.ModelViewSet):
             user = self.request.user
             queryset = Contract.objects.filter(Q(client=user) | Q(freelancer=user)).select_related(
             'project', 'project__category', 'client', 'package', 'freelancer'
-            ).prefetch_related('deliverables', 'revisions', 'disputes')
+            ).prefetch_related('deliverables', 'revisions', 'disputes', 'escrow_details')
         
             status_param = self.request.query_params.get('status')
             if status_param and status_param != 'All':
@@ -303,12 +303,12 @@ class AdminDisputeViewSet(viewsets.ModelViewSet):
                 if new_status == 'resolved':
                     dispute.resolved_at = timezone.now()
                 
-                if contract_status:
-                    dispute.contract.status = "completed"
-                    project = dispute.contract.project
-                    project.status = 'completed'
-                    project.save()
-                    dispute.contract.save()
+               
+                dispute.contract.status = "completed"
+                project = dispute.contract.project
+                project.status = 'completed'
+                project.save()
+                dispute.contract.save()
                     
                 
                 dispute.save()

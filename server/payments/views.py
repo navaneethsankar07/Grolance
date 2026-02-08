@@ -18,6 +18,7 @@ from projects.permissions import IsClientUser, IsFreelancerUser
 from datetime import timedelta
 from common.pagination import AdminUserPagination
 from django_filters.rest_framework import DjangoFilterBackend
+from django.db import transaction
 
 logger = logging.getLogger('payments')
 
@@ -262,43 +263,70 @@ class RefundPaymentView(APIView):
                 payment_id = raw_payment_id.replace('PAY-', '')
             else:
                 payment_id = raw_payment_id
-            payment = get_object_or_404(Payment, id=payment_id)
-            contract = payment.contract
 
-            if contract.status != 'dispute':
-                return Response(
-                    {"error": f"Refund rejected. Contract is currently '{contract.status}', but must be 'dispute'."}, 
-                    status=status.HTTP_400_BAD_REQUEST
+            with transaction.atomic():
+                payment = Payment.objects.select_for_update().get(id=payment_id)
+                contract = payment.contract
+                dispute = contract.disputes.first()
+
+                if contract.status != 'completed' and contract.status != 'disputed':
+                     pass 
+
+                is_client_won = dispute and dispute.opened_by_client and dispute.status == 'resolved'
+                is_freelancer_lost = dispute and dispute.opened_by_freelancer and dispute.status == 'rejected'
+
+                if not (is_client_won or is_freelancer_lost):
+                    return Response(
+                        {"error": "Refund not authorized for this dispute outcome."},
+                        status=status.HTTP_403_FORBIDDEN
+                    )
+
+                if payment.status in ['released', 'refunded']:
+                    return Response(
+                        {"error": f"Payment is already {payment.status}."},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+
+                if not payment.paypal_capture_id:
+                    return Response({"error": "Capture ID missing"}, status=400)
+
+                token = VerifyEscrowPaymentView().get_paypal_token()
+                if not token:
+                    return Response({"error": "Payment service unavailable"}, status=503)
+
+                base_url = "https://api-m.sandbox.paypal.com" if settings.PAYPAL_MODE == 'sandbox' else "https://api-m.paypal.com"
+
+                res = requests.post(
+                    f"{base_url}/v2/payments/captures/{payment.paypal_capture_id}/refund",
+                    headers={
+                        "Authorization": f"Bearer {token}",
+                        "Content-Type": "application/json",
+                        "PayPal-Request-Id": f"refund-{payment.paypal_capture_id}" 
+                    },
+                    json={}
                 )
-            if payment.status in ['released', 'refunded']:
-                return Response(
-                    {"error": f"Payment cannot be refunded because it is already {payment.status}."},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
 
-            if not payment.paypal_capture_id:
-                return Response({"error": "Capture ID missing"}, status=400)
+                response_data = res.json()
 
-            token = VerifyEscrowPaymentView().get_paypal_token()
-            if not token:
-                return Response({"error": "Payment service unavailable"}, status=503)
+                if res.status_code in [200, 201]:
+                    payment.status = 'refunded'
+                    payment.save()
+                    
+                    contract.status = 'refunded'
+                    contract.is_funded = False 
+                    contract.save()
+                    
+                    return Response({"message": "Refund processed successfully"})
+                
+                if response_data.get('name') == 'ALREADY_REFUNDED':
+                    payment.status = 'refunded'
+                    payment.save()
+                    return Response({"message": "Payment was already refunded."})
 
-            base_url = "https://api-m.sandbox.paypal.com" if settings.PAYPAL_MODE == 'sandbox' else "https://api-m.paypal.com"
+                return Response(response_data, status=res.status_code)
 
-            res = requests.post(
-                f"{base_url}/v2/payments/captures/{payment.paypal_capture_id}/refund",
-                headers={"Authorization": f"Bearer {token}",
-                         "Content-Type": "application/json"},
-                json={}
-            )
-
-            if res.status_code in [200, 201]:
-                payment.status = 'refunded'
-                payment.save()
-                payment.contract.status = 'refunded'
-                payment.contract.save()
-                return Response({"message": "Refunded"})
-            return Response(res.json(), status=400)
+        except Payment.DoesNotExist:
+            return Response({"error": "Payment not found"}, status=404)
         except Exception as e:
             logger.error(f"Error in RefundPaymentView: {str(e)}")
             return Response({"error": "Internal server error during refund processing"}, status=500)

@@ -81,12 +81,13 @@ class ContractSerializer(serializers.ModelSerializer):
     revisions = ContractRevisionSerializer(many=True, read_only=True)
     legal_document_url = serializers.SerializerMethodField()
     dispute_details = serializers.SerializerMethodField()
+    payment_status = serializers.CharField(source='escrow_details.status', read_only=True)
 
     class Meta:
         model = Contract
         fields = [
             'id', 'project_title', 'project_description', 'expected_deliverables','requirements', 'project_category', 'project_id',
-            'client_name', 'freelancer_name', 'total_amount', 'status', 'freelancer_signed_at',
+            'client_name', 'freelancer_name', 'total_amount', 'status','payment_status', 'freelancer_signed_at',
             'skills', 'profile_photo', 'package_name', 'delivery_days', 'deliverables', 'revisions',
             'legal_document_url', 'client_signature', 'freelancer_signature', 
             'client_signed_at', 'client_ip', 'freelancer_ip','freelancer_id','client_id','dispute_details'

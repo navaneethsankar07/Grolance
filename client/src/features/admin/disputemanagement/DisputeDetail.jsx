@@ -199,14 +199,14 @@ export default function DisputeDetail() {
                 <span className="text-[10px] font-bold text-slate-400 uppercase flex items-center gap-1.5 mb-1.5">
                   <Briefcase className="w-3 h-3" /> Project Title
                 </span>
-                <span className="text-sm font-semibold text-slate-700">{contract?.project_title}</span>
+                <span className="text-sm font-semibold wrap-break-word text-slate-700">{contract?.project_title}</span>
               </div>
 
               <div className="flex flex-col">
                 <span className="text-[10px] font-bold text-slate-400 uppercase flex items-center gap-1.5 mb-1.5">
                   <Info className="w-3 h-3" /> Description
                 </span>
-                <span className="text-[11px] leading-relaxed text-slate-600 line-clamp-4 bg-white p-2 rounded border border-slate-100">
+                <span className="text-[11px] leading-relaxed wrap-break-word text-slate-600 line-clamp-4 bg-white p-2 rounded border border-slate-100">
                   {contract?.project_description}
                 </span>
               </div>
@@ -260,7 +260,7 @@ export default function DisputeDetail() {
 
               <div className="pt-4 border-t border-slate-100">
                 <span className="text-[10px] font-bold text-slate-400 uppercase mb-2 block tracking-widest">Expected Deliverables List</span>
-                <p className="text-[11px] text-slate-600 leading-relaxed whitespace-pre-wrap bg-slate-50 p-2.5 rounded border border-slate-100">
+                <p className="text-[11px] text-slate-600 leading-relaxed wrap-break-word whitespace-pre-wrap bg-slate-50 p-2.5 rounded border border-slate-100">
                   {contract?.expected_deliverables}
                 </p>
               </div>

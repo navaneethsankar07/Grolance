@@ -58,7 +58,7 @@ export default function AdminTransactions() {
     }
 
     return (
-        <div className="min-h-screen -m-6 bg-white">
+        <div className="min-h-screen bg-white w-full overflow-hidden">
             <div className="px-4 sm:px-6 lg:px-12 py-8 sm:py-12">
                 <div className="mb-8 sm:mb-12">
                     <h1 className="text-2xl sm:text-[26px] font-semibold text-gray-900 leading-9 mb-2">
@@ -84,7 +84,7 @@ export default function AdminTransactions() {
                     </button>
 
                     {isDropdownOpen && (
-                        <div className="absolute top-full mt-2 w-56 bg-white border border-gray-100 rounded-xl shadow-xl z-50 py-2 origin-top-right">
+                        <div className="absolute top-full right-0 mt-2 w-56 bg-white border border-gray-100 rounded-xl shadow-xl z-50 py-2 origin-top-right">
                             {statuses.map((status) => (
                                 <button
                                     key={status.value}
@@ -102,37 +102,39 @@ export default function AdminTransactions() {
                     )}
                 </div>
 
-                <div className="hidden lg:block overflow-x-auto">
-                    <table className="w-full min-w-[900px]">
-                        <thead>
-                            <tr className="border-b border-gray-100">
-                                <th className="text-left px-4 xl:px-8 py-4 text-[10.2px] font-medium text-gray-500 uppercase">Payment ID</th>
-                                <th className="text-left px-4 xl:px-8 py-4 text-[10.2px] font-medium text-gray-500 uppercase">Client</th>
-                                <th className="text-left px-4 xl:px-8 py-4 text-[10.2px] font-medium text-gray-500 uppercase">Freelancer</th>
-                                <th className="text-left px-4 xl:px-8 py-4 text-[10.2px] font-medium text-gray-500 uppercase">Amount</th>
-                                <th className="text-left px-4 xl:px-8 py-4 text-[10.2px] font-medium text-gray-500 uppercase">Platform Fee</th>
-                                <th className="text-left px-4 xl:px-8 py-4 text-[10.2px] font-medium text-gray-500 uppercase">Status</th>
-                                <th className="text-left px-4 xl:px-8 py-4 text-[10.2px] font-medium text-gray-500 uppercase">Date</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {payments?.results?.map((transaction) => (
-                                <tr key={transaction.id} className="border-b border-gray-100 hover:bg-gray-50/50">
-                                    <td className="px-4 xl:px-8 py-5 text-sm font-medium">{transaction.payment_id}</td>
-                                    <td className="px-4 xl:px-8 py-5 text-sm">{transaction.client_name}</td>
-                                    <td className="px-4 xl:px-8 py-5 text-sm">{transaction.freelancer_name}</td>
-                                    <td className="px-4 xl:px-8 py-5 text-sm font-semibold">${transaction.amount_total}</td>
-                                    <td className="px-4 xl:px-8 py-5 text-sm text-gray-700">${transaction.platform_fee}</td>
-                                    <td className="px-4 xl:px-8 py-5">
-                                        <span className={`inline-flex items-center px-3 py-1 rounded-md text-xs font-medium capitalize ${getStatusStyles(transaction.status)}`}>
-                                            {transaction.status}
-                                        </span>
-                                    </td>
-                                    <td className="px-4 xl:px-8 py-5 text-sm text-gray-500">{transaction.date}</td>
+                <div className="hidden lg:block">
+                    <div className="overflow-x-auto border border-gray-100 rounded-lg">
+                        <table className="w-full min-w-[900px]">
+                            <thead>
+                                <tr className="border-b border-gray-100 bg-gray-50/30">
+                                    <th className="text-left px-4 xl:px-8 py-4 text-[10.2px] font-medium text-gray-500 uppercase tracking-wider">Payment ID</th>
+                                    <th className="text-left px-4 xl:px-8 py-4 text-[10.2px] font-medium text-gray-500 uppercase tracking-wider">Client</th>
+                                    <th className="text-left px-4 xl:px-8 py-4 text-[10.2px] font-medium text-gray-500 uppercase tracking-wider">Freelancer</th>
+                                    <th className="text-left px-4 xl:px-8 py-4 text-[10.2px] font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                                    <th className="text-left px-4 xl:px-8 py-4 text-[10.2px] font-medium text-gray-500 uppercase tracking-wider">Platform Fee</th>
+                                    <th className="text-left px-4 xl:px-8 py-4 text-[10.2px] font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                    <th className="text-left px-4 xl:px-8 py-4 text-[10.2px] font-medium text-gray-500 uppercase tracking-wider">Date</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                {payments?.results?.map((transaction) => (
+                                    <tr key={transaction.id} className="border-b border-gray-100 hover:bg-gray-50/50">
+                                        <td className="px-4 xl:px-8 py-5 text-sm font-medium">{transaction.payment_id}</td>
+                                        <td className="px-4 xl:px-8 py-5 text-sm">{transaction.client_name}</td>
+                                        <td className="px-4 xl:px-8 py-5 text-sm">{transaction.freelancer_name}</td>
+                                        <td className="px-4 xl:px-8 py-5 text-sm font-semibold">${transaction.amount_total}</td>
+                                        <td className="px-4 xl:px-8 py-5 text-sm text-gray-700">${transaction.platform_fee}</td>
+                                        <td className="px-4 xl:px-8 py-5">
+                                            <span className={`inline-flex items-center px-3 py-1 rounded-md text-xs font-medium capitalize ${getStatusStyles(transaction.status)}`}>
+                                                {transaction.status}
+                                            </span>
+                                        </td>
+                                        <td className="px-4 xl:px-8 py-5 text-sm text-gray-500">{transaction.date}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
 
                 <div className="lg:hidden space-y-4">
