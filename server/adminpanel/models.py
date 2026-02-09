@@ -10,6 +10,10 @@ class GlobalSettings(models.Model):
         validators=[MinValueValidator(0), MaxValueValidator(100)],
         help_text="Percentage taken by the platform from each contract."
     )
+    paypal_email = models.EmailField(
+        default="grolance@business.com",
+        help_text="The master PayPal account email used for processing platform payouts."
+    )
     last_updated = models.DateTimeField(auto_now=True)
 
     class Meta:

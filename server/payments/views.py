@@ -19,6 +19,8 @@ from datetime import timedelta
 from common.pagination import AdminUserPagination
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db import transaction
+from adminpanel.models import GlobalSettings
+
 
 logger = logging.getLogger('payments')
 
@@ -116,7 +118,8 @@ class VerifyEscrowPaymentView(APIView):
                 package=selected_package
             )
 
-            fee_percent = 0.10
+            settings_obj = GlobalSettings.objects.filter(pk=1).first()
+            fee_percent = float(settings_obj.commission_percentage) / 100 if settings_obj else 0.10
             platform_fee = total_amount * fee_percent
             freelancer_share = total_amount - platform_fee
 
@@ -170,7 +173,13 @@ class ReleasePaymentView(APIView):
             serializer.is_valid(raise_exception=True)
 
             contract_id = serializer.validated_data['contract_id']
-            platform_email = serializer.validated_data['platform_paypal_email']
+            global_settings = GlobalSettings.objects.filter(pk=1).first()
+            if not global_settings or not global_settings.paypal_email:
+                return Response({
+                    "error": "Platform PayPal email is not configured in Global Settings."
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            platform_email = global_settings.paypal_email
 
             contract = get_object_or_404(Contract, id=contract_id)
             payment_record = get_object_or_404(Payment, contract=contract)
@@ -296,6 +305,8 @@ class RefundPaymentView(APIView):
 
                 base_url = "https://api-m.sandbox.paypal.com" if settings.PAYPAL_MODE == 'sandbox' else "https://api-m.paypal.com"
 
+                refund_amount = str(payment.freelancer_share)
+
                 res = requests.post(
                     f"{base_url}/v2/payments/captures/{payment.paypal_capture_id}/refund",
                     headers={
@@ -303,7 +314,13 @@ class RefundPaymentView(APIView):
                         "Content-Type": "application/json",
                         "PayPal-Request-Id": f"refund-{payment.paypal_capture_id}" 
                     },
-                    json={}
+                    json={
+                        "amount": {
+                            "value": refund_amount,
+                            "currency_code": "USD"
+                        },
+                        "note_to_payer": "Refund issued after platform fee deduction."
+                    }
                 )
 
                 response_data = res.json()

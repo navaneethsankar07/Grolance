@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { CheckCircle2, Clock, ShieldCheck, X, Zap, SendHorizontal, Info } from 'lucide-react';
 import { useFreelancerProfile } from '../../profile/profileQueries';
 import { useSubmitProposal } from './proposalsMutation';
 import { toast } from 'react-toastify';
+import { fetchPlatformFee } from './proposalApi';
 
 const PackageCard = ({ type, data, isSelected, onClick }) => {
   if (!data) return null;
@@ -53,10 +54,21 @@ const PackageCard = ({ type, data, isSelected, onClick }) => {
 export function ProposalModal({ onClose, projectId }) {
   const [coverLetter, setCoverLetter] = useState('');
   const [selectedPackage, setSelectedPackage] = useState('starter');
-  
+  const [feePercentage, setFeePercentage] = useState(10);
   const { data: profile, isLoading } = useFreelancerProfile();
   const { mutate, isPending } = useSubmitProposal();
 
+useEffect(() => {
+    const getFee = async () => {
+      try {
+        const fee = await fetchPlatformFee();
+        setFeePercentage(Number(fee));
+      } catch (error) {
+        console.error("Failed to fetch fee:", error);
+      }
+    };
+    getFee();
+  }, []);
   if (isLoading) return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm">
         <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
@@ -81,10 +93,8 @@ export function ProposalModal({ onClose, projectId }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-md p-0 sm:p-6 lg:p-10">
-      {/* Modal Container: Height handles mobile vs desktop */}
       <div className="relative w-full max-w-[1100px] bg-white sm:rounded-[2.5rem] shadow-2xl flex flex-col lg:flex-row h-full sm:h-auto sm:max-h-[90vh] overflow-hidden transition-all">
         
-        {/* Mobile Header: Fixed at top on small devices */}
         <div className="flex lg:hidden items-center justify-between p-5 border-b border-slate-100 bg-white sticky top-0 z-20">
             <div className="flex items-center gap-2">
                 <Zap className="w-4 h-4 text-primary fill-primary" />
@@ -95,7 +105,6 @@ export function ProposalModal({ onClose, projectId }) {
             </button>
         </div>
 
-        {/* Left Content Area: Scrollable */}
         <div className="flex-1 overflow-y-auto p-6 md:p-10 lg:p-14 scrollbar-hide">
           <div className="hidden lg:block mb-8">
             <div className="flex items-center gap-2 mb-2">
@@ -126,7 +135,6 @@ export function ProposalModal({ onClose, projectId }) {
           </div>
         </div>
 
-        {/* Right Configuration Bar: Fixed/Scrollable Sidebar */}
         <div className="w-full lg:w-[420px] bg-slate-50/80 border-t lg:border-t-0 lg:border-l border-slate-200 p-6 md:p-8 lg:p-12 flex flex-col overflow-y-auto max-h-[50vh] lg:max-h-full">
           
           <button 
@@ -156,7 +164,6 @@ export function ProposalModal({ onClose, projectId }) {
             </div>
           </div>
 
-          {/* Earnings Summary Card */}
           <div className="bg-white rounded-[2rem] p-6 border border-slate-200 shadow-sm space-y-4">
             <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 pb-3">Financial Breakdown</h3>
             <div className="space-y-3">
@@ -166,7 +173,7 @@ export function ProposalModal({ onClose, projectId }) {
                 </div>
                 <div className="flex justify-between text-[11px] font-bold text-slate-500">
                     <span className="flex items-center gap-1 uppercase tracking-tight">Platform Fee <Info className="w-3 h-3 text-slate-300"/></span>
-                    <span className="text-red-500">-${(currentPkgData.price * 0.1).toLocaleString()}</span>
+                    <span className="text-red-500">-${(currentPkgData.price * (feePercentage/100)).toLocaleString()}</span>
                 </div>
                 <div className="h-px bg-slate-50 my-1" />
                 <div className="flex justify-between items-center">
@@ -176,7 +183,7 @@ export function ProposalModal({ onClose, projectId }) {
             </div>
           </div>
 
-          <div className="mt-8 lg:mt-auto">
+          <div className="mt-8">
             <button
               onClick={handleSubmit}
               disabled={isPending}

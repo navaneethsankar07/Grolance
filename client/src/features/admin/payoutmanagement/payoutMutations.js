@@ -6,7 +6,7 @@ export const useReleasePayout = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: releasePayout,
+    mutationFn: (contractId) => releasePayout(contractId),
     onSuccess: () => {
       toast.success("Funds released successfully!");
       queryClient.invalidateQueries(['contracts']); 

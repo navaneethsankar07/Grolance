@@ -8,3 +8,4 @@ export const useMyProposals = (params) => {
     staleTime: 1000 * 60 * 5, 
   });
 }; 
+

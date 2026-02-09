@@ -8,6 +8,7 @@ urlpatterns = [
     path('api/admin/', include('adminpanel.urls')),
     path('api/contracts/' , include('contracts.urls')),
     path('api/payments/', include('payments.urls')),
-    path('api/communication/', include('communication.urls'))
+    path('api/communication/', include('communication.urls')),
+    path('api/common/',include('common.urls'))
 ]
 

@@ -61,7 +61,6 @@ export function ProposalCard({ proposal }) {
   const { openModal } = useModal();
   const currentStatus = proposal.status;
   const statusStyle = statusStyles[currentStatus] || statusStyles.pending;
-console.log(proposal.status);
 
   const handleViewDetails = () => {
     openModal("my-proposal-details", { proposal });
