@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from adminpanel.models import GlobalSettings
-from .models import SupportTicket
+from .models import SupportTicket, CMSSection, FAQ
 
 class PlatformPercentageSerializer(serializers.ModelSerializer):
     class Meta:
@@ -25,3 +25,17 @@ class CreateSupportTicketSerializer(serializers.ModelSerializer):
             sender_role=role,
             **validated_data
         )
+    
+
+
+
+class CMSSectionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CMSSection
+        fields = ['id', 'category', 'heading', 'description']
+    
+
+class FAQAdminSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FAQ
+        fields = '__all__'

@@ -22,6 +22,9 @@ import SpendingSummary from "../features/client/profile/SpendingSummary";
 import HowItWorks from "../features/client/howitworks/HowItWorks";
 import { useNotificationSocket } from "../hooks/notification/useNotificationSocket";
 import SupportPage from "../components/common/SupportPage";
+import TermsAndConditions from "../components/common/termsandconditions/TermsAndConditions";
+import PrivacyPolicies from "../components/common/privacypolicy/PrivacyPolicies";
+import FAQPage from "../components/common/faq/FAQ";
 
 export default function ClientRoutes() {
   const { user,loading } = useSelector(state => state.auth);
@@ -53,6 +56,9 @@ export default function ClientRoutes() {
           <Route path="/contracts/:id" element={<ClientContractDetail/>}/>
           <Route path="/how-it-works" element={<HowItWorks/>}/>
           <Route path='/support' element={<SupportPage/>}/>
+          <Route path="/terms-and-conditions" element={<TermsAndConditions/>}/>
+          <Route path="/privacy-policies" element={<PrivacyPolicies/>}/>
+          <Route path="/faq" element={<FAQPage/>}/>
         </Route>
           
     </Routes>

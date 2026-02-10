@@ -3,6 +3,7 @@ import { FileText, Shield, HelpCircle, Loader2, X } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { useGlobalSettings } from "./adminSettingsQueries";
 import { useUpdateSettings } from "./adminsettingsMutations";
+import { Link } from "react-router-dom";
 
 export default function AdminSettings() {
   const { data: settings, isLoading } = useGlobalSettings();
@@ -88,9 +89,9 @@ export default function AdminSettings() {
             <p className="mb-6 text-xs text-gray-600">Edit Terms & Conditions, Privacy Policy, and FAQ.</p>
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {[
-                { title: "Terms & Conditions", icon: FileText, desc: "Manage legal agreements." },
-                { title: "Privacy Policy", icon: Shield, desc: "Edit data protection info." },
-                { title: "FAQ", icon: HelpCircle, desc: "Manage frequently asked questions." }
+                { title: "Terms & Conditions", icon: FileText, desc: "Manage legal agreements.",link:'/admin/terms-and-conditions' },
+                { title: "Privacy Policy", icon: Shield, desc: "Edit data protection info." ,link:'/admin/privacy-policy/'},
+                { title: "FAQ", icon: HelpCircle, desc: "Manage frequently asked questions.",link:'/admin/faq-management/' }
               ].map((item, idx) => (
                 <div key={idx} className="flex gap-4">
                   <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-blue-50">
@@ -98,7 +99,7 @@ export default function AdminSettings() {
                   </div>
                   <div className="flex-1 space-y-4">
                     <h3 className="text-[15px] font-semibold text-gray-900">{item.title}</h3>
-                    <button className="rounded-md border border-gray-300 px-3 py-2 text-xs font-medium text-gray-700 hover:bg-gray-50">Edit Page</button>
+                    <Link to={item.link} className="rounded-md border border-gray-300 px-3 py-2 text-xs font-medium text-gray-700 hover:bg-gray-50">Manage {item.title}</Link>
                   </div>
                 </div>
               ))}

@@ -19,7 +19,7 @@ export function Sidebar() {
   
 
   return (
-    <aside className="w-64 h-screen bg-white border-r border-[#E5E7EB] flex flex-col shrink-0">
+    <aside className="w-64 h-250 bg-white border-r border-[#E5E7EB] flex flex-col shrink-0">
       <div className="h-[81px] border-b border-[#E5E7EB] flex items-center px-6">
         <h2 className="text-[20.4px] font-bold text-[#111827]">
           Freelancer Panel

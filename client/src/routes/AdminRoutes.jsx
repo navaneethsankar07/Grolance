@@ -9,6 +9,9 @@ import DisputeDetail from '../features/admin/disputemanagement/DisputeDetail'
 import AdminSettings from '../features/admin/settings/AdminSettings'
 import SupportTicketList from '../features/admin/support/SupportTicketList'
 import SupportTicketDetail from '../features/admin/support/SupportTicketDetials'
+import TermsAndConditions from '../features/admin/termsandconditionsmanagement/TermAndConditions'
+import PrivacyPolicy from '../features/admin/privacypolicymanagement/PrivacyPolicy'
+import FAQManagement from '../features/admin/faq/FAQManagement'
 
 function AdminRoutes() {
   return (
@@ -25,6 +28,9 @@ function AdminRoutes() {
         <Route path='settings/' element={<AdminSettings/>}/>
         <Route path='support/' element={<SupportTicketList/>}/>
         <Route path='support/:id' element={<SupportTicketDetail/>}/>
+        <Route path='terms-and-conditions/' element={<TermsAndConditions/>}/>
+        <Route path='privacy-policy/' element={<PrivacyPolicy/>}/>
+        <Route path='faq-management/' element={<FAQManagement/>}/>
     </Routes>
     </>
   )

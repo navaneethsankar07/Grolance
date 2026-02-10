@@ -2,9 +2,10 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated
-from .models import SupportTicket
+from .models import SupportTicket,CMSSection,FAQ
 import logging
-from .serializers import PlatformPercentageSerializer, CreateSupportTicketSerializer
+from django_filters.rest_framework import DjangoFilterBackend
+from .serializers import PlatformPercentageSerializer, CreateSupportTicketSerializer, CMSSectionSerializer, FAQAdminSerializer
 from adminpanel.models import GlobalSettings
 from rest_framework.exceptions import ValidationError
 
@@ -65,3 +66,30 @@ class UserSupportTicketCreateView(generics.CreateAPIView):
 
     def perform_create(self, serializer):
         serializer.save()
+
+
+from rest_framework.permissions import AllowAny
+
+class TermsAndConditionsView(generics.ListAPIView):
+    serializer_class = CMSSectionSerializer
+    permission_classes = [AllowAny]
+
+    def get_queryset(self):
+        return CMSSection.objects.filter(category='terms')
+
+class PrivacyPolicyView(generics.ListAPIView):
+    serializer_class = CMSSectionSerializer
+    permission_classes = [AllowAny]
+
+    def get_queryset(self):
+        return CMSSection.objects.filter(category='privacy')
+    
+
+
+
+class FAQListView(generics.ListAPIView):
+    queryset = FAQ.objects.filter()
+    serializer_class = FAQAdminSerializer 
+    permission_classes = []
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['category']
