@@ -7,7 +7,7 @@ import { useModal } from "../../../../hooks/modal/useModalStore";
 import { useNotifications } from "../../../../components/notifications/notificationQueries";
 import { useNotificationSocket } from "../../../../hooks/notification/useNotificationSocket";
 
-export function Header() {
+export function FreelancerHeader() {
   const { mutateAsync } = useSwitchRole();
   const user = useSelector((state) => state.auth.user);
   const navigate = useNavigate();

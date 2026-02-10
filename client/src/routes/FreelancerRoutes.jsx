@@ -13,6 +13,7 @@ import Contracts from '../features/freelancer/contracts/Contracts'
 import ContractDetail from '../features/freelancer/contracts/ContractDetail'
 import EarningsOverview from '../features/freelancer/profile/EarningsOverview'
 import PaymentSettings from '../features/freelancer/profile/PaymentSettings'
+import SupportPage from '../components/common/SupportPage'
 
 function FreelancerRoutes() {
   return (
@@ -30,6 +31,7 @@ function FreelancerRoutes() {
         <Route path='/contracts' element={<Contracts/>}/>
         <Route path='/contracts/:id' element={<ContractDetail/>}/>
         <Route path='/settings/payment' element={<PaymentSettings/>}/>
+        <Route path='/support' element={<SupportPage/>}/>
         </Route>
     </Routes>
 )

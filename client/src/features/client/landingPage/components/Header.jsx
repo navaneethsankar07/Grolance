@@ -22,12 +22,10 @@ const Header = () => {
             <div className="text-[#1A1A1A] font-grotesk font-bold text-sm leading-5 hover:text-[#3B82F6] transition-colors">
               About Us
             </div>
-            {/* <div  className="text-[#1A1A1A] font-grotesk font-bold text-sm leading-5 hover:text-[#3B82F6] transition-colors">
-              Find Work
-            </div> */}
-            <div  className="text-[#1A1A1A] font-grotesk font-bold text-sm leading-5 hover:text-[#3B82F6] transition-colors">
+            
+            <Link to={'/why-us'} className="text-[#1A1A1A] font-grotesk font-bold text-sm leading-5 hover:text-[#3B82F6] transition-colors">
               Why Us
-            </div>
+            </Link>
           </div>
 
           <div className="flex items-center gap-2">

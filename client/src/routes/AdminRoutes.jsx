@@ -7,6 +7,8 @@ import AdminTransactions from '../features/admin/transactions/AdminTransactions'
 import DisputeList from '../features/admin/disputemanagement/DisputeList'
 import DisputeDetail from '../features/admin/disputemanagement/DisputeDetail'
 import AdminSettings from '../features/admin/settings/AdminSettings'
+import SupportTicketList from '../features/admin/support/SupportTicketList'
+import SupportTicketDetail from '../features/admin/support/SupportTicketDetials'
 
 function AdminRoutes() {
   return (
@@ -21,6 +23,8 @@ function AdminRoutes() {
         <Route path='disputes' element={<DisputeList/>}/>
         <Route path='disputes/:id' element={<DisputeDetail/>}/>
         <Route path='settings/' element={<AdminSettings/>}/>
+        <Route path='support/' element={<SupportTicketList/>}/>
+        <Route path='support/:id' element={<SupportTicketDetail/>}/>
     </Routes>
     </>
   )

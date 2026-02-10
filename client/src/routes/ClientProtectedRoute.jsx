@@ -1,6 +1,7 @@
 import {  useSelector } from "react-redux";
 import Landingpage from "../features/client/landingPage/Landingpage";
 import { Navigate, useLocation } from "react-router-dom";
+import { toast } from "react-toastify";
 
 export default function ProtectedRoute({ children }) {
   const {user, initialized} = useSelector((state)=>state.auth);

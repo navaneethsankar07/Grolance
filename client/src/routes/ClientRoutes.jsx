@@ -21,6 +21,7 @@ import ClientJobDetail from "../features/client/projectManagement/ProjectDetails
 import SpendingSummary from "../features/client/profile/SpendingSummary";
 import HowItWorks from "../features/client/howitworks/HowItWorks";
 import { useNotificationSocket } from "../hooks/notification/useNotificationSocket";
+import SupportPage from "../components/common/SupportPage";
 
 export default function ClientRoutes() {
   const { user,loading } = useSelector(state => state.auth);
@@ -51,6 +52,7 @@ export default function ClientRoutes() {
           <Route path="/contracts" element={<ClientContracts/>}/>
           <Route path="/contracts/:id" element={<ClientContractDetail/>}/>
           <Route path="/how-it-works" element={<HowItWorks/>}/>
+          <Route path='/support' element={<SupportPage/>}/>
         </Route>
           
     </Routes>

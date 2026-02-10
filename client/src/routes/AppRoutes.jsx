@@ -11,6 +11,8 @@ import Landingpage from '../features/client/landingPage/Landingpage'
 import FreelancerRoutes from './FreelancerRoutes'
 import FreelancerProtectedRoute from './FreelancerProtectedRoutes'
 import ContactPage from '../components/common/ContactUs'
+import WhyUsPage from '../components/common/WhyUs'
+import SupportPage from '../components/common/SupportPage'
 
 
 function AppRoutes() {
@@ -29,6 +31,7 @@ function AppRoutes() {
           </Route>
           <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path='/contact-us' element={<ContactPage/>}/>
+          <Route path='/why-us' element={<WhyUsPage/>}/>
           <Route
             path="/*"
             element={
