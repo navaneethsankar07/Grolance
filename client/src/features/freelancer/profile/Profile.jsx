@@ -7,7 +7,6 @@ import { Link } from "react-router-dom";
 export default function Profile() {
   const { data: profile, isLoading, isError, error } = useFreelancerProfile();
 
-  
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -25,30 +24,6 @@ export default function Profile() {
   }
 
   if (!profile) return null;
-
-  const reviews = [
-    {
-      id: 1,
-      name: "Michael Chen",
-      rating: 5,
-      date: "2 weeks ago",
-      comment: "Outstanding work! Sarah delivered a beautiful, responsive website that exceeded our expectations. Communication was excellent throughout the project."
-    },
-    {
-      id: 2,
-      name: "Emily Rodriguez",
-      rating: 5,
-      date: "1 month ago",
-      comment: "Highly professional and talented developer. The UI/UX design was modern and user-friendly. Will definitely work with her again!"
-    },
-    {
-      id: 3,
-      name: "David Thompson",
-      rating: 4,
-      date: "2 months ago",
-      comment: "Great experience working with Sarah. She was responsive to feedback and delivered quality work on time."
-    }
-  ];
 
   const date = formatDateDMY(profile.created_at);
 
@@ -73,11 +48,11 @@ export default function Profile() {
 
           <div className="flex gap-3">
             <Link 
-  to={'/freelancer/settings/payment'} 
-  className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 font-medium text-sm transition-all shadow-sm"
->
-  <CreditCard size={16} /> Bank Details
-</Link>
+              to={'/freelancer/settings/payment'} 
+              className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 font-medium text-sm transition-all shadow-sm"
+            >
+              <CreditCard size={16} /> Bank Details
+            </Link>
             <Link to={'/freelancer/profile/earnings-overview'} className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 font-medium text-sm transition-all shadow-sm">
               <Eye size={16} /> View Earnings
             </Link>
@@ -89,14 +64,13 @@ export default function Profile() {
 
         <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
           <div className="flex flex-col md:flex-row gap-6 items-center md:items-start">
-            {profile?.profile_photo?
-
+            {profile?.profile_photo ?
               <img 
-              src={profile.profile_photo}
-              alt={profile.full_name} 
-              className="w-24 h-24 md:w-32 md:h-32 rounded-full object-cover ring-4 ring-gray-50"
-              />:
-              <span style={{ fontFamily: 'MuseoModerno, sans-serif' }}  className="w-24 h-24 md:w-32 md:h-32 flex items-center justify-center text-5xl bg-primary text-white rounded-full object-cover ring-4 ring-gray-50">{profile?.full_name[0]}</span>
+                src={profile.profile_photo}
+                alt={profile.full_name} 
+                className="w-24 h-24 md:w-32 md:h-32 rounded-full object-cover ring-4 ring-gray-50"
+              /> :
+              <span style={{ fontFamily: 'MuseoModerno, sans-serif' }} className="w-24 h-24 md:w-32 md:h-32 flex items-center justify-center text-5xl bg-primary text-white rounded-full object-cover ring-4 ring-gray-50">{profile?.full_name[0]}</span>
             }
             <div className="flex-1 text-center md:text-left">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 mb-4">
@@ -112,8 +86,8 @@ export default function Profile() {
               <div className="flex flex-wrap justify-center md:justify-start gap-20 text-sm text-gray-500">
                 <div className="flex items-center gap-1">
                   <Star className="text-yellow-400 fill-yellow-400" size={18} />
-                  <span className="font-bold text-gray-900">4.9</span>
-                  <span>(127 reviews)</span>
+                  <span className="font-bold text-gray-900">{profile.average_rating}</span>
+                  <span>({profile.review_count} reviews)</span>
                 </div>
                 <div className="flex items-center gap-1">
                   <Calendar size={16} />
@@ -205,26 +179,42 @@ export default function Profile() {
         <div className="space-y-4">
           <h3 className="text-lg font-bold text-gray-900">Client Reviews</h3>
           <div className="space-y-4">
-            {reviews.map((review) => (
-              <div key={review.id} className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-                <div className="flex justify-between items-start mb-3">
-                  <div>
-                    <h4 className="font-bold text-gray-900 text-sm">{review.name}</h4>
-                    <div className="flex gap-1 mt-1">
-                      {[...Array(5)].map((_, i) => (
-                        <Star 
-                          key={i} 
-                          size={14} 
-                          className={i < review.rating ? "text-yellow-400 fill-yellow-400" : "text-gray-200"}
-                        />
-                      ))}
+            {profile.reviews?.length > 0 ? (
+              profile.reviews.map((review) => (
+                <div key={review.id} className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+                  <div className="flex justify-between items-start mb-3">
+                    <div className="flex items-center gap-3">
+                      {review.reviewer_photo ? (
+                        <img src={review.reviewer_photo} alt={review.reviewer_name} className="w-10 h-10 rounded-full object-cover" />
+                      ) : (
+                        <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 font-bold text-xs uppercase">
+                          {review.reviewer_name[0]}
+                        </div>
+                      )}
+                      <div>
+                        <h4 className="font-bold text-gray-900 text-sm">{review.reviewer_name}</h4>
+                        <div className="flex gap-1 mt-1">
+                          {[...Array(5)].map((_, i) => (
+                            <Star 
+                              key={i} 
+                              size={14} 
+                              className={i < review.rating ? "text-yellow-400 fill-yellow-400" : "text-gray-200"}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                       <span className="block text-[10px] text-gray-400 font-bold uppercase tracking-wider">{review.project_title}</span>
+                       <span className="text-xs text-gray-400 font-medium">{formatDateDMY(review.created_at)}</span>
                     </div>
                   </div>
-                  <span className="text-xs text-gray-400 font-medium">{review.date}</span>
+                  <p className="text-gray-600 text-sm italic leading-relaxed">"{review.comment}"</p>
                 </div>
-                <p className="text-gray-600 text-sm italic leading-relaxed">"{review.comment}"</p>
-              </div>
-            ))}
+              ))
+            ) : (
+              <p className="text-gray-400 italic text-sm">No reviews received yet.</p>
+            )}
           </div>
         </div>
       </div>

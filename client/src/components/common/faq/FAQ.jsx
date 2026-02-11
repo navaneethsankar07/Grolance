@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useFAQs } from './faqQuries';
 import { ChevronDown, Mail, Loader2 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, replace } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 
 const CATEGORIES = [
   { id: '', label: 'All' },
@@ -17,7 +18,7 @@ export default function FAQPage() {
   const [openId, setOpenId] = useState(null);
 
   const { data, isLoading, isFetching } = useFAQs(category, page);
-
+  const user = useSelector(state=>state.auth.user)
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [page]);
@@ -126,7 +127,7 @@ export default function FAQPage() {
             <h3 className="text-xl font-bold text-[#111827] mb-1">Need More Help?</h3>
             <p className="text-gray-500 text-sm">Can't find what you're looking for? Our support team is here to help you with any questions or issues.</p>
             <div className="mt-4 flex flex-col md:flex-row items-center gap-4">
-              <Link to={'/support'} className="bg-blue-600 text-white px-6 py-2 rounded-lg text-sm font-bold hover:bg-blue-700 transition-colors">
+              <Link to={user?.current_role === 'client' ? '/support' : '/freelancer/support'}  className="bg-blue-600 text-white px-6 py-2 rounded-lg text-sm font-bold hover:bg-blue-700 transition-colors">
                 Contact Support
               </Link>
             </div>

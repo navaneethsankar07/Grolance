@@ -17,6 +17,7 @@ export default function JobDetail() {
   const { id } = useParams();
   const { data, isLoading, isError, error } = useProjectDetails(id);
   const { openModal } = useModal();
+console.log(data);
 
   if (isLoading) return (
     <div className="flex flex-col justify-center items-center h-screen bg-slate-50">
@@ -179,7 +180,7 @@ export default function JobDetail() {
                 <div className="space-y-1">
                   <div className="flex items-center gap-1">
                     <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
-                    <span className="text-sm font-black text-slate-900">4.8</span>
+                    <span className="text-sm font-black text-slate-900">{data.client_info?.average_rating}</span>
                   </div>
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">Client Rating</p>
                 </div>

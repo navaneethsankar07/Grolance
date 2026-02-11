@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { requestContractRevision, updateContractStatus, verifyPayment } from './contractApi';
+import { createReview, requestContractRevision, updateContractStatus, verifyPayment } from './contractApi';
+import { toast } from 'react-toastify';
 
 export const useVerifyPayment = () => {
   const queryClient = useQueryClient();
@@ -38,6 +39,29 @@ export const useUpdateContractStatus = () => {
     mutationFn: updateContractStatus,
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries(["contract", variables.contractId]);
+    },
+  });
+};
+
+
+export const useCreateReview = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: createReview,
+    onSuccess: (_, variables) => {
+      toast.success("Review submitted successfully!");
+      
+      queryClient.invalidateQueries({ 
+        queryKey: ["contract", String(variables.contract),],
+        exact: true 
+      });
+
+      queryClient.invalidateQueries({ queryKey: ["contracts"] });
+    },
+    onError: (error) => {
+      const msg = error.response?.data?.detail || "Failed to submit review.";
+      toast.error(msg);
     },
   });
 };

@@ -272,7 +272,7 @@ class ProjectClientSerializer(serializers.ModelSerializer):
     class Meta:
         model = ClientProfile
         fields = ["full_name", "profile_photo",
-                  "member_since", "total_jobs_posted", 'contract_id']
+                  "member_since", "total_jobs_posted", 'contract_id' ,'average_rating','review_count']
 
     def get_member_since(self, obj):
         return obj.user.created_at.strftime("%b %Y")

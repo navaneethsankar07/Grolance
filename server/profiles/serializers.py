@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from .models import (
     ClientProfile, FreelancerProfile, FreelancerPaymentSettings, 
-    FreelancerPortfolio, FreelancerPackage, FreelancerSkill
+    FreelancerPortfolio, FreelancerPackage, FreelancerSkill, Review
 )
 from categories.models import Category
 import re
@@ -17,8 +17,8 @@ class ClientProfileOverviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = ClientProfile
         fields = [
-            "full_name", "email", "profile_photo", "company_name",
-            "location", "categories", "joined_at", "is_google_account"
+           "id", "full_name", "email", "profile_photo", "company_name",
+            "location", "categories", "joined_at", "is_google_account",'review_count','average_rating'
         ]
 
 class ClientProfileUpdateSerializer(serializers.ModelSerializer):
@@ -63,7 +63,7 @@ class FreelancerProfileSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'tagline', 'bio', 'phone', 
             'is_phone_verified', 'category', 
-            'experience_level', 'availability',
+            'experience_level', 'availability','average_rating','review_count'
         ]
 
 class FreelancerSkillSerializer(serializers.Serializer):
@@ -164,13 +164,14 @@ class FreelancerProfileManageSerializer(serializers.ModelSerializer):
     category = serializers.StringRelatedField()
     payment_settings = serializers.SerializerMethodField()
     completed_projects_count = serializers.SerializerMethodField()
+    reviews = serializers.SerializerMethodField()
     
     class Meta:
         model = FreelancerProfile
         fields = [
             'full_name', 'profile_photo', 'tagline', 'bio', 'phone', 
             'category', 'experience_level', 'availability', 
-            'skills', 'packages', 'portfolios', 'payment_settings', 'created_at','completed_projects_count'
+            'skills', 'packages', 'portfolios', 'payment_settings', 'created_at','completed_projects_count','review_count','average_rating','reviews'
         ]
 
     def get_skills(self, obj):
@@ -182,6 +183,22 @@ class FreelancerProfileManageSerializer(serializers.ModelSerializer):
             freelancer=obj.user, 
             status='completed'
         ).count()
+    
+    def get_reviews(self, obj):
+        reviews = Review.objects.filter(
+            reviewee=obj.user, 
+            review_type='freelancer'
+        ).order_by('-created_at')[:10]
+
+        return [{
+            "id": review.id,
+            "rating": review.rating,
+            "comment": review.comment,
+            "created_at": review.created_at,
+            "reviewer_name": review.reviewer.full_name,
+            "reviewer_photo": review.reviewer.profile_photo if review.reviewer.profile_photo else None,
+            "project_title": review.contract.project.title if review.contract else "Project"
+        } for review in reviews]
 
     def get_packages(self, obj):
         packages = obj.user.freelancer_packages.all()
@@ -288,3 +305,35 @@ class FreelancerListingSerializer(serializers.ModelSerializer):
     def get_starting_price(self, obj):
         prices = obj.user.freelancer_packages.values_list('price', flat=True)
         return min(prices) if prices else 0
+    
+
+class ReviewSerializer(serializers.ModelSerializer):
+    reviewer_name = serializers.ReadOnlyField(source='reviewer.full_name')
+    reviewer_photo = serializers.ReadOnlyField(source='reviewer.profile_photo')
+
+    class Meta:
+        model = Review
+        fields = [
+            'id', 'reviewer', 'reviewer_name', 'reviewer_photo', 
+            'reviewee', 'review_type', 'rating', 'comment', 
+            'contract', 'created_at'
+        ]
+        read_only_fields = ['reviewer', 'created_at']
+
+    def validate(self, data):
+        if self.context['request'].user == data['reviewee']:
+            raise serializers.ValidationError("You cannot review yourself.")
+        return data
+
+class FreelancerReviewListSerializer(serializers.ModelSerializer):
+    reviewer_name = serializers.CharField(source="reviewer.full_name", read_only=True)
+    reviewer_photo = serializers.URLField(source="reviewer.profile_photo", read_only=True)
+    project_title = serializers.CharField(source="contract.project.title", read_only=True)
+
+    class Meta:
+        model = Review
+        fields = [
+            'id', 'rating', 'comment', 'created_at',
+            'reviewer_name', 'reviewer_photo', 'project_title'
+        ]
+

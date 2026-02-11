@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef, useMemo } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { Plus, Bell, Mail, Menu, X } from "lucide-react";
 import { useSelector } from "react-redux";
 import { useModal } from "../../../../hooks/modal/useModalStore";
@@ -11,17 +11,17 @@ export default function ClientHeader() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [shouldAnimate, setShouldAnimate] = useState(false);
   const prevCountRef = useRef(0);
+  const location = useLocation();
   
   const user = useSelector((state) => state.auth.user);
   const currentUserId = user?.id;
   
   const { data: notifications } = useNotifications(false);
-  const { data: rooms } = useChatRooms(); // Fetch rooms for message count
+  const { data: rooms } = useChatRooms(); 
   useNotificationSocket(user?.id);
   
   const unreadNotifications = notifications?.results?.length || 0;
   
-  // Calculate total unread messages across all rooms
   const unreadMessageCount = useMemo(() => {
     const roomList = rooms?.results || rooms || [];
     return roomList.reduce((acc, room) => {
@@ -48,6 +48,8 @@ export default function ClientHeader() {
     prevCountRef.current = unreadNotifications;
   }, [unreadNotifications]);
 
+  const isActive = (path) => location.pathname === path;
+
   return (
     <header className="sticky top-0 z-50 w-full border-b border-gray-200/80 bg-white/95 backdrop-blur-sm">
       <div className="w-full md:px-8 px-4 flex h-[73px] items-center justify-between">
@@ -60,16 +62,16 @@ export default function ClientHeader() {
         </Link>
 
         <nav className="hidden lg:flex items-center gap-9">
-          <Link to="/" className="text-lg font-bold text-primary">Dashboard</Link>
-          <Link to={'/find-talents'} className="text-sm font-medium text-[#111318]">Find Talent</Link>
-          <Link to={'/how-it-works'} className="text-sm font-medium text-[#111318]">How It Works</Link>
-          <Link to="/my-projects" className="text-sm font-medium text-[#111318]">My Posts</Link>
+          <Link to="/" className={`text-lg font-bold ${isActive("/") ? "text-primary" : "text-[#111318]"}`}>Dashboard</Link>
+          <Link to={'/find-talents'} className={`text-sm font-medium ${isActive("/find-talents") ? "text-primary" : "text-[#111318]"}`}>Find Talent</Link>
+          <Link to={'/how-it-works'} className={`text-sm font-medium ${isActive("/how-it-works") ? "text-primary" : "text-[#111318]"}`}>How It Works</Link>
+          <Link to="/my-projects" className={`text-sm font-medium ${isActive("/my-projects") ? "text-primary" : "text-[#111318]"}`}>My Posts</Link>
         </nav>
 
         <div className="flex items-center gap-4 md:gap-10">
           <Link
             to="/create-project"
-            className="hidden sm:flex h-10 md:h-12 items-center gap-2.5 rounded-lg border-2 border-black bg-transparent px-4 md:px-6 transition-colors hover:bg-black/5"
+            className={`hidden sm:flex h-10 md:h-12 items-center gap-2.5 rounded-lg border-2 px-4 md:px-6 transition-colors ${isActive("/create-project") ? "border-primary bg-primary/5 text-primary" : "border-black bg-transparent text-black hover:bg-black/5"}`}
           >
             <Plus className="h-5 w-5 md:h-7 md:w-7" />
             <span className="text-sm md:text-base font-bold">Post a Project</span>

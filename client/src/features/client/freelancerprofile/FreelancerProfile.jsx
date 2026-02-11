@@ -1,5 +1,5 @@
 import React from "react";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { Star, Clock, Truck, Check, Calendar, LayoutGrid } from "lucide-react";
 import { useClientFreelancerProfile } from "./freelancerProfileQueries";
 import { useModal } from "../../../hooks/modal/useModalStore";
@@ -90,8 +90,8 @@ export default function FreelancerProfile() {
               
               <div className="flex items-center justify-center gap-1.5 mt-3 mb-8">
                 <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                <span className="text-sm font-black text-gray-900">5.0</span>
-                <span className="text-xs text-gray-400 font-bold uppercase tracking-tight">(24 Reviews)</span>
+                <span className="text-sm font-black text-gray-900">{freelancer.average_rating}</span>
+                <span className="text-xs text-gray-400 font-bold uppercase tracking-tight">({freelancer.review_count} Reviews)</span>
               </div>
 
               <button 
@@ -190,7 +190,59 @@ export default function FreelancerProfile() {
               </div>
             </section>
 
-            <div className=" rounded-2xl p-10 lg:p-16 flex flex-col md:flex-row items-center justify-between gap-8 text-center md:text-left shadow-2xl border border-gray-300">
+            <section className="bg-white rounded-2xl p-8 lg:p-12 shadow-sm border border-gray-200">
+              <div className="flex justify-between items-center mb-10">
+                <h3 className="text-lg font-black text-gray-900 uppercase tracking-tight">Client Reviews</h3>
+                {freelancer.review_count > 10 && (
+                  <Link 
+                    to={`reviews`}
+                    className="text-[10px] font-black uppercase tracking-widest text-primary hover:text-blue-700 transition-colors"
+                  >
+                    See All {freelancer.review_count} Reviews
+                  </Link>
+                )}
+              </div>
+              <div className="space-y-6">
+                {freelancer.reviews?.length > 0 ? (
+                  freelancer.reviews.map((review, i) => (
+                    <div key={i} className="pb-8 border-b border-gray-100 last:border-0 last:pb-0">
+                      <div className="flex justify-between items-start mb-4">
+                        <div className="flex items-center gap-4">
+                          {review.reviewer_photo ? (
+                            <img src={review.reviewer_photo} className="w-12 h-12 rounded-xl object-cover" alt="" />
+                          ) : (
+                            <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center font-black text-gray-400 text-sm">
+                              {review.reviewer_name[0]}
+                            </div>
+                          )}
+                          <div>
+                            <h4 className="font-black text-gray-900 text-sm tracking-tight">{review.reviewer_name}</h4>
+                            <div className="flex gap-0.5 mt-1">
+                              {[...Array(5)].map((_, starIndex) => (
+                                <Star
+                                  key={starIndex}
+                                  size={12}
+                                  className={starIndex < review.rating ? "text-yellow-400 fill-yellow-400" : "text-gray-200"}
+                                />
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <span className="block text-[10px] font-black text-gray-400 uppercase tracking-widest">{review.project_title}</span>
+                          <span className="text-[11px] font-bold text-gray-400">{formatDateDMY(review.created_at)}</span>
+                        </div>
+                      </div>
+                      <p className="text-sm text-gray-600 font-medium leading-relaxed italic">"{review.comment}"</p>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-gray-400 font-bold text-sm uppercase tracking-widest py-4">No reviews yet</p>
+                )}
+              </div>
+            </section>
+
+            <div className="rounded-2xl p-10 lg:p-16 flex flex-col md:flex-row items-center justify-between gap-8 text-center md:text-left shadow-2xl border border-gray-300">
               <div className="max-w-md">
                 <h3 className="text-2xl lg:text-3xl font-black text-black mb-3 tracking-tight">Ready to start your project?</h3>
                 <p className="text-gray-800 text-sm font-medium leading-relaxed uppercase tracking-widest text-[10px]">Strategic collaboration for exceptional results. Initiate contact for priority scheduling.</p>

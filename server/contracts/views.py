@@ -10,6 +10,8 @@ from django.core.exceptions import ObjectDoesNotExist
 from .models import Contract, ContractRevision, Dispute, DisputeFile
 from .serializers import ContractSerializer, ContractOfferSerializer, ContractAcceptSerializer, ContractDeliverableSerializer,DisputeSerializer, AdminDisputeListSerializer, AdminDisputeDetailSerializer
 import logging
+from django.core.exceptions import ValidationError as DjangoValidationError
+from rest_framework.exceptions import ValidationError as DRFValidationError
 from .utils import generate_contract_pdf
 from django.db import transaction
 from projects.models import Proposal
@@ -31,7 +33,7 @@ class ContractViewSet(viewsets.ModelViewSet):
             user = self.request.user
             queryset = Contract.objects.filter(Q(client=user) | Q(freelancer=user)).select_related(
             'project', 'project__category', 'client', 'package', 'freelancer'
-            ).prefetch_related('deliverables', 'revisions', 'disputes', 'escrow_details')
+            ).prefetch_related('deliverables', 'revisions', 'disputes', 'escrow_details','contract_reviews')
         
             status_param = self.request.query_params.get('status')
             if status_param and status_param != 'All':
@@ -256,16 +258,24 @@ class RaiseDisputeView(APIView):
     permission_classes = [IsClientUser | IsFreelancerUser]
 
     def post(self, request):
-        serializer = DisputeSerializer(data=request.data, context={'request': request})
-        
-        if serializer.is_valid():
-            dispute = serializer.save()
-            return Response({
-                "message": "Dispute raised successfully", 
-                "id": dispute.id
-            }, status=201)
-        
-        return Response(serializer.errors, status=400)
+        try:
+            serializer = DisputeSerializer(data=request.data, context={'request': request})
+            
+            if serializer.is_valid():
+                dispute = serializer.save()
+                return Response({
+                    "message": "Dispute raised successfully", 
+                    "id": dispute.id
+                }, status=status.HTTP_201_CREATED)
+            
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        except DRFValidationError as e:
+            return Response(e.detail, status=status.HTTP_400_BAD_REQUEST)
+        except DjangoValidationError as e:
+            return Response({"error": str(e.message)}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"error": "An unexpected error occurred."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
 class AdminDisputeViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAdminUser]
@@ -283,40 +293,59 @@ class AdminDisputeViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post'])
     def resolve(self, request, pk=None):
-        dispute = self.get_object()
+        try:
+            dispute = self.get_object()
+        except Exception:
+            return Response({"error": "Dispute case not found."}, status=status.HTTP_404_NOT_FOUND)
+
         if dispute.status != 'pending':
             return Response(
                 {"error": f"This case is already {dispute.status} and cannot be modified."}, 
                 status=status.HTTP_400_BAD_REQUEST
             )
+
         new_status = request.data.get('status')
         admin_notes = request.data.get('admin_notes')
 
+        if not new_status:
+            return Response({"error": "Status is required."}, status=status.HTTP_400_BAD_REQUEST)
+
         valid_statuses = [choice[0] for choice in Dispute.STATUS_CHOICES]
         if new_status not in valid_statuses:
-            return Response({"error": "Invalid dispute status"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "Invalid dispute status."}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not admin_notes or len(admin_notes.strip()) < 10:
+            return Response({"error": "Detailed admin notes are required to resolve a dispute."}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
             with transaction.atomic():
                 dispute.status = new_status
                 dispute.admin_notes = admin_notes
+                
                 if new_status == 'resolved':
                     dispute.resolved_at = timezone.now()
                 
-               
-                dispute.contract.status = "completed"
-                project = dispute.contract.project
-                project.status = 'completed'
-                project.save()
-                dispute.contract.save()
+                contract = dispute.contract
+                if not contract:
+                    raise ValueError("Associated contract not found.")
+
+                contract.status = "completed"
+                contract.save()
+
+                project = contract.project
+                if project:
+                    project.status = 'completed'
+                    project.save()
                     
-                
                 dispute.save()
 
             return Response({
                 "message": "Dispute updated successfully",
                 "current_dispute_status": dispute.status,
                 "current_contract_status": dispute.contract.status
-            })
+            }, status=status.HTTP_200_OK)
+
+        except ValueError as ve:
+            return Response({"error": str(ve)}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({"error": "An unexpected error occurred while processing the resolution."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

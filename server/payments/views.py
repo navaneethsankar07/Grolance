@@ -5,6 +5,7 @@ from django.utils import timezone
 from django.shortcuts import get_object_or_404
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.exceptions import APIException
 from rest_framework.generics import ListAPIView
 from rest_framework import status
 from .models import Payment
@@ -423,10 +424,26 @@ class FreelancerTransactionView(APIView):
 
 
 class AdminTransactionListView(ListAPIView):
-    queryset = Payment.objects.select_related(
-        'contract__client', 'contract__freelancer').order_by('-created_at')
     serializer_class = AdminTransactionSerializer
     permission_classes = [IsAdminUser]
-
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['status']
+
+    def get_queryset(self):
+        try:
+            return Payment.objects.select_related(
+                'contract__client', 
+                'contract__freelancer'
+            ).order_by('-created_at')
+        except Exception as e:
+            raise APIException(
+                detail="Error retrieving transaction records.",
+                code=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    def list(self, request, *args, **kwargs):
+        try:
+            response = super().list(request, *args, **kwargs)
+            return response
+        except Exception as e:
+            return self.handle_exception(e)

@@ -14,3 +14,8 @@ export const verifyPayment = async (verificationData) => {
   const response = await axiosInstance.post('/payments/verify-payment/', verificationData);
   return response.data;
 };
+
+export const createReview = async (reviewData) => {
+  const { data } = await axiosInstance.post("/profile/reviews/create/", reviewData);
+  return data;
+}

@@ -13,29 +13,39 @@ from .services.google_auth import GoogleAuthService
 from .services.google_user_service import GoogleUserService
 
 class SendOtpView(APIView):
+    permission_classes = [AllowAny]
+
     def post(self, request):
-        permission_classes = [AllowAny]
         serializer = RegisterSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         data = serializer.validated_data
         email = data["email"]
 
-        cache.set(
-            f"register_temp:{email}",
-            {
-                "full_name": data["full_name"],
-                "email": email,
-                "password": data["password"],
-            },
-            timeout=600
-        )
+        try:
+            cache.set(
+                f"register_temp:{email}",
+                {
+                    "full_name": data["full_name"],
+                    "email": email,
+                    "password": data["password"],
+                },
+                timeout=600
+            )
+        except Exception:
+            return Response({"error": "System storage error. Please try again."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        result = otp_service.send(email, purpose="email_verify", ttl=300)
+        try:
+            result = otp_service.send(email, purpose="email_verify", ttl=300)
+        except Exception as e:
+            return Response({"error": f"Failed to connect to mail service: {str(e)}"}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
 
-        if "error" in result:
-            return Response({"error": result["error"]}, status=400)
-        return Response({"message": "OTP sent to your email. Please verify."}, status=200)
+        if not result or "error" in result:
+            error_msg = result.get("error") if result else "Unknown error in OTP service"
+            return Response({"error": error_msg}, status=status.HTTP_400_BAD_REQUEST)
+            
+        return Response({"message": "OTP sent to your email. Please verify."}, status=status.HTTP_200_OK)
 
 
 
@@ -43,68 +53,87 @@ class VerifyOtpView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        serializer = EmailVerifySerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+        try:
+            serializer = EmailVerifySerializer(data=request.data)
+            if not serializer.is_valid():
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        email = serializer.validated_data["email"]
-        otp_code = serializer.validated_data["otp_code"]
+            email = serializer.validated_data["email"]
+            otp_code = serializer.validated_data["otp_code"]
 
-        otp_result = otp_service.verify(email, otp_code, purpose="email_verify")
-        if "error" in otp_result:
-            return Response({"error": otp_result["error"]}, status=400)
+            try:
+                otp_result = otp_service.verify(email, otp_code, purpose="email_verify")
+            except Exception:
+                return Response({"error": "OTP verification service unavailable"}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
 
-        temp_data = cache.get(f"register_temp:{email}")
-        if not temp_data:
-            return Response(
-                {"error": "Registration session expired. Please register again."},
-                status=400,
-            )
+            if "error" in otp_result:
+                return Response({"error": otp_result["error"]}, status=status.HTTP_400_BAD_REQUEST)
 
-        email = temp_data["email"]
+            temp_data = cache.get(f"register_temp:{email}")
+            if not temp_data:
+                return Response(
+                    {"error": "Registration session expired. Please register again."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
 
-        if User.objects.filter(email=email, is_deleted=True).exists():
-            return Response(
-                {"error": "An account with this email already exists"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+            email = temp_data.get("email")
 
-        if User.objects.filter(email=email).exists():
-            return Response({"error": "User already exists"}, status=400)
+            if User.objects.filter(email=email, is_deleted=True).exists():
+                return Response(
+                    {"error": "An account with this email already exists"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
 
-        user = User.objects.create_user(
-            email=email,
-            password=temp_data["password"],
-            full_name=temp_data["full_name"],
-            is_active=True,
-        )
+            if User.objects.filter(email=email).exists():
+                return Response({"error": "User already exists"}, status=status.HTTP_400_BAD_REQUEST)
 
-        cache.delete(f"register_temp:{email}")
+            try:
+                user = User.objects.create_user(
+                    email=email,
+                    password=temp_data["password"],
+                    full_name=temp_data["full_name"],
+                    is_active=True,
+                )
+            except IntegrityError:
+                return Response({"error": "Database integrity error during user creation"}, status=status.HTTP_409_CONFLICT)
+            except Exception:
+                return Response({"error": "Failed to create user account"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        refresh = RefreshToken.for_user(user)
+            cache.delete(f"register_temp:{email}")
 
-        response = Response(
-            {
-                "message": "Email verified successfully!",
-                "user": {
-                    "id": user.id,
-                    "email": user.email,
-                    "full_name": user.full_name,
+            try:
+                refresh = RefreshToken.for_user(user)
+            except Exception:
+                return Response({"error": "Failed to generate authentication tokens"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+            response = Response(
+                {
+                    "message": "Email verified successfully!",
+                    "user": {
+                        "id": user.id,
+                        "email": user.email,
+                        "full_name": user.full_name,
+                    },
+                    "access_token": str(refresh.access_token),
                 },
-                "access_token": str(refresh.access_token),
-            },
-            status=200,
-        )
+                status=status.HTTP_200_OK,
+            )
 
-        response.set_cookie(
-            key="refresh_token",
-            value=str(refresh),
-            httponly=True,
-            secure=False,
-            samesite="Lax",
-            max_age=7 * 24 * 3600,
-        )
+            response.set_cookie(
+                key="refresh_token",
+                value=str(refresh),
+                httponly=True,
+                secure=False,
+                samesite="Lax",
+                max_age=7 * 24 * 3600,
+            )
 
-        return response
+            return response
+            
+        except KeyError as e:
+            return Response({"error": f"Missing required registration data: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception:
+            return Response({"error": "An unexpected error occurred during verification"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class ResendOtpView(APIView):

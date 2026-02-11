@@ -1,25 +1,31 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { useContractDetail } from "./contractsQueries";
-import { 
-  FileText, Package, Clock, Calendar, Briefcase, Tag, 
+import {
+  FileText, Package, Clock, Calendar, Briefcase, Tag,
   Upload, MessageSquare, ShieldAlert, CheckCircle2, IndianRupee,
   X, Link2, ExternalLink, Download, AlertCircle, History,
-  Scale, Info, User, Landmark, ListChecks, Target, Layers
+  Scale, Info, User, Landmark, ListChecks, Target, Layers,
+  Star
 } from "lucide-react";
 import { useSubmitWork, useRevisionAction } from "./contractMutation";
 import { formatDateDMY } from "../../../utils/date";
 import { toast } from 'react-toastify';
 import { useChatActions } from "../../../components/chat/chatMutations";
 import { useModal } from "../../../hooks/modal/useModalStore";
+import { useCreateReview } from "../../client/contract/contractMutations";
+
 
 export default function ContractDetail() {
   const { id } = useParams();
   const { data: contract, isLoading, isError } = useContractDetail(id);
+  const createReviewMutation = useCreateReview();
   const submitWorkMutation = useSubmitWork();
   const revisionActionMutation = useRevisionAction();
   const { getRoomMutation } = useChatActions();
   const { openModal } = useModal();
+  const [reviewForm, setReviewForm] = useState({ rating: 5, comment: "" });
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
 
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, percentage: 0 });
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -28,7 +34,8 @@ export default function ContractDetail() {
   const [formData, setFormData] = useState({ title: '', file: null, link_url: '', notes: '' });
   const [activeRevisionId, setActiveRevisionId] = useState(null);
   const [rejectionNote, setRejectionNote] = useState("");
-
+  console.log(contract);
+  
   useEffect(() => {
     if (!contract) return;
     if (contract.status === 'completed') {
@@ -63,7 +70,7 @@ export default function ContractDetail() {
 
   const handleOpenChat = async () => {
     try {
-      const targetId = contract.client_id || contract.client; 
+      const targetId = contract.client_id || contract.client;
       if (!targetId) {
         toast.error("Client information missing.");
         return;
@@ -73,6 +80,20 @@ export default function ContractDetail() {
     } catch (error) {
       toast.error("Could not open chat. Please try again.");
     }
+  };
+
+  const handleSubmitReview = () => {
+    if (!reviewForm.comment.trim()) return toast.warning("Please enter a comment");
+    
+    createReviewMutation.mutate({
+      contract: id,
+      reviewee: contract.client_id, 
+      rating: reviewForm.rating,
+      comment: reviewForm.comment,
+      review_type: 'client' 
+    }, {
+      onSuccess: () => setIsReviewModalOpen(false)
+    });
   };
 
   const handleRevisionDecision = (revisionId, action) => {
@@ -89,10 +110,10 @@ export default function ContractDetail() {
 
   const confirmRejection = () => {
     if (!rejectionNote.trim()) return toast.warning("Please provide a reason for rejection");
-    revisionActionMutation.mutate({ 
-      revisionId: activeRevisionId, 
-      action: 'reject', 
-      message: rejectionNote 
+    revisionActionMutation.mutate({
+      revisionId: activeRevisionId,
+      action: 'reject',
+      message: rejectionNote
     }, {
       onSuccess: () => {
         setIsRejectModalOpen(false);
@@ -105,9 +126,9 @@ export default function ContractDetail() {
 
   const handleWorkSubmission = async () => {
     const data = new FormData();
-    data.append('deliverable_type', subType); 
+    data.append('deliverable_type', subType);
     data.append('title', formData.title);
-    data.append('notes', formData.notes || ""); 
+    data.append('notes', formData.notes || "");
     if (subType === 'file') {
       if (!formData.file) return toast.warning("Please select a file");
       data.append('file', formData.file);
@@ -138,11 +159,13 @@ export default function ContractDetail() {
   const dispute = contract.dispute_details;
   const isSelfDisputed = dispute && dispute.raised_by_id === contract.freelancer_id;
   const isCurrentlyDisputed = ['disputed', 'dispute'].includes(contract.status);
+  const clientReview = contract.reviews.client_review
+  const myReview = contract.reviews.freelancer_review
 
   return (
     <div className="min-h-screen bg-[#f8fafc] pb-20">
       <div className="max-w-[1400px] mx-auto px-6 lg:px-12 py-10 lg:py-14">
-        
+
         <div className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-slate-200 pb-8">
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2 mb-2">
@@ -153,9 +176,9 @@ export default function ContractDetail() {
             <p className="text-base md:text-lg text-slate-500 mt-1 break-words">Order #ORD-{contract.id + 8000} • Vendor Workspace</p>
           </div>
           <div className="flex gap-3 shrink-0">
-             <button onClick={handleOpenChat} className="group inline-flex items-center gap-2 px-6 py-3 bg-white border border-slate-200 rounded-lg text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-all shadow-sm whitespace-nowrap">
-                Open Workspace Chat <MessageSquare className="w-4 h-4" />
-             </button>
+            <button onClick={handleOpenChat} className="group inline-flex items-center gap-2 px-6 py-3 bg-white border border-slate-200 rounded-lg text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-all shadow-sm whitespace-nowrap">
+              Open Workspace Chat <MessageSquare className="w-4 h-4" />
+            </button>
           </div>
         </div>
 
@@ -176,9 +199,8 @@ export default function ContractDetail() {
                   <p className="text-xs text-slate-500 font-medium truncate">Case Reference: #{dispute.id}</p>
                 </div>
               </div>
-              <span className={`self-start sm:self-center px-4 py-1.5 rounded-md text-xs font-bold uppercase tracking-wider border whitespace-nowrap ${
-                dispute.status === 'rejected' ? 'bg-red-50 text-red-700 border-red-200' : 'bg-amber-50 text-amber-700 border-amber-200'
-              }`}>
+              <span className={`self-start sm:self-center px-4 py-1.5 rounded-md text-xs font-bold uppercase tracking-wider border whitespace-nowrap ${dispute.status === 'rejected' ? 'bg-red-50 text-red-700 border-red-200' : 'bg-amber-50 text-amber-700 border-amber-200'
+                }`}>
                 {dispute.status}
               </span>
             </div>
@@ -212,6 +234,55 @@ export default function ContractDetail() {
           </div>
         )}
 
+        {(contract.status === 'completed' || contract.status === 'refunded') && (
+          <div className="mb-10 grid grid-cols-1 md:grid-cols-2 gap-8">
+            {/* Left: Review from Client */}
+            <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-8">
+              <h2 className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2">
+                <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" /> Client's Feedback
+              </h2>
+              {clientReview ? (
+                <div className="space-y-4">
+                  <div className="flex gap-1">
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={i} size={16} className={i < clientReview.rating ? "text-yellow-400 fill-yellow-400" : "text-slate-200"} />
+                    ))}
+                  </div>
+                  <p className="text-sm text-slate-600 italic leading-relaxed">"{clientReview.comment}"</p>
+                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tight">Received on {formatDateDMY(clientReview.created_at)}</p>
+                </div>
+              ) : (
+                <div className="py-4 text-center border border-dashed border-slate-100 rounded-lg">
+                  <p className="text-xs text-slate-400 font-medium">Client hasn't left a review yet.</p>
+                </div>
+              )}
+            </div>
+
+            {/* Right: Your Review for Client */}
+            <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-8">
+              <h2 className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2">
+                <User className="w-4 h-4 text-blue-600" /> Your Review for Client
+              </h2>
+              {myReview ? (
+                <div className="space-y-4">
+                  <div className="flex gap-1">
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={i} size={16} className={i < myReview.rating ? "text-blue-500 fill-blue-500" : "text-slate-200"} />
+                    ))}
+                  </div>
+                  <p className="text-sm text-slate-600 leading-relaxed italic">"{myReview.comment}"</p>
+                </div>
+              ) : (
+                <button 
+                  onClick={() => setIsReviewModalOpen(true)}
+                  className="w-full py-4 border-2 border-dashed border-slate-200 rounded-xl text-slate-400 hover:text-blue-600 hover:border-blue-200 transition-all text-xs font-bold uppercase tracking-widest flex items-center justify-center gap-2"
+                >
+                  <Target className="w-4 h-4" /> Rate your experience with client
+                </button>
+              )}
+            </div>
+          </div>
+        )}
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden mb-10">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 divide-y md:divide-y-0 md:divide-x divide-slate-100">
             <div className="p-6 md:p-8">
@@ -241,10 +312,9 @@ export default function ContractDetail() {
             <div className="p-6 md:p-8">
               <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2">Payment Status</p>
               <div className="flex items-center gap-2">
-                <span className={`w-2 h-2 rounded-full shrink-0 ${
-                  contract.payment_status === 'released' ? 'bg-emerald-500' : 
-                  contract.payment_status === 'refunded' ? 'bg-rose-500' : 'bg-amber-500'
-                }`} />
+                <span className={`w-2 h-2 rounded-full shrink-0 ${contract.payment_status === 'released' ? 'bg-emerald-500' :
+                    contract.payment_status === 'refunded' ? 'bg-rose-500' : 'bg-amber-500'
+                  }`} />
                 <p className="text-lg md:text-xl font-bold text-slate-900 uppercase truncate">
                   {contract.payment_status ? contract.payment_status.replace(/_/g, ' ') : 'Pending'}
                 </p>
@@ -274,10 +344,10 @@ export default function ContractDetail() {
                   <span className="text-[10px] font-bold uppercase truncate max-w-[150px]">{contract.project_category}</span>
                 </div>
               </div>
-              
+
               <div className="space-y-8">
                 <div className="min-w-0">
-                   <h3 className="text-lg md:text-xl font-bold text-slate-800 break-words">{contract.project_title}</h3>
+                  <h3 className="text-lg md:text-xl font-bold text-slate-800 break-words">{contract.project_title}</h3>
                 </div>
 
                 <div className="space-y-4">
@@ -291,24 +361,24 @@ export default function ContractDetail() {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                   <div className="space-y-4 min-w-0">
-                      <div className="flex items-center gap-2 text-slate-400">
-                        <ListChecks className="w-4 h-4 shrink-0" />
-                        <h4 className="text-xs font-bold uppercase tracking-widest">Requirements</h4>
-                      </div>
-                      <div className="p-6 bg-slate-50/50 border border-slate-100 rounded-lg text-sm text-slate-600 leading-relaxed whitespace-pre-wrap break-words">
-                        {contract.requirements || "No specific requirements provided."}
-                      </div>
-                   </div>
-                   <div className="space-y-4 min-w-0">
-                      <div className="flex items-center gap-2 text-slate-400">
-                        <Target className="w-4 h-4 shrink-0" />
-                        <h4 className="text-xs font-bold uppercase tracking-widest">Expected Deliverables</h4>
-                      </div>
-                      <div className="p-6 bg-slate-50/50 border border-slate-100 rounded-lg text-sm text-slate-600 leading-relaxed whitespace-pre-wrap break-words">
-                        {contract.expected_deliverables || "No specific deliverables stated."}
-                      </div>
-                   </div>
+                  <div className="space-y-4 min-w-0">
+                    <div className="flex items-center gap-2 text-slate-400">
+                      <ListChecks className="w-4 h-4 shrink-0" />
+                      <h4 className="text-xs font-bold uppercase tracking-widest">Requirements</h4>
+                    </div>
+                    <div className="p-6 bg-slate-50/50 border border-slate-100 rounded-lg text-sm text-slate-600 leading-relaxed whitespace-pre-wrap break-words">
+                      {contract.requirements || "No specific requirements provided."}
+                    </div>
+                  </div>
+                  <div className="space-y-4 min-w-0">
+                    <div className="flex items-center gap-2 text-slate-400">
+                      <Target className="w-4 h-4 shrink-0" />
+                      <h4 className="text-xs font-bold uppercase tracking-widest">Expected Deliverables</h4>
+                    </div>
+                    <div className="p-6 bg-slate-50/50 border border-slate-100 rounded-lg text-sm text-slate-600 leading-relaxed whitespace-pre-wrap break-words">
+                      {contract.expected_deliverables || "No specific deliverables stated."}
+                    </div>
+                  </div>
                 </div>
 
                 <div className="space-y-4">
@@ -388,13 +458,13 @@ export default function ContractDetail() {
               <h2 className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-8">Production Timeline</h2>
               <div className="mb-8">
                 {!isCurrentlyDisputed && contract.status !== 'completed' ? (
-                   <div className="space-y-1">
-                      <div className="flex flex-wrap items-baseline gap-2">
-                        <span className="text-3xl md:text-4xl font-black text-slate-900 tracking-tighter">{timeLeft.days}D</span>
-                        <span className="text-3xl md:text-4xl font-black text-slate-900 tracking-tighter">{timeLeft.hours}H</span>
-                      </div>
-                      <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Until Maturity</p>
-                   </div>
+                  <div className="space-y-1">
+                    <div className="flex flex-wrap items-baseline gap-2">
+                      <span className="text-3xl md:text-4xl font-black text-slate-900 tracking-tighter">{timeLeft.days}D</span>
+                      <span className="text-3xl md:text-4xl font-black text-slate-900 tracking-tighter">{timeLeft.hours}H</span>
+                    </div>
+                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Until Maturity</p>
+                  </div>
                 ) : (
                   <div className="flex items-center gap-3 p-4 bg-slate-50 rounded-lg border border-slate-100">
                     <AlertCircle className="w-5 h-5 text-slate-400 shrink-0" />
@@ -403,12 +473,11 @@ export default function ContractDetail() {
                 )}
               </div>
               <div className="relative w-full h-2 bg-slate-100 rounded-full overflow-hidden mb-8">
-                <div 
-                  className={`absolute left-0 top-0 h-full transition-all duration-1000 rounded-full ${
-                    contract.status === 'completed' || contract.status ==='CANCELLED' ? 'bg-green-500' : 
-                    isCurrentlyDisputed ? 'bg-amber-400' : 'bg-blue-600'
-                  }`} 
-                  style={{ width: `${timeLeft.percentage}%` }} 
+                <div
+                  className={`absolute left-0 top-0 h-full transition-all duration-1000 rounded-full ${contract.status === 'completed' || contract.status === 'CANCELLED' ? 'bg-green-500' :
+                      isCurrentlyDisputed ? 'bg-amber-400' : 'bg-blue-600'
+                    }`}
+                  style={{ width: `${timeLeft.percentage}%` }}
                 />
               </div>
               <div className="p-4 bg-blue-50/50 rounded-lg border border-blue-100 flex items-start gap-3">
@@ -428,10 +497,9 @@ export default function ContractDetail() {
                     <div key={rev.id} className="space-y-4 pb-6 border-b border-slate-50 last:border-0 last:pb-0">
                       <div className="flex justify-between items-center gap-2">
                         <span className="text-[10px] font-bold text-slate-400 uppercase whitespace-nowrap">Request #{index + 1}</span>
-                        <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded border whitespace-nowrap ${
-                          rev.status === 'pending' ? 'bg-amber-50 text-amber-700 border-amber-100' : 
-                          rev.status === 'rejected' ? 'bg-red-50 text-red-700 border-red-100' : 'bg-green-50 text-green-700 border-green-100'
-                        }`}>
+                        <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded border whitespace-nowrap ${rev.status === 'pending' ? 'bg-amber-50 text-amber-700 border-amber-100' :
+                            rev.status === 'rejected' ? 'bg-red-50 text-red-700 border-red-100' : 'bg-green-50 text-green-700 border-green-100'
+                          }`}>
                           {rev.status}
                         </span>
                       </div>
@@ -447,7 +515,7 @@ export default function ContractDetail() {
                 </div>
               </div>
             )}
-            
+
             {contract.legal_document_url && (
               <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 md:p-8 hover:border-blue-200 transition-colors group">
                 <div className="flex items-center gap-5 mb-8">
@@ -467,14 +535,14 @@ export default function ContractDetail() {
 
             {!dispute?.id && (
               <div className="grid grid-cols-1 gap-4">
-                 {isCurrentlyDisputed ? (
+                {isCurrentlyDisputed ? (
                   <div className="w-full flex items-center justify-center gap-3 py-5 bg-slate-50 border border-slate-200 text-slate-400 text-[10px] md:text-[11px] font-bold rounded-lg uppercase tracking-widest shadow-inner px-4 text-center">
                     <ShieldAlert className="w-4 h-4 shrink-0" /> Arbitration Review In Progress
                   </div>
                 ) : (
-                  <button 
-                     onClick={() => openModal("raise-dispute", { contractId: id })} 
-                     className="w-full flex items-center justify-center gap-3 py-5 bg-white border border-red-50 text-red-600 text-[10px] md:text-[11px] font-bold rounded-lg hover:bg-red-50 transition-all uppercase tracking-widest px-4 text-center"
+                  <button
+                    onClick={() => openModal("raise-dispute", { contractId: id })}
+                    className="w-full flex items-center justify-center gap-3 py-5 bg-white border border-red-50 text-red-600 text-[10px] md:text-[11px] font-bold rounded-lg hover:bg-red-50 transition-all uppercase tracking-widest px-4 text-center"
                   >
                     <ShieldAlert className="w-4 h-4 shrink-0" /> Raise Dispute
                   </button>
@@ -497,7 +565,7 @@ export default function ContractDetail() {
                 <AlertCircle className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
                 <p className="text-xs text-red-900 font-semibold leading-relaxed break-words">Declining a revision may lead to a dispute. Clearly state why the request falls outside the original project scope.</p>
               </div>
-              <textarea 
+              <textarea
                 rows="4"
                 className="w-full p-5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-red-500/20 focus:outline-none resize-none font-medium break-words"
                 placeholder="State your technical or contractual reasoning..."
@@ -514,7 +582,58 @@ export default function ContractDetail() {
           </div>
         </div>
       )}
-    
+      {isReviewModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden border border-slate-200">
+            <div className="p-8 border-b border-slate-100 flex justify-between items-center">
+              <div>
+                <h3 className="text-xl font-black text-slate-900 uppercase tracking-tight">Rate the Client</h3>
+                <p className="text-xs text-slate-400 font-bold uppercase mt-1">Order #ORD-{contract.id + 8000}</p>
+              </div>
+              <button onClick={() => setIsReviewModalOpen(false)} className="p-2 hover:bg-slate-50 rounded-full transition-colors">
+                <X className="w-5 h-5 text-slate-400" />
+              </button>
+            </div>
+            <div className="p-8 space-y-8">
+              <div className="text-center">
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Overall Experience</p>
+                <div className="flex justify-center gap-3">
+                  {[1, 2, 3, 4, 5].map((num) => (
+                    <button
+                      key={num}
+                      onClick={() => setReviewForm({ ...reviewForm, rating: num })}
+                      className="transition-transform active:scale-90"
+                    >
+                      <Star
+                        size={32}
+                        className={num <= reviewForm.rating ? "text-yellow-400 fill-yellow-400" : "text-slate-200"}
+                      />
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="space-y-3">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Public Feedback</label>
+                <textarea
+                  rows={4}
+                  value={reviewForm.comment}
+                  onChange={(e) => setReviewForm({ ...reviewForm, comment: e.target.value })}
+                  placeholder="How was the communication and clarity of requirements?"
+                  className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all resize-none"
+                />
+              </div>
+              <button
+                onClick={handleSubmitReview}
+                disabled={createReviewMutation.isPending}
+                className="w-full py-5 bg-blue-600 text-white rounded-xl font-black text-xs uppercase tracking-[0.2em] hover:bg-blue-700 shadow-xl shadow-blue-100 transition-all disabled:opacity-50"
+              >
+                {createReviewMutation.isPending ? "Submitting..." : "Submit Review"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
 
       {isModalOpen && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
@@ -533,11 +652,11 @@ export default function ContractDetail() {
               </div>
               <div>
                 <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">Asset Label</label>
-                <input type="text" className="w-full p-4 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:outline-none font-medium" placeholder="e.g. Final Identity Design - V1" value={formData.title} onChange={(e) => setFormData({...formData, title: e.target.value})} />
+                <input type="text" className="w-full p-4 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:outline-none font-medium" placeholder="e.g. Final Identity Design - V1" value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} />
               </div>
               {subType === 'file' ? (
                 <div className="border-2 border-dashed border-slate-200 rounded-xl p-10 text-center hover:border-blue-300 transition-colors bg-slate-50/50">
-                  <input type="file" id="dropzone-file" className="hidden" onChange={(e) => setFormData({...formData, file: e.target.files[0]})} />
+                  <input type="file" id="dropzone-file" className="hidden" onChange={(e) => setFormData({ ...formData, file: e.target.files[0] })} />
                   <label htmlFor="dropzone-file" className="cursor-pointer">
                     <Upload className="w-8 h-8 text-blue-500 mx-auto mb-3" />
                     <p className="text-sm font-bold text-slate-700">{formData.file ? formData.file.name : "Select Asset File"}</p>
@@ -547,7 +666,7 @@ export default function ContractDetail() {
               ) : (
                 <div>
                   <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">Resource URL</label>
-                  <input type="text" className="w-full p-4 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:outline-none font-medium" placeholder="https://..." value={formData.link_url} onChange={(e) => setFormData({...formData, link_url: e.target.value})} />
+                  <input type="text" className="w-full p-4 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:outline-none font-medium" placeholder="https://..." value={formData.link_url} onChange={(e) => setFormData({ ...formData, link_url: e.target.value })} />
                 </div>
               )}
               <button onClick={handleWorkSubmission} disabled={submitWorkMutation.isPending} className="w-full py-5 bg-blue-600 text-white text-xs font-bold rounded-lg hover:bg-blue-700 uppercase tracking-widest shadow-lg shadow-blue-100 transition-all">

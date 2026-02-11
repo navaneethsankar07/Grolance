@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { fetchClientSpendingSummary, getMyProfile } from "./profileApi";
+import { fetchClientReviews, fetchClientSpendingSummary, getMyProfile } from "./profileApi";
 
 export const useProfile = () => {
   return useQuery({
@@ -18,4 +18,15 @@ export const useClientSpendingSummary = () => {
         staleTime: 1000 * 60 * 5, 
         retry: 1,
     });
+};
+
+
+export const useClientReviews = (userId) => {
+  console.log(userId);
+  
+  return useQuery({
+    queryKey: ["clientReviews", userId],
+    queryFn: () => fetchClientReviews(userId),
+    enabled: Boolean(userId),
+  });
 };

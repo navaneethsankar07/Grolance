@@ -10,7 +10,11 @@ from .views import (
     FreelancerProfileManageAPIView,
     FreelancerListAPIView,
     FreelancerPublicProfileAPIView,
-    FreelancerPaymentSettingsUpdateView
+    FreelancerPaymentSettingsUpdateView,
+    ReviewCreateView,
+    FreelancerReviewListView,
+    ClientReviewListView
+    
 )
 from projects.views import RecommendedProjectsAPIView
 
@@ -27,6 +31,8 @@ urlpatterns = [
     path('freelancers-list/', FreelancerListAPIView.as_view(), name='freelancer-list'),
     path('freelancer/profile/<int:id>/', FreelancerPublicProfileAPIView.as_view(), name='public-profile'),
     path('freelancer/payment-settings/', FreelancerPaymentSettingsUpdateView.as_view(), name='payment-settings-update'),
-
-
+    path('reviews/create/', ReviewCreateView.as_view(), name='review-create'),
+    path('reviews/freelancer/<int:user_id>/', FreelancerReviewListView.as_view(), name='freelancer-reviews'),
+    path('reviews/client/<int:user_id>/', ClientReviewListView.as_view(), name='client-reviews'),
+    path('freelancers/<int:freelancer_id>/reviews/', FreelancerReviewListView.as_view(), name='freelancer-reviews'),
 ]

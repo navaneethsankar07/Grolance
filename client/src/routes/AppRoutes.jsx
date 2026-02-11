@@ -13,6 +13,7 @@ import FreelancerProtectedRoute from './FreelancerProtectedRoutes'
 import ContactPage from '../components/common/ContactUs'
 import WhyUsPage from '../components/common/WhyUs'
 import SupportPage from '../components/common/SupportPage'
+import AboutPage from '../components/common/AboutUs'
 
 
 function AppRoutes() {
@@ -32,6 +33,7 @@ function AppRoutes() {
           <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path='/contact-us' element={<ContactPage/>}/>
           <Route path='/why-us' element={<WhyUsPage/>}/>
+          <Route path='/about-us' element={<AboutPage/>}/>
           <Route
             path="/*"
             element={

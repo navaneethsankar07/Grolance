@@ -1,20 +1,23 @@
-from rest_framework.generics import RetrieveAPIView, UpdateAPIView, RetrieveUpdateAPIView, ListAPIView
+from rest_framework.generics import RetrieveAPIView, UpdateAPIView, RetrieveUpdateAPIView, ListAPIView, CreateAPIView
 from rest_framework.views import APIView
 from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from django.shortcuts import get_object_or_404
+from contracts.models import Contract
+from rest_framework.exceptions import ValidationError, PermissionDenied
 from rest_framework import status
 from django.db import transaction, DatabaseError
 from django.core.exceptions import ObjectDoesNotExist
 from .models import (
     ClientProfile, FreelancerProfile, FreelancerPaymentSettings,
-    FreelancerPackage, FreelancerPortfolio, FreelancerSkill
+    FreelancerPackage, FreelancerPortfolio, FreelancerSkill, Review
 )
 from .serializers import (
     ClientProfileOverviewSerializer, ClientProfileUpdateSerializer,
     FreelancerOnboardingSerializer, SendPhoneOTPSerializer, VerifyPhoneOTPSerializer,
     FreelancerProfileSerializer, RoleSwitchSerializer, FreelancerProfileManageSerializer,
-    FreelancerProfileUpdateSerializer, FreelancerListingSerializer, FreelancerPaymentSettingsSerializer
+    FreelancerProfileUpdateSerializer, FreelancerListingSerializer, FreelancerPaymentSettingsSerializer, ReviewSerializer,FreelancerReviewListSerializer
 )
 from .services import send_phone_otp, verify_phone_otp
 from rest_framework.pagination import PageNumberPagination
@@ -340,3 +343,90 @@ class FreelancerPublicProfileAPIView(RetrieveAPIView):
             return Response({"error": "Freelancer not found"}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({"error": "Internal server error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
+class ReviewCreateView(CreateAPIView):
+    serializer_class = ReviewSerializer
+    permission_classes = [IsAuthenticated]
+
+    def perform_create(self, serializer):
+        try:
+            contract_id = self.request.data.get('contract')
+            reviewee_id = self.request.data.get('reviewee')
+            review_type = self.request.data.get('review_type')
+            reviewer = self.request.user
+
+            if not all([contract_id, reviewee_id, review_type]):
+                raise ValidationError({"detail": "Missing required fields: contract, reviewee, or review_type."})
+
+            contract = get_object_or_404(Contract, id=contract_id)
+
+            if contract.status not in ['completed', 'refunded']:
+                raise ValidationError({
+                    "detail": "You can only leave a review for a completed contract."
+                })
+
+            try:
+                reviewee_id_int = int(reviewee_id)
+            except (ValueError, TypeError):
+                raise ValidationError({"reviewee": "Invalid reviewee ID format."})
+
+            if review_type == 'freelancer':
+                if contract.client != reviewer or contract.freelancer.id != reviewee_id_int:
+                    raise PermissionDenied({"detail": "You are not authorized to review this freelancer for this contract."})
+            
+            elif review_type == 'client':
+                if contract.freelancer != reviewer or contract.client.id != reviewee_id_int:
+                    raise PermissionDenied({"detail": "You are not authorized to review this client for this contract."})
+            else:
+                raise ValidationError({"review_type": "Invalid review type."})
+
+            already_exists = Review.objects.filter(
+                reviewer=reviewer,
+                contract=contract,
+                review_type=review_type
+            ).exists()
+
+            if already_exists:
+                raise ValidationError({
+                    "detail": f"You have already submitted a {review_type} review for this contract."
+                })
+
+            serializer.save(reviewer=reviewer, contract=contract)
+        except ValidationError as e:
+            raise e
+        except PermissionDenied as e:
+            raise e
+        except Exception as e:
+            raise ValidationError({"detail": str(e)})
+
+class FreelancerReviewListView(ListAPIView):
+    serializer_class = FreelancerReviewListSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        profile_id = self.kwargs.get('freelancer_id')
+        if not profile_id:
+            return Review.objects.none()
+            
+        profile = get_object_or_404(FreelancerProfile.objects.select_related('user'), id=profile_id)
+        
+        return Review.objects.filter(
+            reviewee=profile.user,
+            review_type='freelancer'
+        ).order_by('-created_at')
+
+class ClientReviewListView(ListAPIView):
+    serializer_class = ReviewSerializer
+    permission_classes = []
+
+    def get_queryset(self):
+        user_id = self.kwargs.get('user_id')
+        if not user_id:
+            return Review.objects.none()
+            
+        return Review.objects.filter(
+            reviewee_id=user_id, 
+            review_type='client'
+        ).order_by('-created_at')

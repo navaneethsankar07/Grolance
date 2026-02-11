@@ -1,7 +1,22 @@
 import React from 'react';
 import { Mail, MapPin, Phone, Clock, Globe, ArrowRight, ShieldCheck, Sparkles } from 'lucide-react';
-import Header from '../../features/client/landingPage/components/Header';
 import Footer from '../../features/client/landingPage/components/Footer';
+import { Link } from 'react-router-dom';
+
+const Header = () => (
+  <nav className="sticky top-0 z-50 bg-white border-b border-slate-100 px-6 py-4">
+    <div className="max-w-7xl mx-auto flex items-center justify-between">
+      <Link to="/" className="text-xl font-black text-slate-900 tracking-tighter flex items-center gap-2">
+        <h2 className="text-[37px] font-museo font-extrabold leading-7">
+              <span className="text-[#1A1A1A]">Gro</span>
+              <span className="text-[#3B82F6]">lance</span>
+            </h2>
+      </Link>
+    
+    
+    </div>
+  </nav>
+);
 
 const ContactPage = () => {
   const emailAddress = "support@yourdomain.com";
@@ -10,8 +25,8 @@ const ContactPage = () => {
 
   return (
     <div className="min-h-screen bg-[#FDFDFD] flex flex-col font-sans selection:bg-slate-200">
-      <Header />
       
+      <Header/>
       <main className="flex-grow">
         <div className="bg-white border-b border-slate-100">
           <div className="max-w-7xl mx-auto pt-32 pb-20 lg:pt-52 lg:pb-32 px-6 text-center">

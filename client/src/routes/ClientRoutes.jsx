@@ -25,6 +25,7 @@ import SupportPage from "../components/common/SupportPage";
 import TermsAndConditions from "../components/common/termsandconditions/TermsAndConditions";
 import PrivacyPolicies from "../components/common/privacypolicy/PrivacyPolicies";
 import FAQPage from "../components/common/faq/FAQ";
+import AllFreelancerReviews from "../features/client/freelancerprofile/AllFreelancerReviews";
 
 export default function ClientRoutes() {
   const { user,loading } = useSelector(state => state.auth);
@@ -39,6 +40,7 @@ export default function ClientRoutes() {
           <Route path="/" element={<ClientHomepage />} />
           <Route path="/find-talents" element={<FindTalent/>}/>
           <Route path="/find-talents/:id" element={<FreelancerProfile/>}/>
+          <Route path='/find-talents/:id/reviews' element={<AllFreelancerReviews/>}/>
           <Route path="/create-project" element={<AddProject/>}/>
           <Route path="/my-projects" element={<MyProjects/>}/>
           <Route path="/my-projects/:id" element={<ClientJobDetail/>}/>

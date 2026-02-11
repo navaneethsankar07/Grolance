@@ -1,5 +1,6 @@
 import { ArrowRight } from 'lucide-react'
 import React from 'react'
+import { Link } from 'react-router-dom'
 
 function JoinNow() {
   return (
@@ -11,9 +12,9 @@ function JoinNow() {
           <p className="text-[#4B5563] font-inter text-lg sm:text-xl lg:text-[25px] leading-relaxed mb-4 sm:mb-6">
             Join thousands of professionals finding work on our platform.
           </p>
-          <a href="#" className="text-primary font-inter text-sm sm:text-[20px] font-semibold inline-flex items-center gap-1 hover:underline">
-            Join Now <ArrowRight className='text-lg font-extrabold' strokeWidth={3}/>
-          </a>
+          <Link to="/find-talents" className="text-primary font-inter text-sm sm:text-[20px] font-semibold inline-flex items-center gap-1 hover:underline">
+             find-talents<ArrowRight className='text-lg font-extrabold' strokeWidth={3}/>
+          </Link>
         </div>
       </section>
   )

@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useContractDetail } from "../../freelancer/contracts/contractsQueries";
-import { useRequestRevision, useUpdateContractStatus } from "./contractMutations";
+import { useRequestRevision, useUpdateContractStatus, useCreateReview } from "./contractMutations";
 import { useChatActions } from "../../../components/chat/chatMutations";
-import { 
-  FileText, Clock, Download, MessageSquare, ShieldAlert, 
+import {
+  FileText, Clock, Download, MessageSquare, ShieldAlert,
   ExternalLink, X, AlertCircle, CheckCircle2, ShieldCheck,
-  Scale, Info, History, Landmark, User, Tag, ListChecks, Target, Layers
+  Scale, Info, History, Landmark, User, Tag, ListChecks, Target, Layers, Star
 } from "lucide-react";
 import { toast } from "react-toastify";
 import { useModal } from "../../../hooks/modal/useModalStore";
@@ -16,12 +16,17 @@ export default function ClientContractDetail() {
   const { data: contract, isLoading, isError } = useContractDetail(id);
   const requestRevisionMutation = useRequestRevision();
   const updateStatusMutation = useUpdateContractStatus();
+  const createReviewMutation = useCreateReview();
   const { getRoomMutation } = useChatActions();
   const { openModal } = useModal();
 
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, percentage: 0 });
   const [isRevisionModalOpen, setIsRevisionModalOpen] = useState(false);
   const [revisionReason, setRevisionReason] = useState("");
+  console.log(contract);
+  
+  const [rating, setRating] = useState(5);
+  const [comment, setComment] = useState("");
 
   useEffect(() => {
     if (contract?.freelancer_signed_at && contract?.delivery_days) {
@@ -32,7 +37,7 @@ export default function ClientContractDetail() {
         const now = new Date().getTime();
         const difference = end - now;
         const totalDuration = end - start;
-        
+
         if (difference > 0) {
           const days = Math.floor(difference / (1000 * 60 * 60 * 24));
           const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
@@ -81,11 +86,25 @@ export default function ClientContractDetail() {
       freelancerName: contract.freelancer_name,
       amount: contract.total_amount,
       onApprove: () => {
-        updateStatusMutation.mutate({ 
-          contractId: contract.id, 
-          status: 'completed' 
+        updateStatusMutation.mutate({
+          contractId: contract.id,
+          status: 'completed'
         });
       }
+    });
+  };
+
+  const handleSubmitReview = () => {
+    if (!comment.trim()) {
+      toast.error("Please share your experience in a comment.");
+      return;
+    }
+    createReviewMutation.mutate({
+      contract: contract.id,
+      reviewee: contract.freelancer_id,
+      review_type: 'freelancer',
+      rating,
+      comment
     });
   };
 
@@ -96,13 +115,15 @@ export default function ClientContractDetail() {
   const pendingRevision = contract.revisions?.find(r => r.status === 'pending');
   const acceptedRevision = contract.revisions?.find(r => r.status === 'accepted');
   const dispute = contract.dispute_details;
-  
+  const existingReview = contract.reviews?.client_review;
+  const freelancerReview = contract.reviews?.freelancer_review
   const isFreelancerDisputed = dispute && dispute?.raised_by_id === contract.freelancer_id;
+console.log(freelancerReview);
 
   return (
     <div className="min-h-screen bg-[#f8fafc] pb-20">
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-12 py-10 lg:py-14">
-        
+
         <div className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-gray-200 pb-8">
           <div className="break-words overflow-hidden">
             <div className="flex items-center gap-2 mb-2">
@@ -117,6 +138,79 @@ export default function ClientContractDetail() {
           </Link>
         </div>
 
+{(contract.status === 'completed' || contract.status === 'refunded') && (
+  <div className="mb-10 grid grid-cols-1 lg:grid-cols-2 gap-8">
+    
+    <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+      <div className="bg-slate-50 px-6 py-4 border-b border-slate-200 flex items-center gap-3">
+        <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
+        <h3 className="text-xs font-bold text-slate-900 uppercase tracking-widest">Your Review</h3>
+      </div>
+      <div className="p-6">
+        {existingReview ? (
+          <div className="space-y-4">
+            <div className="flex items-center gap-1">
+              {[...Array(5)].map((_, i) => (
+                <Star key={i} className={`w-4 h-4 ${i < existingReview.rating ? 'text-amber-500 fill-amber-500' : 'text-slate-200 fill-slate-200'}`} />
+              ))}
+            </div>
+            <p className="text-sm text-slate-700 font-medium italic leading-relaxed">"{existingReview.comment}"</p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 mb-4">
+              {[1, 2, 3, 4, 5].map((num) => (
+                <button key={num} onClick={() => setRating(num)}>
+                  <Star className={`w-6 h-6 ${num <= rating ? 'text-amber-400 fill-amber-400' : 'text-slate-200'}`} />
+                </button>
+              ))}
+            </div>
+            <textarea 
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+              placeholder="Leave feedback for the freelancer..."
+              className="w-full h-20 p-3 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all resize-none"
+            />
+            <button 
+              onClick={handleSubmitReview}
+              disabled={createReviewMutation.isPending}
+              className="w-full py-2 bg-blue-600 text-white text-[10px] font-bold rounded-md uppercase tracking-widest hover:bg-blue-700 transition-all"
+            >
+              {createReviewMutation.isPending ? "Posting..." : "Post Review"}
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+
+    <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+      <div className="bg-slate-50 px-6 py-4 border-b border-slate-200 flex items-center gap-3">
+        <User className="w-4 h-4 text-blue-600" />
+        <h3 className="text-xs font-bold text-slate-900 uppercase tracking-widest">Freelancer's Review</h3>
+      </div>
+      <div className="p-6">
+        {freelancerReview ? (
+          <div className="space-y-4">
+            <div className="flex items-center gap-1">
+              {[...Array(5)].map((_, i) => (
+                <Star key={i} className={`w-4 h-4 ${i < freelancerReview.rating ? 'text-blue-500 fill-blue-500' : 'text-slate-200 fill-slate-200'}`} />
+              ))}
+              <span className="ml-2 text-[10px] font-bold text-slate-400 uppercase">Received Feedback</span>
+            </div>
+            <p className="text-sm text-slate-700 font-medium italic leading-relaxed">"{freelancerReview.comment}"</p>
+          </div>
+        ) : (
+          <div className="py-8 flex flex-col items-center justify-center text-center">
+            <History className="w-8 h-8 text-slate-200 mb-2" />
+            <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">Awaiting Feedback</p>
+            <p className="text-[10px] text-slate-400 mt-1 uppercase">The freelancer has not rated this experience yet.</p>
+          </div>
+        )}
+      </div>
+    </div>
+
+  </div>
+)}
         {dispute && (
           <div className="mb-10 bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
             <div className="bg-slate-50 px-4 sm:px-8 py-5 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -134,9 +228,8 @@ export default function ClientContractDetail() {
                   <p className="text-xs text-slate-500 font-medium">Case ID: #{dispute.id}</p>
                 </div>
               </div>
-              <span className={`w-fit px-4 py-1.5 rounded-md text-xs font-bold uppercase tracking-wider border ${
-                dispute.status === 'rejected' ? 'bg-red-50 text-red-700 border-red-200' : 'bg-amber-50 text-amber-700 border-amber-200'
-              }`}>
+              <span className={`w-fit px-4 py-1.5 rounded-md text-xs font-bold uppercase tracking-wider border ${dispute.status === 'rejected' ? 'bg-red-50 text-red-700 border-red-200' : 'bg-amber-50 text-amber-700 border-amber-200'
+                }`}>
                 {dispute.status}
               </span>
             </div>
@@ -194,14 +287,12 @@ export default function ClientContractDetail() {
             <div className="p-6 sm:p-8 bg-slate-50/50">
               <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2">Payment Status</p>
               <div className="flex items-center gap-2">
-                <span className={`w-2 h-2 rounded-full shrink-0 ${
-                  contract.payment_status === 'released' ? 'bg-green-500' : 
-                  contract.payment_status === 'refunded' ? 'bg-rose-500' : 'bg-blue-500'
-                }`} />
-                <p className={`text-xl font-bold uppercase break-words ${
-                  contract.payment_status === 'released' ? 'text-green-700' : 
-                  contract.payment_status === 'refunded' ? 'text-rose-700' : 'text-blue-700'
-                }`}>
+                <span className={`w-2 h-2 rounded-full shrink-0 ${contract.payment_status === 'released' ? 'bg-green-500' :
+                    contract.payment_status === 'refunded' ? 'bg-rose-500' : 'bg-blue-500'
+                  }`} />
+                <p className={`text-xl font-bold uppercase break-words ${contract.payment_status === 'released' ? 'text-green-700' :
+                    contract.payment_status === 'refunded' ? 'text-rose-700' : 'text-blue-700'
+                  }`}>
                   {contract.payment_status?.replace('_', ' ') || "Pending"}
                 </p>
               </div>
@@ -245,7 +336,7 @@ export default function ClientContractDetail() {
               </div>
               <div className="space-y-8">
                 <div>
-                   <h3 className="text-lg sm:text-xl font-bold text-slate-800 break-words">{contract.project_title}</h3>
+                  <h3 className="text-lg sm:text-xl font-bold text-slate-800 break-words">{contract.project_title}</h3>
                 </div>
 
                 <div className="space-y-4 break-words">
@@ -259,24 +350,24 @@ export default function ClientContractDetail() {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                   <div className="space-y-4 break-words overflow-hidden">
-                      <div className="flex items-center gap-2 text-slate-400">
-                        <ListChecks className="w-4 h-4 shrink-0" />
-                        <h4 className="text-xs font-bold uppercase tracking-widest">Requirements</h4>
-                      </div>
-                      <div className="p-6 bg-slate-50/50 border border-slate-100 rounded-lg text-sm text-slate-600 leading-relaxed whitespace-pre-line break-words">
-                        {contract.requirements || "No specific requirements provided."}
-                      </div>
-                   </div>
-                   <div className="space-y-4 break-words overflow-hidden">
-                      <div className="flex items-center gap-2 text-slate-400">
-                        <Target className="w-4 h-4 shrink-0" />
-                        <h4 className="text-xs font-bold uppercase tracking-widest">Expected Deliverables</h4>
-                      </div>
-                      <div className="p-6 bg-slate-50/50 border border-slate-100 rounded-lg text-sm text-slate-600 leading-relaxed whitespace-pre-line break-words">
-                        {contract.expected_deliverables || "No specific deliverables stated."}
-                      </div>
-                   </div>
+                  <div className="space-y-4 break-words overflow-hidden">
+                    <div className="flex items-center gap-2 text-slate-400">
+                      <ListChecks className="w-4 h-4 shrink-0" />
+                      <h4 className="text-xs font-bold uppercase tracking-widest">Requirements</h4>
+                    </div>
+                    <div className="p-6 bg-slate-50/50 border border-slate-100 rounded-lg text-sm text-slate-600 leading-relaxed whitespace-pre-line break-words">
+                      {contract.requirements || "No specific requirements provided."}
+                    </div>
+                  </div>
+                  <div className="space-y-4 break-words overflow-hidden">
+                    <div className="flex items-center gap-2 text-slate-400">
+                      <Target className="w-4 h-4 shrink-0" />
+                      <h4 className="text-xs font-bold uppercase tracking-widest">Expected Deliverables</h4>
+                    </div>
+                    <div className="p-6 bg-slate-50/50 border border-slate-100 rounded-lg text-sm text-slate-600 leading-relaxed whitespace-pre-line break-words">
+                      {contract.expected_deliverables || "No specific deliverables stated."}
+                    </div>
+                  </div>
                 </div>
 
                 <div className="space-y-4 break-words overflow-hidden">
@@ -340,7 +431,7 @@ export default function ClientContractDetail() {
                         </a>
                       </div>
                     ))}
-                    
+
                     {contract.status === 'submitted' && (
                       <div className="flex flex-col sm:flex-row gap-4 pt-10">
                         <button onClick={handleApproveOrder} disabled={updateStatusMutation.isPending} className="w-full sm:w-fit px-10 py-4 bg-green-600 text-white text-sm font-bold rounded-md hover:bg-green-700 transition-all flex items-center justify-center gap-2 shadow-lg shadow-green-100">
@@ -406,15 +497,15 @@ export default function ClientContractDetail() {
                 </a>
               </div>
             )}
-            
+
             {!dispute?.id && (
               <div className="grid grid-cols-1 gap-4">
-                {contract?.status !== 'completed' && 
-                <button onClick={handleMessageFreelancer} disabled={getRoomMutation.isPending} className="w-full flex items-center justify-center gap-4 py-5 bg-white border border-slate-200 text-slate-900 text-sm font-bold rounded-lg hover:bg-slate-50 shadow-sm uppercase tracking-widest transition-all px-4 text-center break-words">
-                  <MessageSquare className="w-5 h-5 text-slate-400 shrink-0" /> {getRoomMutation.isPending ? "Connecting..." : "Open Workspace Chat"}
-                </button>
+                {contract?.status !== 'completed' &&
+                  <button onClick={handleMessageFreelancer} disabled={getRoomMutation.isPending} className="w-full flex items-center justify-center gap-4 py-5 bg-white border border-slate-200 text-slate-900 text-sm font-bold rounded-lg hover:bg-slate-50 shadow-sm uppercase tracking-widest transition-all px-4 text-center break-words">
+                    <MessageSquare className="w-5 h-5 text-slate-400 shrink-0" /> {getRoomMutation.isPending ? "Connecting..." : "Open Workspace Chat"}
+                  </button>
                 }
-                
+
                 {contract.status === 'disputed' || contract.status === 'dispute' ? (
                   <div className="w-full flex items-center justify-center gap-4 py-5 bg-slate-50 border border-slate-200 text-slate-400 text-xs font-bold rounded-lg uppercase tracking-widest px-4 text-center break-words">
                     <ShieldAlert className="w-5 h-5 shrink-0" /> Dispute Under Review
@@ -447,7 +538,7 @@ export default function ClientContractDetail() {
                 <Info className="w-5 h-5 text-blue-600 shrink-0" />
                 <p className="text-xs text-blue-900 font-semibold leading-relaxed break-words">Provide specific feedback regarding the changes required to meet the original brief.</p>
               </div>
-              <textarea 
+              <textarea
                 className="w-full h-40 p-5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:bg-white focus:outline-none transition-all resize-none font-medium break-words"
                 placeholder="State the specific deliverables that need adjustment..."
                 value={revisionReason}

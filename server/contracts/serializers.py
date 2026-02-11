@@ -82,6 +82,8 @@ class ContractSerializer(serializers.ModelSerializer):
     legal_document_url = serializers.SerializerMethodField()
     dispute_details = serializers.SerializerMethodField()
     payment_status = serializers.CharField(source='escrow_details.status', read_only=True)
+    reviews = serializers.SerializerMethodField()
+    
 
     class Meta:
         model = Contract
@@ -90,7 +92,7 @@ class ContractSerializer(serializers.ModelSerializer):
             'client_name', 'freelancer_name', 'total_amount', 'status','payment_status', 'freelancer_signed_at',
             'skills', 'profile_photo', 'package_name', 'delivery_days', 'deliverables', 'revisions',
             'legal_document_url', 'client_signature', 'freelancer_signature', 
-            'client_signed_at', 'client_ip', 'freelancer_ip','freelancer_id','client_id','dispute_details'
+            'client_signed_at', 'client_ip', 'freelancer_ip','freelancer_id','client_id','dispute_details', 'reviews'
         ]
 
     def get_skills(self, obj):
@@ -103,6 +105,28 @@ class ContractSerializer(serializers.ModelSerializer):
         if obj.legal_document:
             return obj.legal_document.url
         return None
+
+    def get_reviews(self, obj):
+        reviews = obj.contract_reviews.all()
+        
+        result = {
+            "client_review": None,      
+            "freelancer_review": None   
+        }
+
+        for r in reviews:
+            review_data = {
+                "id": r.id,
+                "rating": r.rating,
+                "comment": r.comment,
+                "created_at": r.created_at
+            }
+            if r.review_type == 'freelancer':
+                result["client_review"] = review_data
+            elif r.review_type == 'client':
+                result["freelancer_review"] = review_data
+                
+        return result
 
     def get_dispute_details(self, obj):
         dispute = getattr(obj, 'dispute', None) 

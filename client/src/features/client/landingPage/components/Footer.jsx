@@ -1,6 +1,8 @@
 import React from "react";
 
 export default function Footer() {
+  const d = new Date();
+let year = d.getFullYear();
   return (
     <footer className="border-t border-[#E5E7EB]   pb-5">
       <div className="max-w-[1800px] mx-auto">
@@ -8,7 +10,7 @@ export default function Footer() {
 
         <div className="pt-8 border-t border-[#8F8F8F] flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="font-grotesk font-bold text-sm leading-5 text-[#6C757D]">
-            © 2026 Freelancer. All rights reserved.
+            © {year} Freelancer. All rights reserved.
           </p>
 
           <div className="flex items-center gap-4">

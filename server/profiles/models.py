@@ -3,6 +3,7 @@ from django.conf import settings
 from categories.models import Category, Skill
 from django.db.models.signals import post_delete
 from django.dispatch import receiver
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 class ClientProfile(models.Model):
     user = models.OneToOneField(
@@ -12,6 +13,8 @@ class ClientProfile(models.Model):
     )
     company_name = models.CharField(max_length=255, blank=True)
     location = models.CharField(max_length=255, blank=True)
+    average_rating = models.DecimalField(max_digits=3, decimal_places=2, default=0.00)
+    review_count = models.PositiveIntegerField(default=0)
     categories = models.ManyToManyField(
         Category,
         blank=True,
@@ -47,6 +50,8 @@ class FreelancerProfile(models.Model):
     bio = models.TextField()
     phone = models.CharField(max_length=10)
     is_phone_verified = models.BooleanField(default=False)
+    average_rating = models.DecimalField(max_digits=3, decimal_places=2, default=0.00)
+    review_count = models.PositiveIntegerField(default=0)
     category = models.ForeignKey(
         Category,
         on_delete=models.SET_NULL,
@@ -157,3 +162,51 @@ def delete_freelancer_related_data(sender, instance, **kwargs):
     user.is_freelancer = False
     user.current_role = 'client'
     user.save()
+
+class Review(models.Model):
+    reviewer = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="reviews_given"
+    )
+    
+    reviewee = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="reviews_received"
+    )
+
+    REVIEW_FOR_CHOICES = [
+        ('client', 'Client Review'),
+        ('freelancer', 'Freelancer Review'),
+    ]
+    review_type = models.CharField(
+        max_length=20, 
+        choices=REVIEW_FOR_CHOICES
+    )
+
+    rating = models.PositiveSmallIntegerField(
+        validators=[MinValueValidator(1), MaxValueValidator(5)],
+        help_text="Rating from 1 to 5"
+    )
+    
+    comment = models.TextField(blank=True)
+    
+    contract = models.ForeignKey(
+        'contracts.Contract', 
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="contract_reviews"
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('reviewer', 'contract', 'review_type')
+        indexes = [
+            models.Index(fields=['reviewee', 'review_type']),
+            models.Index(fields=['rating']),
+        ]
+
+    def __str__(self):
+        return f"{self.rating}* for {self.reviewee.email} as {self.review_type}"
