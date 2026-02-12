@@ -1,5 +1,5 @@
 import React from "react";
-import { IndianRupee, ClipboardList, Clock, FileText } from "lucide-react";
+import { ClipboardList, Clock, FileText } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useModal } from "../../../../hooks/modal/useModalStore";
 
@@ -48,7 +48,6 @@ export default function ProjectCard({ job }) {
 
         <div className="flex items-center flex-wrap gap-6 pt-2">
           <div className="flex items-center gap-1.5">
-            <IndianRupee className="w-4 h-4 text-gray-500" />
             {renderBudget()}
             <span className="text-sm text-gray-400 ml-1">
               {job.pricing_type === "fixed" ? "Fixed Price" : "Range"}

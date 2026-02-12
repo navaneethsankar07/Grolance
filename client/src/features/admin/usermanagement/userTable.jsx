@@ -1,7 +1,7 @@
 import { useModal } from "../../../hooks/modal/useModalStore";
 import { formatDateDMY } from "../../../utils/date";
 import { useSoftDeleteUser, useToggleUserActive } from "./usersMutations";
-import { MoreVertical, Ban, Unlock, Trash2, ExternalLink } from "lucide-react";
+import { MoreVertical, Ban, Unlock, Trash2, ExternalLink, ChevronRight, ChevronLeft } from "lucide-react";
 
 export default function UserTable({ users, page, setPage, hasNext, hasPrev, totalUsers }) {
   const toggleMutation = useToggleUserActive();
@@ -134,30 +134,30 @@ export default function UserTable({ users, page, setPage, hasNext, hasPrev, tota
         </tbody>
       </table>
 
-      <div className="px-6 py-4 bg-gray-50/50 border-t border-gray-200 flex items-center justify-between">
-        <p className="text-xs text-gray-500 font-medium">
-          Showing <span className="text-gray-900">{users.length}</span> of <span className="text-gray-900">{totalUsers}</span> users
-        </p>
-        <div className="flex gap-2">
-          <button
-            disabled={!hasPrev}
-            onClick={() => setPage((p) => p - 1)}
-            className="px-4 py-2 text-xs font-semibold border border-gray-200 rounded-xl bg-white hover:bg-gray-50 disabled:opacity-50 transition-all shadow-sm"
-          >
-            Previous
-          </button>
-          <div className="flex items-center px-4 bg-white border border-gray-200 rounded-xl text-xs font-bold text-blue-600 shadow-sm">
-            {page}
-          </div>
-          <button
-            disabled={!hasNext}
-            onClick={() => setPage((p) => p + 1)}
-            className="px-4 py-2 text-xs font-semibold border border-gray-200 rounded-xl bg-white hover:bg-gray-50 disabled:opacity-50 transition-all shadow-sm"
-          >
-            Next
-          </button>
-        </div>
-      </div>
+      <div className="px-6 py-4 bg-gray-50/50 border-t border-gray-200 flex flex-col md:flex-row justify-between items-center gap-4">
+  <p className="text-sm text-gray-600">
+    Showing <span className="font-medium text-gray-900">{users.length}</span> of <span className="font-medium text-gray-900">{totalUsers}</span> results
+  </p>
+  <nav className="flex items-center rounded-md shadow-sm">
+    <button
+      disabled={!hasPrev}
+      onClick={() => setPage((p) => p - 1)}
+      className="h-9 w-9 flex items-center justify-center border border-gray-300 rounded-l-md bg-white hover:bg-gray-50 disabled:opacity-50 transition-colors"
+    >
+      <ChevronLeft className="text-gray-400 w-5 h-5" />
+    </button>
+    <div className="h-9 px-4 bg-blue-600 text-white text-sm font-semibold flex items-center border-t border-b border-blue-600">
+      {page}
+    </div>
+    <button
+      disabled={!hasNext}
+      onClick={() => setPage((p) => p + 1)}
+      className="h-9 w-9 flex items-center justify-center border border-gray-300 rounded-r-md bg-white hover:bg-gray-50 disabled:opacity-50 transition-colors"
+    >
+      <ChevronRight className="text-gray-400 w-5 h-5" />
+    </button>
+  </nav>
+</div>
     </div>
   );
 }

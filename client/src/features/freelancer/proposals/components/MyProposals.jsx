@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { ChevronDown, ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
+import { ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
 import { ProposalCard } from "./ProposalsCard";
 import { useMyProposals } from "./proposalsQueries";
 
@@ -61,8 +61,6 @@ export default function MyProposals() {
               </select>
               <ChevronDown className="w-4 h-4 text-gray-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
             </div>
-
-            
           </div>
 
           <div className="text-xs text-gray-500 font-medium">
@@ -70,9 +68,6 @@ export default function MyProposals() {
             <span> {proposals.length === 1 ? 'proposal' : 'proposals'}</span>
           </div>
         </div>
-<div className="text-xs text-gray-500 mb-5 font-medium">
-            <span>Showing {proposals.length} of {totalCount} proposals</span>
-          </div>
         
         <div className="space-y-4">
           {proposals.length > 0 ? (
@@ -87,28 +82,27 @@ export default function MyProposals() {
         </div>
 
         {totalCount > 0 && (
-          <div className="flex items-center justify-center mt-8">
-            <div className="flex items-center rounded-md border border-gray-300 overflow-hidden shadow-sm">
-              <button
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4 mt-8 pt-2">
+            <p className="text-sm text-gray-600">Showing {proposals.length} of {totalCount} results</p>
+            <nav className="flex items-center rounded-md shadow-sm">
+              <button 
                 disabled={!hasPrev}
-                className="h-9 w-9 flex items-center justify-center border-r border-gray-300 bg-white hover:bg-gray-50 disabled:opacity-50"
+                onClick={() => setPage(p => p - 1)}
+                className="h-9 w-9 flex items-center justify-center border border-gray-300 rounded-l-md hover:bg-gray-50 disabled:opacity-50"
               >
-                <ChevronLeft className="w-5 h-5" />
+                <ChevronLeft className="text-gray-400 w-5 h-5" />
               </button>
-
-              <div className="h-9 px-4 flex items-center justify-center bg-blue-500 text-white font-semibold text-sm">
+              <div className="h-9 px-4 bg-blue-500 text-white text-sm font-semibold flex items-center border-t border-b border-blue-500">
                 {page}
               </div>
-
-              <button
-                onClick={() => setPage((p) => p + 1)}
+              <button 
                 disabled={!hasNext}
-                className="h-9 w-9 flex items-center justify-center bg-white hover:bg-gray-50 disabled:opacity-50"
+                onClick={() => setPage(p => p + 1)}
+                className="h-9 w-9 flex items-center justify-center border border-gray-300 rounded-r-md hover:bg-gray-50 disabled:opacity-50"
               >
-                <ChevronRight className="w-5 h-5" />
+                <ChevronRight className="text-gray-400 w-5 h-5" />
               </button>
-            </div>
+            </nav>
           </div>
         )}
       </div>

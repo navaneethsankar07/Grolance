@@ -4,17 +4,17 @@ export const projectCreateSchema = z
   .object({
     title: z
       .string()
-      .min(5)
-      .regex(/^[^0-9]*$/, "Title cannot contain numbers")
-      .regex(/^[a-zA-Z\s]*$/, "Full name can only contain letters and spaces"),
-    description: z.string().min(50),
-    requirements: z.string().min(20),
-    expected_deliverables: z.string().min(10),
-
+      .min(5,'Title must be greater than 5 characters')
+      .max(255,'Title must be less than 255 characters')
+      .regex(/^[^0-9]*.$/, "Title cannot contain numbers")
+      .regex(/^[a-zA-Z0-9\s\./:]*$/, "Full name can only contain letters and spaces"),
+    description: z.string().min(50,'Description must be greater than 50 characters').max(600,'Description must be less than 600 characters'),
+    requirements: z.string().min(20,'Requirements must be greater than 20 characters').max(600,'Requirements must be less than 600 characters'),
+    expected_deliverables: z.string().min(20,'Must be greater than 20 characters').max(600,'Must be less than 600 characters'),
     category: z.preprocess((val) => Number(val), z.number().min(1)),
     skills: z
       .array(z.string().regex(/^[^0-9]*$/, "Title cannot contain numbers")
-      .regex(/^[a-zA-Z\s\.]*$/, "Full name can only contain letters and spaces"))
+      .regex(/^[a-zA-Z\s\.]*$/, "Skill can only contain letters and spaces"))
       .min(3)
       
       ,

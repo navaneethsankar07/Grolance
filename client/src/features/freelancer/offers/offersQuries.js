@@ -21,7 +21,6 @@ export const useAcceptOffer = () => {
       toast.success("Contract signed successfully! Project started.");
     },
     onError: (error) => {
-      // Added toast.error here as well
       const msg = error.response?.data?.error || "Failed to sign contract";
       toast.error(msg);
     }

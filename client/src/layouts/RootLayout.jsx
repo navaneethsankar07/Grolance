@@ -34,11 +34,16 @@ import Notifications from "../components/notifications/Notifications";
 import Chat from "../components/chat/Chat";
 import DisputeModal from "../features/freelancer/contracts/components/DisputeModal";
 import ClientDisputeModal from "../features/client/contract/components/ClientDisputeModal";
+import { useNotificationSocket } from "../hooks/notification/useNotificationSocket";
 export default function RootLayout() {
   const { modal, modalProps, closeModal } = useModal();
-  const { loading, initialized, accessToken, user } = useSelector((s) => s.auth);
+  const { loading, initialized, user } = useSelector((s) => s.auth);
+  const accessToken = useSelector((s) => s.auth.accessToken);
   const dispatch = useDispatch();
 
+  const userId = useSelector((s) => s.auth.user?.id);
+  
+useNotificationSocket(userId);
   useEffect(() => {
     if (!accessToken && !user) {
       dispatch(fetchUser());

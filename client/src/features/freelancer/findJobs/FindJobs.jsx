@@ -4,6 +4,7 @@ import { useFreelancerProjects } from "./findJobsQueries";
 import { useCategories, useSkills } from '../../client/projectManagement/projectQueries';
 import { toast } from 'react-toastify';
 import { Link } from 'react-router-dom';
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 export default function FindJobs() {
   const [searchInput, setSearchInput] = useState("");
@@ -37,7 +38,6 @@ export default function FindJobs() {
 
   const projects = data?.results || [];
   const totalCount = data?.count || 0;
-  const totalPages = Math.ceil(totalCount / 10); 
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
@@ -202,41 +202,28 @@ export default function FindJobs() {
               )}
             </div>
 
-            {totalPages > 1 && (
-              <div className="mt-12 flex justify-center items-center gap-2">
-                <button
-                  disabled={page === 1}
-                  onClick={() => handlePageChange(page - 1)}
-                  className="p-2 border rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15 18l-6-6 6-6" /></svg>
-                </button>
-                
-                {[...Array(totalPages)].map((_, i) => {
-                   const pageNum = i + 1;
-                   if (pageNum === 1 || pageNum === totalPages || (pageNum >= page - 1 && pageNum <= page + 1)) {
-                     return (
-                        <button
-                          key={pageNum}
-                          onClick={() => handlePageChange(pageNum)}
-                          className={`w-10 h-10 rounded-lg text-sm font-semibold transition-all ${page === pageNum ? 'bg-primary text-white shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}
-                        >
-                          {pageNum}
-                        </button>
-                     );
-                   } else if (pageNum === page - 2 || pageNum === page + 2) {
-                     return <span key={pageNum} className="text-gray-400">...</span>;
-                   }
-                   return null;
-                })}
-
-                <button
-                  disabled={page === totalPages}
-                  onClick={() => handlePageChange(page + 1)}
-                  className="p-2 border rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 18l6-6-6-6" /></svg>
-                </button>
+            {totalCount > 10 && (
+              <div className="flex flex-col md:flex-row justify-between items-center gap-4 mt-8 pt-2">
+                <p className="text-sm text-gray-600">Showing {projects.length} of {totalCount} results</p>
+                <nav className="flex items-center rounded-md shadow-sm">
+                  <button 
+                    disabled={!data?.previous}
+                    onClick={() => handlePageChange(page - 1)}
+                    className="h-9 w-9 flex items-center justify-center border border-gray-300 rounded-l-md hover:bg-gray-50 disabled:opacity-50 transition-colors"
+                  >
+                    <ChevronLeft className="text-gray-400 w-5 h-5" />
+                  </button>
+                  <div className="h-9 px-4 bg-primary text-white text-sm font-semibold flex items-center border-t border-b border-primary">
+                    {page}
+                  </div>
+                  <button 
+                    disabled={!data?.next}
+                    onClick={() => handlePageChange(page + 1)}
+                    className="h-9 w-9 flex items-center justify-center border border-gray-300 rounded-r-md hover:bg-gray-50 disabled:opacity-50 transition-colors"
+                  >
+                    <ChevronRight className="text-gray-400 w-5 h-5" />
+                  </button>
+                </nav>
               </div>
             )}
           </>

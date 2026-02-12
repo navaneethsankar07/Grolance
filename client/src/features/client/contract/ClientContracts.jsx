@@ -86,7 +86,6 @@ export default function ClientContracts() {
 
   const contractList = data?.results || [];
   const totalCount = data?.count || 0;
-  const totalPages = Math.ceil(totalCount / 10);
 
   const handleTabChange = (tab) => {
     setActiveTab(tab);
@@ -95,16 +94,14 @@ export default function ClientContracts() {
 
   return (
     <div className="min-h-screen bg-[#f8fafc] pb-20 font-sans">
-      <div className="bg-white border-b border-slate-200">
+      <div className="bg-white border-b py-10 border-slate-200">
         <div className="max-w-7xl mx-auto px-6 py-8">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div>
-              <div className="flex items-center gap-2 mb-2">
-                <ShieldCheck className="w-4 h-4 text-blue-600" />
-                <span className="text-[10px] font-black text-blue-600 uppercase tracking-[0.2em]">Secure Escrow Management</span>
+              <div className="flex items-center  mb-2">
               </div>
-              <h1 className="text-3xl font-black text-slate-900 tracking-tight">Project Portfolio</h1>
-              <p className="text-sm text-slate-500 mt-1 font-medium">Monitoring {totalCount} agreements.</p>
+              <h1 className="text-5xl font-black text-slate-900 tracking-tight">Contracts</h1>
+              <p className="text-lg text-slate-500 pl-2 mt-1 font-medium">Total: {totalCount} agreements.</p>
             </div>
             
             <div className="flex items-center gap-3">
@@ -262,39 +259,30 @@ export default function ClientContracts() {
           )}
         </div>
 
-        {totalPages > 1 && (
-          <div className="mt-12 flex justify-center items-center gap-3">
-            <button 
-              disabled={page === 1}
-              onClick={() => setPage(prev => prev - 1)}
-              className="p-3 rounded-xl border border-slate-200 bg-white text-slate-400 hover:text-blue-600 hover:border-blue-200 disabled:opacity-30 transition-all shadow-sm"
-            >
-              <ChevronLeft className="w-5 h-5" />
-            </button>
-            
-            <div className="flex items-center gap-2">
-              {[...Array(totalPages)].map((_, i) => (
-                <button 
-                  key={i + 1} 
-                  onClick={() => setPage(i + 1)}
-                  className={`w-11 h-11 rounded-xl text-xs font-black transition-all shadow-sm ${
-                    page === i + 1 
-                    ? 'bg-blue-600 text-white shadow-blue-100' 
-                    : 'bg-white text-slate-400 border border-slate-200 hover:border-slate-300'
-                  }`}
-                >
-                  {i + 1}
-                </button>
-              ))}
-            </div>
-
-            <button 
-              disabled={page === totalPages}
-              onClick={() => setPage(prev => prev + 1)}
-              className="p-3 rounded-xl border border-slate-200 bg-white text-slate-400 hover:text-blue-600 hover:border-blue-200 disabled:opacity-30 transition-all shadow-sm"
-            >
-              <ChevronRight className="w-5 h-5" />
-            </button>
+        {totalCount > 0 && (
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4 mt-8 pt-2">
+            <p className="text-sm text-gray-600">
+              Showing {contractList.length} of {totalCount} results
+            </p>
+            <nav className="flex items-center rounded-md shadow-sm">
+              <button 
+                disabled={!data?.previous}
+                onClick={() => setPage(p => p - 1)}
+                className="h-9 w-9 flex items-center justify-center border border-gray-300 rounded-l-md hover:bg-gray-50 disabled:opacity-50"
+              >
+                <ChevronLeft className="text-gray-400 w-5 h-5" />
+              </button>
+              <div className="h-9 px-4 bg-blue-600 text-white text-sm font-semibold flex items-center border-t border-b border-blue-600">
+                {page}
+              </div>
+              <button 
+                disabled={!data?.next}
+                onClick={() => setPage(p => p + 1)}
+                className="h-9 w-9 flex items-center justify-center border border-gray-300 rounded-r-md hover:bg-gray-50 disabled:opacity-50"
+              >
+                <ChevronRight className="text-gray-400 w-5 h-5" />
+              </button>
+            </nav>
           </div>
         )}
       </div>

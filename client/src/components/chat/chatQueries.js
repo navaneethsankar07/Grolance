@@ -5,6 +5,9 @@ export const useChatRooms = () => {
   return useQuery({
     queryKey: ["chatRooms"],
     queryFn: fetchChatRooms,
+    placeholderData:(previousData)=>previousData,
+    staleTime: 1000 * 60 * 5, 
+    gcTime: 1000 * 60 * 30,   
     refetchOnWindowFocus: false,
   });
 };
@@ -16,7 +19,9 @@ export const useChatMessages = (roomId) => {
     enabled: !!roomId,
     initialPageParam: 1, 
     getNextPageParam: (lastPage) => {
-      if (!lastPage || !lastPage.next) return undefined;
+      if (!lastPage || !lastPage.results) return undefined;
+
+      if (!lastPage.next) return undefined;
       try {
         const url = new URL(lastPage.next);
         return url.searchParams.get("page");
@@ -24,5 +29,7 @@ export const useChatMessages = (roomId) => {
         return undefined;
       }
     },
+    placeholderData: (previousData) => previousData,
+    staleTime: 1000 * 60 * 5,
   });
 };

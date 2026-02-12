@@ -4,7 +4,7 @@ export default function ClientFooter() {
   const d = new Date();
 let year = d.getFullYear();
   return (
-    <footer className="mt-5 border-t border-gray-300 bg-white">
+    <footer className=" border-t border-gray-300 bg-white">
       <div className="container mx-auto px-6 py-12">
         <div className="grid grid-cols-1 gap-12 md:grid-cols-2 lg:grid-cols-4">
           <div className="flex flex-col gap-2">
@@ -64,7 +64,7 @@ let year = d.getFullYear();
 
         <div className="mt-8 flex flex-col items-center justify-between gap-4 border-t border-gray-400 pt-6 md:flex-row">
           <p className="text-sm font-bold text-gray-500" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
-            © {year} Freelancer. All rights reserved.
+            © {year} <Link to={'/'}><span className="text-black">gro</span><span className="text-primary">lance.</span></Link>   All rights reserved.
           </p>
           <div className="flex items-center gap-4">
             <a href="https://x.com/NavaneethSankar" target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-gray-700">

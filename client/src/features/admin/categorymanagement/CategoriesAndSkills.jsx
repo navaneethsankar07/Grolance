@@ -13,20 +13,20 @@ export default function CategoriesAndSkills() {
   const [skillInput, setSkillInput] = useState("");
   const [categorySearch, setCategorySearch] = useState("");
   const [skillSearch, setSkillSearch] = useState("");
+  
   const { data: categoryData, isLoading: catLoading } = useCategories({
     page: categoryPage,
     search: categorySearch,
   });
-  const allCategories = useAllCategories()
+  
+  const allCategories = useAllCategories();
+  
   const { data: skillData, isLoading: skillLoading } = useSkills({
     page: skillPage,
     search: skillSearch,
   });
 
-  if (
-    (catLoading && !categoryData) ||
-    (skillLoading && !skillData)
-  ) {
+  if ((catLoading && !categoryData) || (skillLoading && !skillData)) {
     return (
       <div className="min-h-screen flex items-center justify-center text-sm text-gray-500">
         Loading management data...
@@ -40,7 +40,6 @@ export default function CategoriesAndSkills() {
   return (
     <div className="min-h-screen bg-[#F8F9FC] p-8 md:p-12">
       <div className="max-w-5xl mx-auto">
-
         <ManagementList
           title="Categories"
           icon={LayoutGrid}
@@ -52,8 +51,10 @@ export default function CategoriesAndSkills() {
             setCategorySearch(categoryInput);
             setCategoryPage(1);
           }}
-          onNext={() => setCategoryPage(p => p + 1)}
-          onPrev={() => setCategoryPage(p => p - 1)}
+          currentPage={categoryPage}
+          totalCount={categoryData?.count || 0}
+          onNext={() => setCategoryPage((p) => p + 1)}
+          onPrev={() => setCategoryPage((p) => p - 1)}
           hasNext={!!categoryData?.next}
           hasPrev={!!categoryData?.previous}
           onAdd={() => openModal("add-category")}
@@ -72,15 +73,16 @@ export default function CategoriesAndSkills() {
             setSkillSearch(skillInput);
             setSkillPage(1);
           }}
-          onNext={() => setSkillPage(p => p + 1)}
-          onPrev={() => setSkillPage(p => p - 1)}
+          currentPage={skillPage}
+          totalCount={skillData?.count || 0}
+          onNext={() => setSkillPage((p) => p + 1)}
+          onPrev={() => setSkillPage((p) => p - 1)}
           hasNext={!!skillData?.next}
           hasPrev={!!skillData?.previous}
           onAdd={() => openModal("add-skill", { allCategories })}
           onEdit={(item) => openModal("edit-skill", { item, categories })}
           onDelete={(item) => openModal("delete-skill", item)}
         />
-
       </div>
     </div>
   );

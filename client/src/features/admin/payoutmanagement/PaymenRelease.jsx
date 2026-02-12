@@ -1,12 +1,23 @@
-import { CheckCircle, XCircle, CreditCard, Clock, ChevronRight, Loader2, AlertCircle, User, Briefcase } from 'lucide-react';
+import { CheckCircle, XCircle, CreditCard, Clock, ChevronRight, Loader2, AlertCircle, User, Briefcase, ChevronLeft } from 'lucide-react';
 import { usePendingPayouts } from './payoutQueries';
 import { useModal } from '../../../hooks/modal/useModalStore';
 import { useRefundPayment } from './payoutMutations';
+import { useState } from 'react';
 
 export default function PaymentRelease() {
-  const { data: payments = [], isLoading } = usePendingPayouts();
+  const [page, setPage] = useState(1);
+  const { data: payoutData, isLoading } = usePendingPayouts(page);
+  
+  const payments = payoutData?.results || [];
+  const totalCount = payoutData?.count || 0;
+  
   const { openModal } = useModal();
   const refundMutation = useRefundPayment();
+
+  const handlePageChange = (newPage) => {
+    setPage(newPage);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   const handleRefund = (paymentId) => {
     const numericId = paymentId.replace('PAY-', '');
@@ -188,6 +199,29 @@ export default function PaymentRelease() {
                   </div>
                 );
               })}
+            </div>
+
+            <div className="flex flex-col md:flex-row justify-between items-center gap-4 mt-8 pt-2">
+              <p className="text-sm text-gray-600">Showing {payments.length} of {totalCount} results</p>
+              <nav className="flex items-center rounded-md shadow-sm">
+                <button 
+                  disabled={!payoutData?.previous}
+                  onClick={() => handlePageChange(page - 1)}
+                  className="h-9 w-9 flex items-center justify-center border border-gray-300 rounded-l-md hover:bg-gray-50 disabled:opacity-50"
+                >
+                  <ChevronLeft className="text-gray-400 w-5 h-5" />
+                </button>
+                <div className="h-9 px-4 bg-blue-600 text-white text-sm font-semibold flex items-center border-t border-b border-blue-600">
+                  {page}
+                </div>
+                <button 
+                  disabled={!payoutData?.next}
+                  onClick={() => handlePageChange(page + 1)}
+                  className="h-9 w-9 flex items-center justify-center border border-gray-300 rounded-r-md hover:bg-gray-50 disabled:opacity-50"
+                >
+                  <ChevronRight className="text-gray-400 w-5 h-5" />
+                </button>
+              </nav>
             </div>
           </>
         )}

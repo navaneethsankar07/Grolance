@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useFAQs } from './faqQuries';
-import { ChevronDown, Mail, Loader2 } from 'lucide-react';
+import { ChevronDown, Mail, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Link, replace } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 
@@ -96,28 +96,31 @@ export default function FAQPage() {
         </div>
 
         {data?.count > 0 && (
-          <div className="flex items-center justify-center gap-4 mb-12">
-            <button 
-              disabled={!data.previous || isFetching}
-              onClick={() => setPage(prev => prev - 1)}
-              className="flex items-center justify-center px-6 py-2 bg-white border border-gray-200 rounded-lg disabled:opacity-50 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors shadow-sm"
-            >
-              ← Previous
-            </button>
-            
-            <div className="text-sm font-medium text-gray-500">
-              Page <span className="text-gray-900">{page}</span>
-            </div>
-
-            <button 
-              disabled={!data.next || isFetching}
-              onClick={() => setPage(prev => prev + 1)}
-              className="flex items-center justify-center px-6 py-2 bg-white border border-gray-200 rounded-lg disabled:opacity-50 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors shadow-sm"
-            >
-              Next →
-            </button>
-          </div>
-        )}
+  <div className="flex flex-col md:flex-row justify-between items-center mb-10 gap-4 mt-8 pt-2">
+    <p className="text-sm text-gray-600">
+      Showing {data?.results?.length || 0} of {data?.count || 0} results
+    </p>
+    <nav className="flex items-center rounded-md shadow-sm">
+      <button
+        disabled={!data?.previous || isFetching}
+        onClick={() => setPage(prev => prev - 1)}
+        className="h-9 w-9 flex items-center justify-center border border-gray-300 rounded-l-md hover:bg-gray-50 disabled:opacity-50 transition-colors"
+      >
+        <ChevronLeft className="text-gray-400 w-5 h-5" />
+      </button>
+      <div className="h-9 px-4 bg-blue-600 text-white text-sm font-semibold flex items-center border-t border-b border-blue-600">
+        {page}
+      </div>
+      <button
+        disabled={!data?.next || isFetching}
+        onClick={() => setPage(prev => prev + 1)}
+        className="h-9 w-9 flex items-center justify-center border border-gray-300 rounded-r-md hover:bg-gray-50 disabled:opacity-50 transition-colors"
+      >
+        <ChevronRight className="text-gray-400 w-5 h-5" />
+      </button>
+    </nav>
+  </div>
+)}
 
         <div className="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm flex flex-col md:flex-row items-center gap-6">
           <div className="w-16 h-16 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-200">

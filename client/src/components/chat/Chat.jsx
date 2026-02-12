@@ -46,9 +46,15 @@ export default function Chat({ onClose, data }) {
 
   const { data: rooms, isLoading: roomsLoading } = useChatRooms();
   
-  const currentRoom = useMemo(() =>
-    (rooms?.results || rooms || []).find(r => r.id === selectedRoomId),
-    [rooms, selectedRoomId]);
+  const currentRoom = useMemo(() =>{
+  const roomList = Array.isArray(rooms?.results) 
+    ? rooms.results 
+    : Array.isArray(rooms) 
+      ? rooms 
+      : [];
+
+  return roomList.find(r => r.id === selectedRoomId);
+}, [rooms, selectedRoomId]);
   
   const isChatDisabled = useMemo(() => {
     if (!currentRoom) return false;

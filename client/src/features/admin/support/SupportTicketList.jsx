@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useSupportTickets } from "./supportQueries";
-import { Loader2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
 
 export default function SupportTicketList() {
@@ -114,31 +114,32 @@ export default function SupportTicketList() {
                 </table>
               </div>
 
-              {/* Pagination */}
-              <div className="px-6 py-4 border-t border-gray-100 bg-white flex items-center justify-between">
-                <div className="text-xs font-bold text-gray-400 uppercase tracking-widest">
-                  Total Records: {data?.count || 0}
-                </div>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => setPage(p => Math.max(1, p - 1))}
-                    disabled={!data?.previous}
-                    className="px-4 py-2 text-[10px] font-black uppercase tracking-widest border-2 rounded-xl disabled:opacity-30"
-                  >
-                    Prev
-                  </button>
-                  <button
-                    onClick={() => setPage(p => p + 1)}
-                    disabled={!data?.next}
-                    className="px-4 py-2 text-[10px] font-black uppercase tracking-widest border-2 rounded-xl disabled:opacity-30 text-white bg-primary border-primary shadow-lg shadow-primary/20"
-                  >
-                    Next
-                  </button>
-                </div>
-              </div>
+              <div className="px-6 py-4 border-t border-gray-100 bg-white flex flex-col md:flex-row justify-between items-center gap-4">
+  <div className="text-xs font-bold text-gray-400 uppercase tracking-widest">
+    Showing {data?.results?.length || 0} of {data?.count || 0} Records
+  </div>
+  <nav className="flex items-center rounded-md shadow-sm">
+    <button
+      disabled={!data?.previous}
+      onClick={() => setPage((p) => Math.max(1, p - 1))}
+      className="h-9 w-9 flex items-center justify-center border border-gray-300 rounded-l-md hover:bg-gray-50 disabled:opacity-50 transition-colors"
+    >
+      <ChevronLeft className="text-gray-400 w-5 h-5" />
+    </button>
+    <div className="h-9 px-4 bg-primary text-white text-sm font-semibold flex items-center border-t border-b border-primary">
+      {page}
+    </div>
+    <button
+      disabled={!data?.next}
+      onClick={() => setPage((p) => p + 1)}
+      className="h-9 w-9 flex items-center justify-center border border-gray-300 rounded-r-md hover:bg-gray-50 disabled:opacity-50 transition-colors"
+    >
+      <ChevronRight className="text-gray-400 w-5 h-5" />
+    </button>
+  </nav>
+</div>
             </div>
 
-            {/* Mobile View */}
             <div className="md:hidden space-y-4">
               {data?.results?.map((ticket) => (
                 <div key={ticket.id} className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm">

@@ -101,6 +101,22 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 }
             }
         )
+        other_user = await self.get_other_user()
+        if other_user:
+            notification_group = f"user_{other_user.id}"
+            await self.channel_layer.group_send(
+                notification_group,
+                {
+                    "type": "send_notification", 
+                    "content": {"type": "refresh_chat_counts"} 
+                }
+            )
+
+    @database_sync_to_async
+    def get_other_user(self):
+        room = ChatRoom.objects.get(id=self.room_id)
+        return room.participants.exclude(id=self.user.id).first()
+
 
     async def chat_message(self, event):
         message = event['message']

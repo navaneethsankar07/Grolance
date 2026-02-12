@@ -64,7 +64,6 @@ export default function Contracts() {
 
   const contractList = data?.results || [];
   const totalCount = data?.count || 0;
-  const totalPages = Math.ceil(totalCount / 10);
 
   return (
     <div className="min-h-screen bg-[#f3f4f6] p-4 sm:p-8 font-sans text-[#1e293b]">
@@ -127,70 +126,95 @@ export default function Contracts() {
 
         <div className="space-y-4">
           {contractList.length > 0 ? (
-            contractList.map((contract) => (
-              <div 
-                key={contract.id} 
-                className="group bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-xl hover:border-blue-100 transition-all duration-300 overflow-hidden"
-              >
-                <div className="p-6 sm:p-8">
-                  <div className="flex flex-col lg:flex-row justify-between lg:items-center gap-6">
-                    
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-3">
-                        <span className={`px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-widest ${
-                          contract.status === 'active' 
-                          ? 'bg-blue-50 text-blue-600 border border-blue-100' 
-                          : 'bg-green-50 text-green-600 border border-green-100'
-                        }`}>
-                          {contract.status === 'active' ? 'In Progress' : contract.status}
-                        </span>
-                        <span className="text-[10px] font-bold text-gray-500 uppercase tracking-tighter italic">
-                          Contract: #ORD-{contract.id + 8000}
-                        </span>
-                      </div>
+            <>
+              {contractList.map((contract) => (
+                <div 
+                  key={contract.id} 
+                  className="group bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-xl hover:border-blue-100 transition-all duration-300 overflow-hidden"
+                >
+                  <div className="p-6 sm:p-8">
+                    <div className="flex flex-col lg:flex-row justify-between lg:items-center gap-6">
                       
-                      <h2 className="text-xl font-bold text-[#1e293b] mb-1 group-hover:text-[#3b82f6] transition-colors cursor-pointer">
-                        {contract.project_title}
-                      </h2>
-                      <p className="text-xs text-gray-500 mb-4">
-                        Client Partner: <span className="text-[#3b82f6] font-semibold">{contract.client_name}</span>
-                      </p>
-                      
-                      <p className="text-sm text-gray-500 leading-relaxed line-clamp-2 max-w-2xl">
-                        {contract.project_description || "Consultancy and implementation services for the aforementioned project scope."}
-                      </p>
-                    </div>
-
-                    <div className="flex flex-col sm:flex-row lg:flex-col xl:flex-row items-center gap-4 lg:min-w-[300px]">
-                      <div className="grid grid-cols-2 gap-x-8 gap-y-2 w-full lg:mb-4 xl:mb-0">
-                        <div className="space-y-0.5">
-                          <p className="text-[10px] text-gray-400 font-bold uppercase">Package</p>
-                          <p className="text-xs font-bold text-gray-700">{contract.package_name || 'Professional'}</p>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-3">
+                          <span className={`px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-widest ${
+                            contract.status === 'active' 
+                            ? 'bg-blue-50 text-blue-600 border border-blue-100' 
+                            : 'bg-green-50 text-green-600 border border-green-100'
+                          }`}>
+                            {contract.status === 'active' ? 'In Progress' : contract.status}
+                          </span>
+                          <span className="text-[10px] font-bold text-gray-500 uppercase tracking-tighter italic">
+                            Contract: #ORD-{contract.id + 8000}
+                          </span>
                         </div>
-                        <div className="space-y-0.5 text-right">
-                          <p className="text-[10px] text-gray-400 font-bold uppercase">Budget</p>
-                          <p className="text-sm font-black text-gray-900">${Number(contract.total_amount).toLocaleString()}</p>
-                        </div>
-                        <div className="space-y-0.5">
-                          <p className="text-[10px] text-gray-400 font-bold uppercase">Timeline</p>
-                          <p className="text-xs font-bold text-gray-700">{contract.delivery_days || 14} Days</p>
-                        </div>
+                        
+                        <h2 className="text-xl font-bold text-[#1e293b] mb-1 group-hover:text-[#3b82f6] transition-colors cursor-pointer">
+                          {contract.project_title}
+                        </h2>
+                        <p className="text-xs text-gray-500 mb-4">
+                          Client Partner: <span className="text-[#3b82f6] font-semibold">{contract.client_name}</span>
+                        </p>
+                        
+                        <p className="text-sm text-gray-500 leading-relaxed line-clamp-2 max-w-2xl">
+                          {contract.project_description || "Consultancy and implementation services for the aforementioned project scope."}
+                        </p>
                       </div>
 
-                      <div className="flex gap-2 w-full">
-                        <button 
-                          onClick={() => navigate(`/freelancer/contracts/${contract.id}`)}
-                          className="flex-1 flex items-center justify-center gap-2 bg-[#3b82f6] text-white px-4 py-3 rounded-xl text-xs font-bold hover:bg-blue-600 transition-all hover:shadow-lg hover:shadow-blue-100"
-                        >
-                          <ExternalLink className="w-4 h-4" />
-                          Details
-                        </button>
+                      <div className="flex flex-col sm:flex-row lg:flex-col xl:flex-row items-center gap-4 lg:min-w-[300px]">
+                        <div className="grid grid-cols-2 gap-x-8 gap-y-2 w-full lg:mb-4 xl:mb-0">
+                          <div className="space-y-0.5">
+                            <p className="text-[10px] text-gray-400 font-bold uppercase">Package</p>
+                            <p className="text-xs font-bold text-gray-700">{contract.package_name || 'Professional'}</p>
+                          </div>
+                          <div className="space-y-0.5 text-right">
+                            <p className="text-[10px] text-gray-400 font-bold uppercase">Budget</p>
+                            <p className="text-sm font-black text-gray-900">${Number(contract.total_amount).toLocaleString()}</p>
+                          </div>
+                          <div className="space-y-0.5">
+                            <p className="text-[10px] text-gray-400 font-bold uppercase">Timeline</p>
+                            <p className="text-xs font-bold text-gray-700">{contract.delivery_days || 14} Days</p>
+                          </div>
+                        </div>
+
+                        <div className="flex gap-2 w-full">
+                          <button 
+                            onClick={() => navigate(`/freelancer/contracts/${contract.id}`)}
+                            className="flex-1 flex items-center justify-center gap-2 bg-[#3b82f6] text-white px-4 py-3 rounded-xl text-xs font-bold hover:bg-blue-600 transition-all hover:shadow-lg hover:shadow-blue-100"
+                          >
+                            <ExternalLink className="w-4 h-4" />
+                            Details
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
+              ))}
+
+              <div className="flex flex-col md:flex-row justify-between items-center gap-4 mt-8 pt-2">
+                <p className="text-sm text-gray-600">Showing {contractList.length} of {totalCount} results</p>
+                <nav className="flex items-center rounded-md shadow-sm">
+                  <button 
+                    disabled={!data?.previous}
+                    onClick={() => setPage(p => p - 1)}
+                    className="h-9 w-9 flex items-center justify-center border border-gray-300 rounded-l-md hover:bg-gray-50 disabled:opacity-50"
+                  >
+                    <ChevronLeft className="text-gray-400 w-5 h-5" />
+                  </button>
+                  <div className="h-9 px-4 bg-[#3b82f6] text-white text-sm font-semibold flex items-center border-t border-b border-[#3b82f6]">
+                    {page}
+                  </div>
+                  <button 
+                    disabled={!data?.next}
+                    onClick={() => setPage(p => p + 1)}
+                    className="h-9 w-9 flex items-center justify-center border border-gray-300 rounded-r-md hover:bg-gray-50 disabled:opacity-50"
+                  >
+                    <ChevronRight className="text-gray-400 w-5 h-5" />
+                  </button>
+                </nav>
               </div>
-            ))
+            </>
           ) : (
             <div className="bg-white rounded-3xl p-24 text-center border-2 border-dashed border-gray-200">
               <div className="flex justify-center mb-4 text-gray-200">
@@ -201,43 +225,6 @@ export default function Contracts() {
             </div>
           )}
         </div>
-
-        {/* Pagination */}
-        {totalPages > 1 && (
-          <div className="mt-12 flex justify-center items-center gap-3">
-            <button 
-              disabled={page === 1}
-              onClick={() => setPage(prev => prev - 1)}
-              className="p-3 rounded-xl border border-gray-200 bg-white text-gray-400 hover:text-[#3b82f6] hover:border-[#3b82f6] disabled:opacity-40 transition-all shadow-sm"
-            >
-              <ChevronLeft className="w-5 h-5" />
-            </button>
-            
-            <div className="flex gap-2">
-              {[...Array(totalPages)].map((_, i) => (
-                <button 
-                  key={i + 1} 
-                  onClick={() => setPage(i + 1)}
-                  className={`w-10 h-10 rounded-xl text-xs font-bold transition-all ${
-                    page === i + 1 
-                    ? 'bg-[#3b82f6] text-white shadow-lg' 
-                    : 'bg-white text-gray-400 border border-gray-200 hover:bg-gray-50'
-                  }`}
-                >
-                  {i + 1}
-                </button>
-              ))}
-            </div>
-
-            <button 
-              disabled={page === totalPages}
-              onClick={() => setPage(prev => prev + 1)}
-              className="p-3 rounded-xl border border-gray-200 bg-white text-gray-400 hover:text-[#3b82f6] hover:border-[#3b82f6] disabled:opacity-40 transition-all shadow-sm"
-            >
-              <ChevronRight className="w-5 h-5" />
-            </button>
-          </div>
-        )}
       </div>
     </div>
   );

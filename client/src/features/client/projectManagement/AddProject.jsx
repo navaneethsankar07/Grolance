@@ -264,12 +264,12 @@ function AddProject() {
                     </Button>
                   </div>
 
-                  {errors.skills && (
-                    <p className="text-red-500 text-xs mt-1">
-                      {errors.skills.message}
-                    </p>
-                  )}
-
+                 {errors.skills && (
+  <p className="text-red-500 text-xs mt-1">
+    {errors.skills.message || 
+     (Array.isArray(errors.skills) && errors.skills.find(err => err)?.message)}
+  </p>
+)}
                   {suggestedSkills.length > 0 && (
                     <div className="flex flex-wrap gap-2 mt-3">
                       {suggestedSkills.map((skill) => (

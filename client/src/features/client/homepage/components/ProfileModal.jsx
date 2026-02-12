@@ -85,7 +85,7 @@ const handleSwitchToFreelancer = async() => {
         </Link>
 
         <Link
-          to=""
+          to="/support"
           onClick={onClose}
           className="menu-item flex items-center gap-3 rounded-lg px-4 py-3 transition-colors hover:bg-gray-200"
           style={{ backgroundColor: "#F1F1F1" }}

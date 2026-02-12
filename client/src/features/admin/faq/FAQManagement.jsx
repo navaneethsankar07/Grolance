@@ -116,27 +116,30 @@ export default function FAQManagement() {
           </div>
         )}
 
-        <div className="px-6 py-4 border-t border-gray-100 bg-gray-50/30 flex items-center justify-between">
-            <p className="text-sm text-gray-500 font-medium">
-                Page {page}
-            </p>
-            <div className="flex gap-2">
-                <button
-                    onClick={() => setPage(p => Math.max(1, p - 1))}
-                    disabled={!data?.previous}
-                    className="p-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                >
-                    <ChevronLeft size={18} className="text-gray-600" />
-                </button>
-                <button
-                    onClick={() => setPage(p => p + 1)}
-                    disabled={!data?.next}
-                    className="p-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                >
-                    <ChevronRight size={18} className="text-gray-600" />
-                </button>
-            </div>
-        </div>
+        <div className="px-6 py-4 border-t border-gray-100 bg-white flex flex-col md:flex-row justify-between items-center gap-4">
+  <div className="text-xs font-bold text-gray-400 uppercase tracking-widest">
+    Showing {data?.results?.length || 0} of {data?.count || 0} Records
+  </div>
+  <nav className="flex items-center rounded-md shadow-sm">
+    <button
+      disabled={!data?.previous}
+      onClick={() => setPage((p) => Math.max(1, p - 1))}
+      className="h-9 w-9 flex items-center justify-center border border-gray-300 rounded-l-md hover:bg-gray-50 disabled:opacity-50 transition-colors"
+    >
+      <ChevronLeft className="text-gray-400 w-5 h-5" />
+    </button>
+    <div className="h-9 px-4 bg-primary text-white text-sm font-semibold flex items-center border-t border-b border-primary">
+      {page}
+    </div>
+    <button
+      disabled={!data?.next}
+      onClick={() => setPage((p) => p + 1)}
+      className="h-9 w-9 flex items-center justify-center border border-gray-300 rounded-r-md hover:bg-gray-50 disabled:opacity-50 transition-colors"
+    >
+      <ChevronRight className="text-gray-400 w-5 h-5" />
+    </button>
+  </nav>
+</div>
       </div>
 
       {isModalOpen && (

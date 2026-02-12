@@ -20,7 +20,6 @@ import ClientContractDetail from "../features/client/contract/ContractDetail";
 import ClientJobDetail from "../features/client/projectManagement/ProjectDetails";
 import SpendingSummary from "../features/client/profile/SpendingSummary";
 import HowItWorks from "../features/client/howitworks/HowItWorks";
-import { useNotificationSocket } from "../hooks/notification/useNotificationSocket";
 import SupportPage from "../components/common/SupportPage";
 import TermsAndConditions from "../components/common/termsandconditions/TermsAndConditions";
 import PrivacyPolicies from "../components/common/privacypolicy/PrivacyPolicies";
@@ -32,7 +31,6 @@ export default function ClientRoutes() {
   if (loading) {
     return null; 
   }
-  useNotificationSocket(user?.id);
   return (
     <Routes>
       

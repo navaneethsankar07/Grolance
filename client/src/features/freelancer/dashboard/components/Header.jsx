@@ -2,10 +2,11 @@ import { Bell, Mail } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useSwitchRole } from "../../../client/homepage/homePageMutation";
 import { useSelector } from "react-redux";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useModal } from "../../../../hooks/modal/useModalStore";
 import { useNotifications } from "../../../../components/notifications/notificationQueries";
 import { useNotificationSocket } from "../../../../hooks/notification/useNotificationSocket";
+import { useChatRooms } from "../../../../components/chat/chatQueries";
 
 export function FreelancerHeader() {
   const { mutateAsync } = useSwitchRole();
@@ -15,6 +16,8 @@ export function FreelancerHeader() {
   
   const [shouldAnimate, setShouldAnimate] = useState(false);
   const prevCountRef = useRef(0);
+  const { data: rooms } = useChatRooms(); 
+  const currentUserId = user?.id;
 
   const { data: notifications } = useNotifications(false);
   useNotificationSocket(user?.id);
@@ -42,6 +45,17 @@ export function FreelancerHeader() {
     }
   };
 
+    const unreadMessageCount = useMemo(() => {
+      const roomList = rooms?.results || rooms || [];
+      return roomList.reduce((acc, room) => {
+        const lastMsg = room.last_message;
+        if (lastMsg && !lastMsg.is_read && lastMsg.sender !== currentUserId) {
+          return acc + 1;
+        }
+        return acc;
+      }, 0);
+    }, [rooms, currentUserId]);
+
   return (
     <header className="w-full h-[80px] bg-white border-b border-[#F3F4F6] flex items-center justify-between px-10">
       <Link to="/" className="flex items-center">
@@ -68,9 +82,13 @@ export function FreelancerHeader() {
               className="relative w-11 h-11 rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors"
             >
               <Mail className="w-6 h-6 text-[#4B5563]" />
-              <span className="absolute top-1.5 right-1.5 w-5 h-5 bg-[#3B82F6] border-2 border-white rounded-full flex items-center justify-center text-[10px] font-bold text-white">
-                3
-              </span>
+              {unreadMessageCount > 0 && (
+                <span className="absolute top-0 right-0 md:top-1 md:right-1 min-w-[14px] h-3.5 md:w-4 md:h-4 bg-blue-500 rounded-full flex items-center justify-center px-1">
+                  <span className="text-white text-[8px] md:text-[9px] font-semibold">
+                    {unreadMessageCount}
+                  </span>
+                </span>
+              )}
             </button>
 
             <button 

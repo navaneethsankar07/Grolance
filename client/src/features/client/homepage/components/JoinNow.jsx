@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom'
 
 function JoinNow() {
   return (
-    <section className="py-12 sm:py-16 bg-[#EFF6FF]">
+    <section className="py-12 mb-15 sm:py-16 bg-[#EFF6FF]">
         <div className="max-w-[1728px] mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-[#111827] font-inter text-3xl sm:text-4xl lg:text-[50px] font-bold leading-tight mb-4 sm:mb-6">
             Freelancer?

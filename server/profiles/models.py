@@ -63,7 +63,7 @@ class FreelancerProfile(models.Model):
         choices=EXPERIENCE_CHOICES
     )                   
     availability = models.BooleanField(default=True)
-    is_active = models.BooleanField(default=True)
+    is_active = models.BooleanField(default=False)
     total_earnings = models.DecimalField(
         max_digits=12,
         decimal_places=2,

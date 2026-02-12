@@ -21,7 +21,8 @@ export default function FindTalent() {
   });
 
   const { data, isLoading } = useFreelancerList(queryParams);
-  const {data:categories} = useAllCategories();
+  const { data: categories } = useAllCategories();
+
   const handleApplyFilters = () => {
     const minVal = minPriceRef.current.value ? parseFloat(minPriceRef.current.value) : null;
     const maxVal = maxPriceRef.current.value ? parseFloat(maxPriceRef.current.value) : null;
@@ -39,7 +40,7 @@ export default function FindTalent() {
     setPage(1);
     setQueryParams({
       search: searchRef.current.value,
-      category: categoryRef.current.value,
+      category: categoryRef.current.value === "All Categories" ? "" : categoryRef.current.value,
       minPrice: minPriceRef.current.value,
       maxPrice: maxPriceRef.current.value,
       page: 1
@@ -80,18 +81,10 @@ export default function FindTalent() {
     });
   };
 
-  const totalPages = data ? Math.ceil(data.count / (data.results?.length || 10)) : 0;
-console.log(categories);
-
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="bg-white border-b border-gray-200 pt-16 pb-12">
         <div className="max-w-7xl mx-auto px-4">
-          <Link to="/dashboard" className="flex items-center gap-2 text-gray-500 hover:text-blue-600 transition-colors mb-6 w-fit">
-            <ArrowLeft className="w-4 h-4" />
-            <span className="text-sm font-medium">Back to Dashboard</span>
-          </Link>
-          
           <div className="text-center max-w-3xl mx-auto">
             <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight">
               Find & Hire Top <span className="text-blue-600">Talent</span>
@@ -134,8 +127,9 @@ console.log(categories);
                   <select 
                     ref={categoryRef}
                     className="w-full h-11 px-3 rounded-xl border border-gray-200 bg-gray-50 text-sm outline-none focus:border-blue-500"
-                  ><option>All Categories</option>
-                    {categories?.map(cat=><option key={cat.id} value={cat.name}>{cat.name}</option>)}
+                  >
+                    <option>All Categories</option>
+                    {categories?.map(cat => <option key={cat.id} value={cat.name}>{cat.name}</option>)}
                   </select>
                 </div>
                 <div className="space-y-2">
@@ -205,38 +199,29 @@ console.log(categories);
                 </div>
 
                 {data?.count > 0 && (
-                  <div className="mt-10 flex items-center justify-center gap-2">
-                    <button
-                      disabled={!data?.previous}
-                      onClick={() => handlePageChange(page - 1)}
-                      className="p-2 rounded-lg border border-gray-200 hover:bg-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                    >
-                      <ChevronLeft className="w-5 h-5" />
-                    </button>
-                    
-                    <div className="flex gap-1">
-                      {[...Array(totalPages)].map((_, i) => (
-                        <button
-                          key={i + 1}
-                          onClick={() => handlePageChange(i + 1)}
-                          className={`w-10 h-10 rounded-lg text-sm font-medium transition-all ${
-                            page === i + 1 
-                              ? "bg-blue-600 text-white shadow-md shadow-blue-100" 
-                              : "text-gray-600 hover:bg-white border border-transparent hover:border-gray-200"
-                          }`}
-                        >
-                          {i + 1}
-                        </button>
-                      ))}
-                    </div>
-
-                    <button
-                      disabled={!data?.next}
-                      onClick={() => handlePageChange(page + 1)}
-                      className="p-2 rounded-lg border border-gray-200 hover:bg-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                    >
-                      <ChevronRight className="w-5 h-5" />
-                    </button>
+                  <div className="flex flex-col md:flex-row justify-between items-center gap-4 mt-8 pt-2">
+                    <p className="text-sm text-gray-600">
+                      Showing {data?.results?.length || 0} of {data?.count || 0} results
+                    </p>
+                    <nav className="flex items-center rounded-md shadow-sm">
+                      <button 
+                        disabled={!data?.previous}
+                        onClick={() => handlePageChange(page - 1)}
+                        className="h-9 w-9 flex items-center justify-center border border-gray-300 rounded-l-md hover:bg-gray-50 disabled:opacity-50"
+                      >
+                        <ChevronLeft className="text-gray-400 w-5 h-5" />
+                      </button>
+                      <div className="h-9 px-4 bg-blue-600 text-white text-sm font-semibold flex items-center border-t border-b border-blue-600">
+                        {page}
+                      </div>
+                      <button 
+                        disabled={!data?.next}
+                        onClick={() => handlePageChange(page + 1)}
+                        className="h-9 w-9 flex items-center justify-center border border-gray-300 rounded-r-md hover:bg-gray-50 disabled:opacity-50"
+                      >
+                        <ChevronRight className="text-gray-400 w-5 h-5" />
+                      </button>
+                    </nav>
                   </div>
                 )}
               </>
@@ -245,5 +230,5 @@ console.log(categories);
         </div>
       </div>
     </div>
-  ); 
+  );
 }

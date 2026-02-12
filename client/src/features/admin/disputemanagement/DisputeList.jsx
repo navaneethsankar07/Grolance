@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Search, Loader2, User } from "lucide-react";
+import { Search, Loader2, User, ChevronLeft, ChevronRight } from "lucide-react";
 import { useAdminDisputes } from "./disputeQueries";
 import { useNavigate } from "react-router-dom";
 
@@ -7,8 +7,9 @@ export default function DisputeList() {
   const navigate = useNavigate();
   const [activeFilter, setActiveFilter] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
+  const [page, setPage] = useState(1);
 
-  const { data: disputes, isLoading, isError } = useAdminDisputes();
+  const { data: disputes, isLoading, isError } = useAdminDisputes(page, searchQuery, activeFilter);
 
   const getStatusLabel = (status) => {
     return status.replace("_", " ").toUpperCase();
@@ -25,15 +26,15 @@ export default function DisputeList() {
     }
   };
 
-  const filteredDisputes = disputes?.results?.filter((dispute) => {
-    const matchesFilter = activeFilter === "All" || dispute.status === activeFilter;
-    const matchesSearch = 
-      searchQuery === "" ||
-      dispute.id.toString().includes(searchQuery) ||
-      dispute.client_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      dispute.freelancer_name.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesFilter && matchesSearch;
-  });
+  const handleFilterChange = (filter) => {
+    setActiveFilter(filter);
+    setPage(1);
+  };
+
+  const handlePageChange = (newPage) => {
+    setPage(newPage);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   if (isLoading) return (
     <div className="min-h-screen flex items-center justify-center bg-white">
@@ -57,8 +58,8 @@ export default function DisputeList() {
             <p className="text-sm text-gray-500 mt-1">Manage and resolve conflicts between users</p>
           </div>
           <div className="text-right">
-            <span className="text-2xl font-bold text-primary">{filteredDisputes?.length || 0}</span>
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Active Cases</p>
+            <span className="text-2xl font-bold text-primary">{disputes?.count || 0}</span>
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Total Cases</p>
           </div>
         </div>
 
@@ -68,7 +69,10 @@ export default function DisputeList() {
               type="text"
               placeholder="Search by ID, Client or Freelancer..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setPage(1);
+              }}
               className="w-full h-12 pl-12 pr-4 py-2 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all shadow-sm"
             />
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -78,7 +82,7 @@ export default function DisputeList() {
             {["All", "pending"].map((f) => (
               <button
                 key={f}
-                onClick={() => setActiveFilter(f)}
+                onClick={() => handleFilterChange(f)}
                 className={`flex-1 text-[10px] font-bold rounded-lg transition-all uppercase tracking-tight ${
                   activeFilter === f ? "bg-white text-primary shadow-sm" : "text-gray-500 hover:text-gray-700"
                 }`}
@@ -93,7 +97,7 @@ export default function DisputeList() {
           {["All", "pending", "resolved"].map((f) => (
             <button
               key={f}
-              onClick={() => setActiveFilter(f)}
+              onClick={() => handleFilterChange(f)}
               className={`px-6 py-2 text-[11px] font-black rounded-full border transition-all whitespace-nowrap uppercase tracking-widest ${
                 activeFilter === f 
                   ? "bg-primary border-primary text-white shadow-md shadow-primary/20" 
@@ -119,7 +123,7 @@ export default function DisputeList() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
-                {filteredDisputes?.map((dispute) => (
+                {disputes?.results?.map((dispute) => (
                   <tr key={dispute.id} className="hover:bg-primary/[0.02] transition-colors group">
                     <td className="px-8 py-6">
                       <span className="text-sm font-bold text-gray-900 bg-gray-100 px-3 py-1 rounded-lg">
@@ -137,7 +141,6 @@ export default function DisputeList() {
                           </div>
                           <span className="text-sm font-semibold text-gray-800">{dispute.client_name}</span>
                         </div>
-                        
                       </div>
                     </td>
                     <td>
@@ -175,12 +178,37 @@ export default function DisputeList() {
             </table>
           </div>
           
-          {filteredDisputes?.length === 0 && (
+          {disputes?.results?.length === 0 && (
             <div className="py-20 text-center">
               <p className="text-gray-400 font-medium">No disputes found matching your criteria.</p>
             </div>
           )}
         </div>
+
+        {disputes?.count > 10 && (
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4 mt-8 pt-2">
+            <p className="text-sm text-gray-600">Showing {disputes?.results?.length || 0} of {disputes?.count || 0} results</p>
+            <nav className="flex items-center rounded-md shadow-sm">
+              <button 
+                disabled={!disputes?.previous}
+                onClick={() => handlePageChange(page - 1)}
+                className="h-9 w-9 flex items-center justify-center border border-gray-300 rounded-l-md hover:bg-gray-50 disabled:opacity-50"
+              >
+                <ChevronLeft className="text-gray-400 w-5 h-5" />
+              </button>
+              <div className="h-9 px-4 bg-primary text-white text-sm font-semibold flex items-center border-t border-b border-primary">
+                {page}
+              </div>
+              <button 
+                disabled={!disputes?.next}
+                onClick={() => handlePageChange(page + 1)}
+                className="h-9 w-9 flex items-center justify-center border border-gray-300 rounded-r-md hover:bg-gray-50 disabled:opacity-50"
+              >
+                <ChevronRight className="text-gray-400 w-5 h-5" />
+              </button>
+            </nav>
+          </div>
+        )}
       </div>
     </div>
   );

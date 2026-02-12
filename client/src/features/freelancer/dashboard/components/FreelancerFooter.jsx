@@ -36,7 +36,7 @@ let year = d.getFullYear();
           </Link>
         </nav>
         <p className="text-gray-600 text-sm text-center">
-          © {year} Grolance — Your Craft Your Crown
+          © {year} <Link to={'/'}><span className="text-black">gro</span><span className="text-primary">lance.</span></Link> Your Craft Your Crown
         </p>
       </div>
     </footer>

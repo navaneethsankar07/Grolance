@@ -1,4 +1,4 @@
-import { GripVertical, Pencil, Plus, Trash2 } from "lucide-react";
+import { GripVertical, Pencil, Plus, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
 
 export const ManagementList = ({
   title,
@@ -8,15 +8,15 @@ export const ManagementList = ({
   onAdd,
   onEdit,
   onDelete,
-
   searchValue,
   onSearchChange,
   onSearchSubmit,
-
   onNext,
   onPrev,
   hasNext,
   hasPrev,
+  currentPage,
+  totalCount,
 }) => {
   return (
     <div className="mb-12">
@@ -93,22 +93,33 @@ export const ManagementList = ({
           )}
         </div>
       </div>
-      <div className="flex items-center justify-end gap-3 mt-4">
-        <button
-          disabled={!hasPrev}
-          onClick={onPrev}
-          className="px-3 py-1 text-sm rounded border border-gray-200 disabled:opacity-40"
-        >
-          Prev
-        </button>
-        <button
-          disabled={!hasNext}
-          onClick={onNext}
-          className="px-3 py-1 text-sm rounded border border-gray-200 disabled:opacity-40"
-        >
-          Next
-        </button>
-      </div>
+
+      {totalCount > 0 && (
+        <div className="flex flex-col md:flex-row justify-between items-center gap-4 mt-8 pt-2">
+          <p className="text-sm text-gray-600">
+            Showing {items.length} of {totalCount} results
+          </p>
+          <nav className="flex items-center rounded-md shadow-sm">
+            <button
+              disabled={!hasPrev}
+              onClick={onPrev}
+              className="h-9 w-9 flex items-center justify-center border border-gray-300 rounded-l-md hover:bg-gray-50 disabled:opacity-50 transition-colors"
+            >
+              <ChevronLeft className="text-gray-400 w-5 h-5" />
+            </button>
+            <div className="h-9 px-4 bg-blue-600 text-white text-sm font-semibold flex items-center border-t border-b border-blue-600">
+              {currentPage}
+            </div>
+            <button
+              disabled={!hasNext}
+              onClick={onNext}
+              className="h-9 w-9 flex items-center justify-center border border-gray-300 rounded-r-md hover:bg-gray-50 disabled:opacity-50 transition-colors"
+            >
+              <ChevronRight className="text-gray-400 w-5 h-5" />
+            </button>
+          </nav>
+        </div>
+      )}
     </div>
   );
 };

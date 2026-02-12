@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import { X, CheckCircle2, ShieldCheck } from "lucide-react"; 
+import { X, CheckCircle2, ShieldCheck, Loader2 } from "lucide-react"; 
 import SignatureCanvas from 'react-signature-canvas'; 
 import { useModal } from "../../../hooks/modal/useModalStore";
 import { useAcceptOffer } from "./offersQuries";
@@ -12,7 +12,7 @@ export default function OfferModal() {
   const [fullName, setFullName] = useState("");
   const sigCanvas = useRef(null);
 
-  const { mutate: acceptOffer, isLoading } = useAcceptOffer();
+  const { mutate: acceptOffer, isPending } = useAcceptOffer();
 
   const offer = modalProps?.offer;
   const projectName = offer?.project_title || "Project Offer";
@@ -211,15 +211,22 @@ export default function OfferModal() {
         </div>
 
         <div className="flex items-center justify-end gap-3 px-6 py-6 border-t bg-slate-50">
-          <button onClick={closeModal} className="px-6 py-2 text-sm font-medium text-slate-600 hover:text-slate-900" disabled={isLoading}>
+          <button onClick={closeModal} className="px-6 py-2 text-sm font-medium text-slate-600 hover:text-slate-900" disabled={isPending}>
             close
           </button>
           <button
             onClick={handleSignAndAccept}
-            disabled={!agreed || (signatureMode === 'type' && !fullName.trim()) || isLoading}
+            disabled={!agreed || (signatureMode === 'type' && !fullName.trim()) || isPending}
             className="px-8 py-2.5 text-sm font-bold text-white rounded-lg bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 shadow-lg shadow-blue-200 transition-all flex items-center gap-2"
           >
-            {isLoading ? "Signing..." : "Sign & Start Project"}
+            {isPending ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Signing...
+              </>
+            ) : (
+              "Sign & Start Project"
+            )}
           </button>
         </div>
       </div>

@@ -1,23 +1,25 @@
 import React, { useState } from 'react';
 import { useReceivedInvitations } from './invitationQueries';
 import { InvitationCard } from './InvitationCard';
-import { Loader2, Inbox } from 'lucide-react';
+import { Loader2, Inbox, ChevronLeft, ChevronRight } from 'lucide-react';
 
 export default function InvitationsPage() {
   const [activeTab, setActiveTab] = useState('all');
-  const { data, isLoading, isError } = useReceivedInvitations();
-const invitations = data?.results || data || []
+  const [page, setPage] = useState(1);
+  const { data, isLoading, isError } = useReceivedInvitations({ page, status: activeTab === 'all' ? '' : activeTab });
+  
+  const invitations = data?.results || [];
 
-const filteredInvitations = invitations?.filter(inv => {
-    if (activeTab === 'all') return true;
-    return inv.status === activeTab;
-  }) || [];
+  const handlePageChange = (newPage) => {
+    setPage(newPage);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   const counts = {
-    all: invitations?.length || 0,
-    pending: invitations?.filter(inv => inv.status === 'pending').length || 0,
-    accepted: invitations?.filter(inv => inv.status === 'accepted').length || 0,
-    hired:invitations?.filter(inv=>inv.status === 'hired').length || 0
+    all: data?.total_counts?.all || 0,
+    pending: data?.total_counts?.pending || 0,
+    accepted: data?.total_counts?.accepted || 0,
+    hired: data?.total_counts?.hired || 0
   };
 
   if (isLoading) {
@@ -37,10 +39,13 @@ const filteredInvitations = invitations?.filter(inv => {
         </div>
 
         <div className="border-b border-gray-200 mb-8 flex gap-8">
-          {['all', 'pending', 'accepted','hired'].map((tab) => (
+          {['all', 'pending', 'accepted', 'hired'].map((tab) => (
             <button
               key={tab}
-              onClick={() => setActiveTab(tab)}
+              onClick={() => {
+                setActiveTab(tab);
+                setPage(1);
+              }}
               className={`pb-4 px-1 relative text-xs font-bold uppercase tracking-wider transition-all ${
                 activeTab === tab ? 'text-blue-600' : 'text-gray-400 hover:text-gray-600'
               }`}
@@ -54,10 +59,39 @@ const filteredInvitations = invitations?.filter(inv => {
         </div>
 
         <div className="space-y-4">
-          {filteredInvitations.length > 0 ? (
-            filteredInvitations.map((invitation) => (
-              <InvitationCard key={invitation.id} invitation={invitation} />
-            ))
+          {invitations.length > 0 ? (
+            <>
+              {invitations.map((invitation) => (
+                <InvitationCard key={invitation.id} invitation={invitation} />
+              ))}
+              {data.count>10 &&
+
+              <div className="flex flex-col md:flex-row justify-between items-center gap-4 mt-8 pt-2">
+                <p className="text-sm text-gray-600">
+                  Showing {invitations.length} of {data?.count || 0} results
+                </p>
+                <nav className="flex items-center rounded-md shadow-sm">
+                  <button
+                    disabled={!data?.previous}
+                    onClick={() => handlePageChange(page - 1)}
+                    className="h-9 w-9 flex items-center justify-center border border-gray-300 rounded-l-md hover:bg-gray-50 disabled:opacity-50"
+                    >
+                    <ChevronLeft className="text-gray-400 w-5 h-5" />
+                  </button>
+                  <div className="h-9 px-4 bg-blue-600 text-white text-sm font-semibold flex items-center border-t border-b border-blue-600">
+                    {page}
+                  </div>
+                  <button
+                    disabled={!data?.next}
+                    onClick={() => handlePageChange(page + 1)}
+                    className="h-9 w-9 flex items-center justify-center border border-gray-300 rounded-r-md hover:bg-gray-50 disabled:opacity-50"
+                    >
+                    <ChevronRight className="text-gray-400 w-5 h-5" />
+                  </button>
+                </nav>
+              </div>
+                  }
+            </>
           ) : (
             <div className="bg-white rounded-2xl border border-dashed border-gray-300 p-12 text-center">
               <Inbox className="w-12 h-12 text-gray-300 mx-auto mb-4" />

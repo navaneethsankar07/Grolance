@@ -4,7 +4,6 @@ import { Plus, Bell, Mail, Menu, X } from "lucide-react";
 import { useSelector } from "react-redux";
 import { useModal } from "../../../../hooks/modal/useModalStore";
 import { useNotifications } from "../../../../components/notifications/notificationQueries";
-import { useNotificationSocket } from "../../../../hooks/notification/useNotificationSocket";
 import { useChatRooms } from "../../../../components/chat/chatQueries";
 
 export default function ClientHeader() {
@@ -18,13 +17,19 @@ export default function ClientHeader() {
   
   const { data: notifications } = useNotifications(false);
   const { data: rooms } = useChatRooms(); 
-  useNotificationSocket(user?.id);
   
   const unreadNotifications = notifications?.results?.length || 0;
+  console.log('room',rooms?.results, 'noti', unreadNotifications);
   
   const unreadMessageCount = useMemo(() => {
-    const roomList = rooms?.results || rooms || [];
-    return roomList.reduce((acc, room) => {
+    const roomList = Array.isArray(rooms?.results) 
+    ? rooms.results 
+    : Array.isArray(rooms) 
+      ? rooms 
+      : [];
+
+  if (roomList.length === 0) return 0;
+    return roomList?.reduce((acc, room) => {
       const lastMsg = room.last_message;
       if (lastMsg && !lastMsg.is_read && lastMsg.sender !== currentUserId) {
         return acc + 1;

@@ -8,7 +8,6 @@ import StepSix from "./step6/StepSix";
 
 export default function OnboardingManager() {
   const { currentStep } = useOnBoarding();
-  console.log(currentStep);
   
 
   switch (currentStep) {

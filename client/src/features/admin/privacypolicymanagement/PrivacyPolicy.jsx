@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { ArrowLeft, Pencil, Trash2, Loader2, X, AlertTriangle } from "lucide-react";
+import { ArrowLeft, Pencil, Trash2, Loader2, X, AlertTriangle, ChevronRight, ChevronLeft } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { usePrivacyMutations } from "./privacyMutations";
@@ -118,28 +118,30 @@ export default function PrivacyPolicy() {
             </div>
           </div>
 
-          <div className="bg-white px-6 py-4 flex flex-col sm:flex-row items-center justify-between border-t border-gray-100 gap-4">
-            <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 text-center sm:text-left">
-              <span className="text-xs text-gray-500 font-medium">Page {page} of {Math.ceil((data?.count || 0) / 10) || 1}</span>
-              <span className="text-xs text text-gray-400">Total Results: {data?.count || 0}</span>
-            </div>
-            <div className="flex gap-2 w-full sm:w-auto">
-              <button 
-                disabled={!data?.previous} 
-                onClick={() => setPage(p => p - 1)}
-                className="flex-1 sm:flex-none px-4 py-2 text-xs font-bold border rounded-lg disabled:opacity-30 bg-white"
-              >
-                Previous
-              </button>
-              <button 
-                disabled={!data?.next} 
-                onClick={() => setPage(p => p + 1)}
-                className="flex-1 sm:flex-none px-4 py-2 text-xs font-bold border rounded-lg disabled:opacity-30 bg-white"
-              >
-                Next
-              </button>
-            </div>
-          </div>
+          <div className="px-6 py-4 border-t border-gray-100 bg-white flex flex-col md:flex-row justify-between items-center gap-4">
+  <div className="text-xs font-bold text-gray-400 uppercase tracking-widest">
+    Showing {data?.results?.length || 0} of {data?.count || 0} Records
+  </div>
+  <nav className="flex items-center rounded-md shadow-sm">
+    <button
+      disabled={!data?.previous}
+      onClick={() => setPage((p) => Math.max(1, p - 1))}
+      className="h-9 w-9 flex items-center justify-center border border-gray-300 rounded-l-md hover:bg-gray-50 disabled:opacity-50 transition-colors"
+    >
+      <ChevronLeft className="text-gray-400 w-5 h-5" />
+    </button>
+    <div className="h-9 px-4 bg-primary text-white text-sm font-semibold flex items-center border-t border-b border-primary">
+      {page}
+    </div>
+    <button
+      disabled={!data?.next}
+      onClick={() => setPage((p) => p + 1)}
+      className="h-9 w-9 flex items-center justify-center border border-gray-300 rounded-r-md hover:bg-gray-50 disabled:opacity-50 transition-colors"
+    >
+      <ChevronRight className="text-gray-400 w-5 h-5" />
+    </button>
+  </nav>
+</div>
         </div>
       </div>
 

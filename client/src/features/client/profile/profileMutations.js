@@ -19,8 +19,8 @@ export const useUpdateProfile = () => {
         profile_photo:updatedData.profile_photo,
       }
       dispatch(setCredentials({ user: updatedUser }));
-      queryClient.setQueriesData(['profile','me'],updatedData)
-      queryClient.invalidateQueries({ queryKey: ["profile", "me"] });
+      queryClient.setQueriesData(['profile'],updatedData)
+      queryClient.invalidateQueries({ queryKey: ["profile"],refetchType:'none' });
     },
   });
 };
