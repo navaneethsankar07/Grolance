@@ -1,13 +1,16 @@
-import axios from 'axios';
+import axios from "axios";
 import axiosInstance from "./axiosInstance";
 import store from "../app/store";
-import { logout, setCredentials } from "../features/client/account/auth/authslice";
+import {
+  logout,
+  setCredentials,
+} from "../features/client/account/auth/authslice";
 
 let isRefreshing = false;
 let failedQueue = [];
 
 const processQueue = (error, token = null) => {
-  failedQueue.forEach(prom => {
+  failedQueue.forEach((prom) => {
     if (error) prom.reject(error);
     else prom.resolve(token);
   });
@@ -22,7 +25,7 @@ axiosInstance.interceptors.request.use(
     }
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => Promise.reject(error),
 );
 
 axiosInstance.interceptors.response.use(
@@ -57,15 +60,17 @@ axiosInstance.interceptors.response.use(
         const res = await axios.post(
           `${import.meta.env.VITE_BASE_URL}/auth/refresh/`,
           {},
-          { withCredentials: true }
+          { withCredentials: true },
         );
 
         const newAccess = res.data.access;
 
-        store.dispatch(setCredentials({
-          user: store.getState().auth.user,
-          accessToken: newAccess,
-        }));
+        store.dispatch(
+          setCredentials({
+            user: store.getState().auth.user,
+            accessToken: newAccess,
+          }),
+        );
 
         originalRequest.headers.Authorization = `Bearer ${newAccess}`;
         processQueue(null, newAccess);
@@ -78,5 +83,5 @@ axiosInstance.interceptors.response.use(
         isRefreshing = false;
       }
     });
-  }
+  },
 );

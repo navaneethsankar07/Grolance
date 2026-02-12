@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { X, Lock, AlertCircle } from "lucide-react"; 
-import { useForm } from "react-hook-form"; 
-import { zodResolver } from "@hookform/resolvers/zod"; 
+import { X, Lock, AlertCircle } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useChatRooms, useChatMessages } from "./chatQueries";
 import { useChatMutations } from "./chatMutations";
 import { useChatSocket } from "../../hooks/chat/UseChatRooms";
@@ -28,7 +28,7 @@ export default function Chat({ onClose, data }) {
   const initialRoomId = data?.initialRoomId;
   const [selectedRoomId, setSelectedRoomId] = useState(initialRoomId || null);
   const [searchQuery, setSearchQuery] = useState("");
-  
+
   const typingTimeoutRef = useRef(null);
   const messagesEndRef = useRef(null);
   const topItemRef = useRef(null);
@@ -45,17 +45,17 @@ export default function Chat({ onClose, data }) {
   const currentUserId = currentUser?.id;
 
   const { data: rooms, isLoading: roomsLoading } = useChatRooms();
-  
-  const currentRoom = useMemo(() =>{
-  const roomList = Array.isArray(rooms?.results) 
-    ? rooms.results 
-    : Array.isArray(rooms) 
-      ? rooms 
-      : [];
 
-  return roomList.find(r => r.id === selectedRoomId);
-}, [rooms, selectedRoomId]);
-  
+  const currentRoom = useMemo(() => {
+    const roomList = Array.isArray(rooms?.results)
+      ? rooms.results
+      : Array.isArray(rooms)
+        ? rooms
+        : [];
+
+    return roomList.find(r => r.id === selectedRoomId);
+  }, [rooms, selectedRoomId]);
+
   const isChatDisabled = useMemo(() => {
     if (!currentRoom) return false;
     return currentRoom.can_chat === false;
@@ -137,11 +137,11 @@ export default function Chat({ onClose, data }) {
     return () => observer.disconnect();
   }, [hasNextPage, isFetchingNextPage, fetchNextPage, selectedRoomId]);
 
-  
+
   const onValidSubmit = (formData) => {
     if (isChatDisabled) return;
     sendMessage(formData.message);
-    reset(); 
+    reset();
     sendTypingStatus(false);
   };
 

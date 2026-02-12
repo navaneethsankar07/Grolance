@@ -1,16 +1,17 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated,AllowAny
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework import status
 from django.core.cache import cache
 from django.contrib.auth import authenticate
-from .serializer import RegisterSerializer, EmailVerifySerializer, ResendEmailOtpSerializer, UserSerializer, ForgotPasswordSerializer, ResetTokenValidateSerializer, ResetPasswordSerializer, GoogleAuthSerializer, ChangePasswordSerializer,DeleteAccountSerializer
+from .serializer import RegisterSerializer, EmailVerifySerializer, ResendEmailOtpSerializer, UserSerializer, ForgotPasswordSerializer, ResetTokenValidateSerializer, ResetPasswordSerializer, GoogleAuthSerializer, ChangePasswordSerializer, DeleteAccountSerializer
 from .utils import otp_service, reset_password_service
 from .models import User
-from rest_framework_simplejwt.tokens import RefreshToken,TokenError
+from rest_framework_simplejwt.tokens import RefreshToken, TokenError
 from django.conf import settings
 from .services.google_auth import GoogleAuthService
 from .services.google_user_service import GoogleUserService
+
 
 class SendOtpView(APIView):
     permission_classes = [AllowAny]
@@ -42,11 +43,11 @@ class SendOtpView(APIView):
             return Response({"error": f"Failed to connect to mail service: {str(e)}"}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
 
         if not result or "error" in result:
-            error_msg = result.get("error") if result else "Unknown error in OTP service"
+            error_msg = result.get(
+                "error") if result else "Unknown error in OTP service"
             return Response({"error": error_msg}, status=status.HTTP_400_BAD_REQUEST)
-            
-        return Response({"message": "OTP sent to your email. Please verify."}, status=status.HTTP_200_OK)
 
+        return Response({"message": "OTP sent to your email. Please verify."}, status=status.HTTP_200_OK)
 
 
 class VerifyOtpView(APIView):
@@ -62,7 +63,8 @@ class VerifyOtpView(APIView):
             otp_code = serializer.validated_data["otp_code"]
 
             try:
-                otp_result = otp_service.verify(email, otp_code, purpose="email_verify")
+                otp_result = otp_service.verify(
+                    email, otp_code, purpose="email_verify")
             except Exception:
                 return Response({"error": "OTP verification service unavailable"}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
 
@@ -129,7 +131,7 @@ class VerifyOtpView(APIView):
             )
 
             return response
-            
+
         except KeyError as e:
             return Response({"error": f"Missing required registration data: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
         except Exception:
@@ -163,7 +165,7 @@ class RefreshTokenView(APIView):
             return Response({"access": new_access}, status=200)
         except TokenError:
             return Response({"error": "Invalid refresh token"}, status=401)
-        
+
 
 class LoginView(APIView):
     permission_classes = [AllowAny]
@@ -211,14 +213,14 @@ class LoginView(APIView):
 
         return response
 
-    
 
 class CurrentUserView(APIView):
     permission_classes = [IsAuthenticated]
+
     def get(self, request):
         serializer = UserSerializer(request.user)
         return Response({"user": serializer.data})
-    
+
 
 class LogoutView(APIView):
     permission_classes = [IsAuthenticated]
@@ -226,7 +228,6 @@ class LogoutView(APIView):
     def post(self, request):
         try:
             refresh_token = request.COOKIES.get("refresh_token")
-            
 
             if refresh_token:
                 token = RefreshToken(refresh_token)
@@ -237,7 +238,7 @@ class LogoutView(APIView):
                 status=status.HTTP_200_OK
             )
 
-            response.delete_cookie("refresh_token", path='/',samesite='Lax')
+            response.delete_cookie("refresh_token", path='/', samesite='Lax')
 
             return response
 
@@ -246,12 +247,13 @@ class LogoutView(APIView):
                 {"error": "Logout failed"},
                 status=status.HTTP_400_BAD_REQUEST
             )
-    
+
 
 class ForgotPasswordView(APIView):
     permission_classes = [AllowAny]
+
     def post(self, request):
-        serializer = ForgotPasswordSerializer(data = request.data)
+        serializer = ForgotPasswordSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         email = serializer.validated_data["email"]
 
@@ -262,7 +264,7 @@ class ForgotPasswordView(APIView):
                 {"message": "If an account exists, a reset link has been sent."},
                 status=200
             )
-        
+
         token_data = reset_password_service.generatetoken(user)
         uid = token_data["uid"]
         token = token_data["token"]
@@ -277,8 +279,8 @@ class ForgotPasswordView(APIView):
             {"message": "If this email exists, a reset link has been sent."},
             status=200
         )
-        
-        
+
+
 class ValidateResetTokenView(APIView):
     permission_classes = [AllowAny]
 
@@ -300,9 +302,10 @@ class ValidateResetTokenView(APIView):
             {"error": "Reset link is invalid or expired"},
             status=status.HTTP_400_BAD_REQUEST
         )
-    
+
+
 class ResetPasswordView(APIView):
-    permission_classes = [AllowAny]  
+    permission_classes = [AllowAny]
 
     def post(self, request):
         serializer = ResetPasswordSerializer(data=request.data)
@@ -318,11 +321,12 @@ class ResetPasswordView(APIView):
             {"message": "Password reset successful"},
             status=status.HTTP_200_OK
         )
-    
+
 
 class GoogleAuthView(APIView):
     permission_classes = [AllowAny]
-    authentication_classes= []
+    authentication_classes = []
+
     def post(self, request):
         serializer = GoogleAuthSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -347,8 +351,8 @@ class GoogleAuthView(APIView):
                 "email": user.email,
                 "full_name": user.full_name,
                 "profile_photo": user.profile_photo,
-                'current_role':user.current_role,
-                'is_freelancer':user.is_freelancer
+                'current_role': user.current_role,
+                'is_freelancer': user.is_freelancer
             }
         })
 
@@ -362,7 +366,8 @@ class GoogleAuthView(APIView):
         )
 
         return response
-    
+
+
 class ChangePasswordAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -380,13 +385,14 @@ class ChangePasswordAPIView(APIView):
             )
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
-    
+
+
 class DeleteAccountView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        serializer = DeleteAccountSerializer(data=request.data, context={'request': request})
+        serializer = DeleteAccountSerializer(
+            data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
 
         user = request.user
@@ -394,7 +400,7 @@ class DeleteAccountView(APIView):
         user.is_deleted = True
         user.save()
 
-        response = Response({"message": "Account deleted successfully."}, status=status.HTTP_200_OK)
-        # Clear cookies on deletion
+        response = Response(
+            {"message": "Account deleted successfully."}, status=status.HTTP_200_OK)
         response.delete_cookie("refresh_token")
         return response

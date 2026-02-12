@@ -18,7 +18,7 @@ export default function FAQPage() {
   const [openId, setOpenId] = useState(null);
 
   const { data, isLoading, isFetching } = useFAQs(category, page);
-  const user = useSelector(state=>state.auth.user)
+  const user = useSelector(state => state.auth.user)
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [page]);
@@ -41,16 +41,15 @@ export default function FAQPage() {
           {CATEGORIES.map((cat) => (
             <button
               key={cat.id}
-              onClick={() => { 
-                setCategory(cat.id); 
-                setPage(1); 
-                setOpenId(null); 
+              onClick={() => {
+                setCategory(cat.id);
+                setPage(1);
+                setOpenId(null);
               }}
-              className={`px-6 py-2 rounded-full text-sm font-medium transition-all ${
-                category === cat.id 
-                ? 'bg-blue-600 text-white shadow-md' 
-                : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
-              }`}
+              className={`px-6 py-2 rounded-full text-sm font-medium transition-all ${category === cat.id
+                  ? 'bg-blue-600 text-white shadow-md'
+                  : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
+                }`}
             >
               {cat.label}
             </button>
@@ -70,16 +69,15 @@ export default function FAQPage() {
                 className="w-full flex items-center justify-between p-5 text-left hover:bg-gray-50 transition-colors"
               >
                 <span className="font-semibold text-[#1F2937] text-[15px]">{faq.question}</span>
-                <ChevronDown 
-                  className={`text-gray-400 transition-transform duration-300 ${openId === faq.id ? 'rotate-180' : ''}`} 
-                  size={20} 
+                <ChevronDown
+                  className={`text-gray-400 transition-transform duration-300 ${openId === faq.id ? 'rotate-180' : ''}`}
+                  size={20}
                 />
               </button>
-              
-              <div 
-                className={`transition-all duration-300 ease-in-out ${
-                  openId === faq.id ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0'
-                } overflow-hidden`}
+
+              <div
+                className={`transition-all duration-300 ease-in-out ${openId === faq.id ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0'
+                  } overflow-hidden`}
               >
                 <div className="p-5 pt-0 text-gray-600 text-[14px] leading-relaxed border-t border-gray-50 mt-2">
                   {faq.answer}
@@ -96,31 +94,31 @@ export default function FAQPage() {
         </div>
 
         {data?.count > 0 && (
-  <div className="flex flex-col md:flex-row justify-between items-center mb-10 gap-4 mt-8 pt-2">
-    <p className="text-sm text-gray-600">
-      Showing {data?.results?.length || 0} of {data?.count || 0} results
-    </p>
-    <nav className="flex items-center rounded-md shadow-sm">
-      <button
-        disabled={!data?.previous || isFetching}
-        onClick={() => setPage(prev => prev - 1)}
-        className="h-9 w-9 flex items-center justify-center border border-gray-300 rounded-l-md hover:bg-gray-50 disabled:opacity-50 transition-colors"
-      >
-        <ChevronLeft className="text-gray-400 w-5 h-5" />
-      </button>
-      <div className="h-9 px-4 bg-blue-600 text-white text-sm font-semibold flex items-center border-t border-b border-blue-600">
-        {page}
-      </div>
-      <button
-        disabled={!data?.next || isFetching}
-        onClick={() => setPage(prev => prev + 1)}
-        className="h-9 w-9 flex items-center justify-center border border-gray-300 rounded-r-md hover:bg-gray-50 disabled:opacity-50 transition-colors"
-      >
-        <ChevronRight className="text-gray-400 w-5 h-5" />
-      </button>
-    </nav>
-  </div>
-)}
+          <div className="flex flex-col md:flex-row justify-between items-center mb-10 gap-4 mt-8 pt-2">
+            <p className="text-sm text-gray-600">
+              Showing {data?.results?.length || 0} of {data?.count || 0} results
+            </p>
+            <nav className="flex items-center rounded-md shadow-sm">
+              <button
+                disabled={!data?.previous || isFetching}
+                onClick={() => setPage(prev => prev - 1)}
+                className="h-9 w-9 flex items-center justify-center border border-gray-300 rounded-l-md hover:bg-gray-50 disabled:opacity-50 transition-colors"
+              >
+                <ChevronLeft className="text-gray-400 w-5 h-5" />
+              </button>
+              <div className="h-9 px-4 bg-blue-600 text-white text-sm font-semibold flex items-center border-t border-b border-blue-600">
+                {page}
+              </div>
+              <button
+                disabled={!data?.next || isFetching}
+                onClick={() => setPage(prev => prev + 1)}
+                className="h-9 w-9 flex items-center justify-center border border-gray-300 rounded-r-md hover:bg-gray-50 disabled:opacity-50 transition-colors"
+              >
+                <ChevronRight className="text-gray-400 w-5 h-5" />
+              </button>
+            </nav>
+          </div>
+        )}
 
         <div className="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm flex flex-col md:flex-row items-center gap-6">
           <div className="w-16 h-16 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-200">
@@ -130,7 +128,7 @@ export default function FAQPage() {
             <h3 className="text-xl font-bold text-[#111827] mb-1">Need More Help?</h3>
             <p className="text-gray-500 text-sm">Can't find what you're looking for? Our support team is here to help you with any questions or issues.</p>
             <div className="mt-4 flex flex-col md:flex-row items-center gap-4">
-              <Link to={user?.current_role === 'client' ? '/support' : '/freelancer/support'}  className="bg-blue-600 text-white px-6 py-2 rounded-lg text-sm font-bold hover:bg-blue-700 transition-colors">
+              <Link to={user?.current_role === 'client' ? '/support' : '/freelancer/support'} className="bg-blue-600 text-white px-6 py-2 rounded-lg text-sm font-bold hover:bg-blue-700 transition-colors">
                 Contact Support
               </Link>
             </div>

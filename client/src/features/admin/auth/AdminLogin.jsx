@@ -15,7 +15,7 @@ export default function AdminLogin() {
   const [showPassword, setShowPassword] = useState(false);
   const [serverError, setServerError] = useState("");
   const navigate = useNavigate()
-  const {user,loading} = useSelector(state=>state.auth)
+  const { user, loading } = useSelector(state => state.auth)
 
   useEffect(() => {
     if (!loading && user?.is_admin) {
@@ -44,21 +44,21 @@ export default function AdminLogin() {
         dispatch(logout())
         return;
       }
-      navigate('/admin', {replace:true})
+      navigate('/admin', { replace: true })
       toast.success("Login Successful")
 
     } catch (err) {
       setServerError(
         err?.message || "Invalid admin credentials"
       );
-      toast.error(err?.message||"invalid admin credentials")
+      toast.error(err?.message || "invalid admin credentials")
     }
   };
 
   return (
     <div className="min-h-screen bg-[#F9FAFB] flex items-center justify-center px-4">
       <div className="w-full max-w-[440px]">
-        
+
         <div className="flex flex-col items-center mb-8">
           <div className="w-14 h-14 bg-primary rounded-2xl flex items-center justify-center mb-4">
             <ShieldCheck className="text-white w-8 h-8" />
