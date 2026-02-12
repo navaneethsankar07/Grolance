@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { FileText, Shield, HelpCircle, Loader2, X } from "lucide-react";
+import { FileText, Shield, HelpCircle, Loader2, X, CreditCard } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { useGlobalSettings } from "./adminSettingsQueries";
 import { useUpdateSettings } from "./adminsettingsMutations";
@@ -22,6 +22,7 @@ export default function AdminSettings() {
       reset({
         commission_percentage: settings.commission_percentage,
         support_email: settings.support_email,
+        paypal_email: settings.paypal_email,
       });
     }
   }, [settings, reset]);
@@ -45,7 +46,7 @@ export default function AdminSettings() {
       <div className="mx-auto max-w-[1024px]">
         <div className="mb-8 space-y-2">
           <h1 className="text-[26px] font-bold leading-9 text-gray-900">Platform Settings</h1>
-          <p className="text-sm text-gray-600">Configure your platform's core settings and integrations.</p>
+          <p className="text-sm text-gray-600">Configure your platform's core settings, integrations, and payouts.</p>
         </div>
 
         <div className="space-y-8">
@@ -83,15 +84,33 @@ export default function AdminSettings() {
             </div>
           </div>
 
-          {/* Site Pages Section Stays Same */}
+          <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+            <div className="flex items-center gap-2 mb-6">
+              <CreditCard className="h-4 w-4 text-gray-400" />
+              <h2 className="text-[15px] font-semibold text-gray-900">Master PayPal Account</h2>
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="space-y-2">
+                <div className="text-base font-normal text-gray-900">{settings?.paypal_email}</div>
+                <p className="text-xs text-gray-600">The business PayPal email used for processing platform payouts.</p>
+              </div>
+              <button 
+                onClick={() => setActiveModal('paypal')}
+                className="rounded-md border border-gray-300 bg-transparent px-[17px] py-[11px] text-xs font-medium text-gray-700 transition-colors hover:bg-gray-50"
+              >
+                Update PayPal
+              </button>
+            </div>
+          </div>
+
           <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm opacity-80">
             <h2 className="mb-2 text-[15px] font-semibold text-gray-900">Manage Site Pages</h2>
             <p className="mb-6 text-xs text-gray-600">Edit Terms & Conditions, Privacy Policy, and FAQ.</p>
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {[
-                { title: "Terms & Conditions", icon: FileText, desc: "Manage legal agreements.",link:'/admin/terms-and-conditions' },
-                { title: "Privacy Policy", icon: Shield, desc: "Edit data protection info." ,link:'/admin/privacy-policy/'},
-                { title: "FAQ", icon: HelpCircle, desc: "Manage frequently asked questions.",link:'/admin/faq-management/' }
+                { title: "Terms & Conditions", icon: FileText, desc: "Manage legal agreements.", link:'/admin/terms-and-conditions' },
+                { title: "Privacy Policy", icon: Shield, desc: "Edit data protection info.", link:'/admin/privacy-policy/' },
+                { title: "FAQ", icon: HelpCircle, desc: "Manage frequently asked questions.", link:'/admin/faq-management/' }
               ].map((item, idx) => (
                 <div key={idx} className="flex gap-4">
                   <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-blue-50">
@@ -108,13 +127,13 @@ export default function AdminSettings() {
         </div>
       </div>
 
-      {/* Unified Settings Modal */}
       {activeModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
           <div className="w-full max-w-md animate-in fade-in zoom-in duration-200 rounded-xl bg-white p-6 shadow-2xl">
             <div className="mb-6 flex items-center justify-between">
               <h3 className="text-lg font-bold text-gray-900">
-                {activeModal === 'commission' ? 'Edit Commission' : 'Update Support Email'}
+                {activeModal === 'commission' ? 'Edit Commission' : 
+                 activeModal === 'paypal' ? 'Update PayPal Email' : 'Update Support Email'}
               </h3>
               <button onClick={() => setActiveModal(null)} className="text-gray-400 hover:text-gray-600 transition-colors">
                 <X className="h-5 w-5" />
@@ -122,7 +141,7 @@ export default function AdminSettings() {
             </div>
 
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-              {activeModal === 'commission' ? (
+              {activeModal === 'commission' && (
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">Percentage (%)</label>
                   <div className="relative">
@@ -140,9 +159,11 @@ export default function AdminSettings() {
                   </div>
                   {errors.commission_percentage && <p className="mt-1 text-xs text-red-500">{errors.commission_percentage.message}</p>}
                 </div>
-              ) : (
+              )}
+
+              {activeModal === 'email' && (
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">New Email Address</label>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">New Support Email</label>
                   <input
                     type="email"
                     {...register("support_email", {
@@ -156,6 +177,25 @@ export default function AdminSettings() {
                     placeholder="support@example.com"
                   />
                   {errors.support_email && <p className="mt-1 text-xs text-red-500">{errors.support_email.message}</p>}
+                </div>
+              )}
+
+              {activeModal === 'paypal' && (
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">Business PayPal Email</label>
+                  <input
+                    type="email"
+                    {...register("paypal_email", {
+                      required: "PayPal email is required",
+                      pattern: {
+                        value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                        message: "Invalid email address"
+                      }
+                    })}
+                    className={`w-full rounded-lg border px-4 py-3 text-sm focus:outline-none focus:ring-2 ${errors.paypal_email ? 'border-red-500 focus:ring-red-100' : 'border-gray-200 focus:ring-blue-100'}`}
+                    placeholder="business@paypal.com"
+                  />
+                  {errors.paypal_email && <p className="mt-1 text-xs text-red-500">{errors.paypal_email.message}</p>}
                 </div>
               )}
 
