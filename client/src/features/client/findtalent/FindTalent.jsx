@@ -185,7 +185,7 @@ export default function FindTalent() {
                       description={freelancer.bio}
                       imageUrl={freelancer.profile_photo}
                       skills={freelancer.skills}
-                      rating={4.9} 
+                      rating={freelancer.average_rating} 
                       price={freelancer.starting_price}
                       packages={freelancer.packages}
                     />

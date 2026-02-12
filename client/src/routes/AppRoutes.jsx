@@ -14,26 +14,30 @@ import ContactPage from '../components/common/ContactUs'
 import WhyUsPage from '../components/common/WhyUs'
 import SupportPage from '../components/common/SupportPage'
 import AboutPage from '../components/common/AboutUs'
+import NotFound from '../components/NotFound'
 
 
 function AppRoutes() {
+  
   return (
+    
     <BrowserRouter>
       <Routes>
+<Route path="/404" element={<NotFound />} />
         <Route element={<RootLayout />}>
 
+          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
+          <Route path='/contact-us' element={<ContactPage/>}/>
+          <Route path='/why-us' element={<WhyUsPage/>}/>
+          <Route path='/about-us' element={<AboutPage/>}/>
           
           <Route path='/freelancer/*' element={<FreelancerProtectedRoute><FreelancerRoutes/></FreelancerProtectedRoute> }/>
-          <Route path="/admin/login" element={<AdminLogin />} />
           <Route element={<AdminProtectedRoute />}>
             <Route path="/admin/*" element={<AdminLayout />}>
               <Route path="*" element={<AdminRoutes />} />
             </Route>
           </Route>
-          <Route path="/reset-password" element={<ResetPasswordPage />} />
-          <Route path='/contact-us' element={<ContactPage/>}/>
-          <Route path='/why-us' element={<WhyUsPage/>}/>
-          <Route path='/about-us' element={<AboutPage/>}/>
           <Route
             path="/*"
             element={
@@ -42,7 +46,7 @@ function AppRoutes() {
               </ProtectedRoute>
             }
           />
-
+          <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>
     </BrowserRouter>

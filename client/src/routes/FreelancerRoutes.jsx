@@ -17,6 +17,7 @@ import SupportPage from '../components/common/SupportPage'
 import TermsAndConditions from '../components/common/termsandconditions/TermsAndConditions'
 import PrivacyPolicies from '../components/common/privacypolicy/PrivacyPolicies'
 import FAQPage from '../components/common/faq/FAQ'
+import NotFound from '../components/NotFound'
 
 function FreelancerRoutes() {
   return (
@@ -38,6 +39,8 @@ function FreelancerRoutes() {
         <Route path="/terms-and-conditions" element={<TermsAndConditions/>}/>
         <Route path='/privacy-policies' element={<PrivacyPolicies/>}/>
         <Route path="/faq" element={<FAQPage/>}/>
+                  <Route path='*' element={<NotFound/>}/>
+        
         </Route>
     </Routes>
 )

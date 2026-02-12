@@ -3,10 +3,14 @@ import { Link } from "react-router-dom";
 import { MessageCircle, CheckCircle, AlertCircle, FileText, Bell, Loader2, X } from "lucide-react";
 import { useNotifications } from "./notificationQueries";
 import { useMarkAsRead } from "./notificationMutations";
+import { useSelector } from "react-redux";
 
 export default function Notifications({ onClose }) {
   const [fetchAll, setFetchAll] = useState(false);
-  const { data: notifications, isLoading } = useNotifications(fetchAll);
+  const { user } = useSelector(state => state.auth);
+  const { data: notifications, isLoading } = useNotifications(fetchAll, {
+  enabled: !!user 
+});
   const markReadMutation = useMarkAsRead();
     
   const getStyleMap = (type) => {

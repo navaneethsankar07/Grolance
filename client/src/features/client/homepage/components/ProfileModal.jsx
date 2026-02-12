@@ -10,7 +10,6 @@ export default function ProfileModal({ isOpen, onClose }) {
 const { mutateAsync } = useSwitchRole();
 
 const user = useSelector((state) => state.auth.user);
-console.log(user.current_role);
 
 useEffect(() => {
   function handleClickOutside(event) {

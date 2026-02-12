@@ -1,17 +1,20 @@
 import { useQuery, useInfiniteQuery } from "@tanstack/react-query";
 import { fetchChatRooms, fetchMessages } from "./chatApi";
+import { useSelector } from "react-redux"; // Import this
 
-export const useChatRooms = () => {
+export const useChatRooms = (options = {}) => {
+  const user = useSelector((state) => state.auth.user);
+
   return useQuery({
     queryKey: ["chatRooms"],
     queryFn: fetchChatRooms,
-    placeholderData:(previousData)=>previousData,
+    enabled: !!user && (options.enabled !== false), 
+    placeholderData: (previousData) => previousData,
     staleTime: 1000 * 60 * 5, 
     gcTime: 1000 * 60 * 30,   
     refetchOnWindowFocus: false,
   });
 };
-
 export const useChatMessages = (roomId) => {
   return useInfiniteQuery({
     queryKey: ["messages", roomId],

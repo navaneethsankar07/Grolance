@@ -5,6 +5,9 @@ import { useSelector } from "react-redux";
 import { useModal } from "../../../../hooks/modal/useModalStore";
 import { useNotifications } from "../../../../components/notifications/notificationQueries";
 import { useChatRooms } from "../../../../components/chat/chatQueries";
+import Header from "../../landingPage/components/Header";
+import { FreelancerHeader } from "../../../freelancer/dashboard/components/Header";
+import AdminHeader from "../../../admin/dashboard/components/AdminHeader";
 
 export default function ClientHeader() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -13,11 +16,20 @@ export default function ClientHeader() {
   const location = useLocation();
   
   const user = useSelector((state) => state.auth.user);
+ 
   const currentUserId = user?.id;
   
-  const { data: notifications } = useNotifications(false);
-  const { data: rooms } = useChatRooms(); 
-  
+  const { data: notifications } = useNotifications(false,{enabled:!!currentUserId});
+  const { data: rooms } = useChatRooms({enabled:!!currentUserId}); 
+   if (!user) {
+    return <Header/>
+  }
+  if(user?.current_role ==='freelancer'){
+    return <FreelancerHeader/>
+  }
+  if(user?.is_admin){
+    return <AdminHeader/>
+  }
   const unreadNotifications = notifications?.results?.length || 0;
   console.log('room',rooms?.results, 'noti', unreadNotifications);
   

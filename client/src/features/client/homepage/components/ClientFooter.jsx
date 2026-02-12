@@ -1,8 +1,25 @@
+import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
+import Footer from "../../landingPage/components/Footer";
+import FreelancerFooter from "../../../freelancer/dashboard/components/FreelancerFooter";
+import AdminFooter from "../../../admin/dashboard/components/AdminFooter";
 
 export default function ClientFooter() {
   const d = new Date();
 let year = d.getFullYear();
+const user = useSelector(state=>state.auth.user)
+if(!user){
+  return <Footer/>
+}
+console.log(user);
+
+if (user?.current_role === 'freelancer'){
+  return <FreelancerFooter/>
+}
+if(user?.is_admin){
+  return <AdminFooter/>
+}
+
   return (
     <footer className=" border-t border-gray-300 bg-white">
       <div className="container mx-auto px-6 py-12">

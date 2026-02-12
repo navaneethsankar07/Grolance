@@ -12,6 +12,7 @@ import SupportTicketDetail from '../features/admin/support/SupportTicketDetials'
 import TermsAndConditions from '../features/admin/termsandconditionsmanagement/TermAndConditions'
 import PrivacyPolicy from '../features/admin/privacypolicymanagement/PrivacyPolicy'
 import FAQManagement from '../features/admin/faq/FAQManagement'
+import NotFound from '../components/NotFound'
 
 function AdminRoutes() {
   return (
@@ -31,6 +32,7 @@ function AdminRoutes() {
         <Route path='terms-and-conditions/' element={<TermsAndConditions/>}/>
         <Route path='privacy-policy/' element={<PrivacyPolicy/>}/>
         <Route path='faq-management/' element={<FAQManagement/>}/>
+        <Route path="*" element={<NotFound />} />
     </Routes>
     </>
   )

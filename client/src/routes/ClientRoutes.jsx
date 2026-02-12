@@ -25,6 +25,7 @@ import TermsAndConditions from "../components/common/termsandconditions/TermsAnd
 import PrivacyPolicies from "../components/common/privacypolicy/PrivacyPolicies";
 import FAQPage from "../components/common/faq/FAQ";
 import AllFreelancerReviews from "../features/client/freelancerprofile/AllFreelancerReviews";
+import NotFound from "../components/NotFound";
 
 export default function ClientRoutes() {
   const { user,loading } = useSelector(state => state.auth);
@@ -59,6 +60,7 @@ export default function ClientRoutes() {
           <Route path="/terms-and-conditions" element={<TermsAndConditions/>}/>
           <Route path="/privacy-policies" element={<PrivacyPolicies/>}/>
           <Route path="/faq" element={<FAQPage/>}/>
+          <Route path='*' element={<NotFound/>}/>
         </Route>
           
     </Routes>
