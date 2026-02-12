@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path,include
 from .views import (
     ClientProfileOverviewAPIView,
     ClientProfileUpdateAPIView,
@@ -13,12 +13,20 @@ from .views import (
     FreelancerPaymentSettingsUpdateView,
     ReviewCreateView,
     FreelancerReviewListView,
-    ClientReviewListView
+    ClientReviewListView,
+    RecommendedFreelancersView,
+    FreelancerToDoViewSet
+    
     
 )
+from rest_framework.routers import DefaultRouter
 from projects.views import RecommendedProjectsAPIView
 
+router = DefaultRouter()
+router.register(r'todos', FreelancerToDoViewSet, basename='freelancertodo')
+
 urlpatterns = [
+    path('', include(router.urls)),
     path("me/", ClientProfileOverviewAPIView.as_view(), name="client-profile"),
     path("me/update/", ClientProfileUpdateAPIView.as_view(), name="client-profile-update"),
     path("freelancer/me/", FreelancerProfileMeAPIView.as_view()),
@@ -35,4 +43,5 @@ urlpatterns = [
     path('reviews/freelancer/<int:user_id>/', FreelancerReviewListView.as_view(), name='freelancer-reviews'),
     path('reviews/client/<int:user_id>/', ClientReviewListView.as_view(), name='client-reviews'),
     path('freelancers/<int:freelancer_id>/reviews/', FreelancerReviewListView.as_view(), name='freelancer-reviews'),
+    path('recommended-freelancers/', RecommendedFreelancersView.as_view(), name='recommended-freelancers')
 ]

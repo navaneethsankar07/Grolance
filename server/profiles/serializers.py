@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from .models import (
     ClientProfile, FreelancerProfile, FreelancerPaymentSettings, 
-    FreelancerPortfolio, FreelancerPackage, FreelancerSkill, Review
+    FreelancerPortfolio, FreelancerPackage, FreelancerSkill, Review,FreelancerToDo
 )
 from categories.models import Category
 import re
@@ -294,9 +294,9 @@ class FreelancerListingSerializer(serializers.ModelSerializer):
     class Meta:
         model = FreelancerProfile
         fields = [
-            'id', 'full_name', 'profile_photo', 'tagline', 
+            'id', 'full_name', 'profile_photo', 'tagline','bio',
             'category_name', 'experience_level', 'skills', 
-            'starting_price', 'availability'
+            'starting_price', 'availability','average_rating','review_count'
         ]
 
     def get_skills(self, obj):
@@ -337,3 +337,9 @@ class FreelancerReviewListSerializer(serializers.ModelSerializer):
             'reviewer_name', 'reviewer_photo', 'project_title'
         ]
 
+
+class FreelancerToDoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FreelancerToDo
+        fields = ['id', 'todo', 'is_completed']
+        read_only_fields = ['id']

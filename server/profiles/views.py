@@ -1,26 +1,29 @@
 from rest_framework.generics import RetrieveAPIView, UpdateAPIView, RetrieveUpdateAPIView, ListAPIView, CreateAPIView
-from rest_framework.views import APIView
+from rest_framework.views import APIView 
+from rest_framework import viewsets, status
+from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from contracts.models import Contract
+from django.db.models import Count,Q, ExpressionWrapper, F, FloatField
 from rest_framework.exceptions import ValidationError, PermissionDenied
 from rest_framework import status
 from django.db import transaction, DatabaseError
 from django.core.exceptions import ObjectDoesNotExist
+from django.db.models.functions import Coalesce
 from .models import (
     ClientProfile, FreelancerProfile, FreelancerPaymentSettings,
-    FreelancerPackage, FreelancerPortfolio, FreelancerSkill, Review
+    FreelancerPackage, FreelancerPortfolio, FreelancerSkill, Review,FreelancerToDo
 )
 from .serializers import (
     ClientProfileOverviewSerializer, ClientProfileUpdateSerializer,
     FreelancerOnboardingSerializer, SendPhoneOTPSerializer, VerifyPhoneOTPSerializer,
     FreelancerProfileSerializer, RoleSwitchSerializer, FreelancerProfileManageSerializer,
-    FreelancerProfileUpdateSerializer, FreelancerListingSerializer, FreelancerPaymentSettingsSerializer, ReviewSerializer,FreelancerReviewListSerializer
+    FreelancerProfileUpdateSerializer, FreelancerListingSerializer, FreelancerPaymentSettingsSerializer, ReviewSerializer,FreelancerReviewListSerializer,FreelancerToDoSerializer
 )
 from .services import send_phone_otp, verify_phone_otp
-from rest_framework.pagination import PageNumberPagination
 from common.pagination import AdminUserPagination
 from projects.permissions import IsFreelancerUser
 import logging
@@ -430,3 +433,84 @@ class ClientReviewListView(ListAPIView):
             reviewee_id=user_id, 
             review_type='client'
         ).order_by('-created_at')
+    
+
+class RecommendedFreelancersView(ListAPIView):
+    serializer_class = FreelancerListingSerializer
+
+    def get_queryset(self):
+        try:
+            return FreelancerProfile.objects.filter(
+                is_active=True,
+                average_rating__gte=3.0
+            ).annotate(
+                total_contracts=Count(
+                    'user__contracts_as_freelancer', 
+                    distinct=True
+                ),
+                completed_contracts=Count(
+                    'user__contracts_as_freelancer', 
+                    filter=Q(user__contracts_as_freelancer__status='completed'),
+                    distinct=True
+                ),
+                safe_rating=Coalesce(F('average_rating'), 0.0, output_field=FloatField()),
+                safe_earnings=Coalesce(F('total_earnings'), 0.0, output_field=FloatField())
+            ).annotate(
+                recommendation_score=ExpressionWrapper(
+                    (F('safe_rating') * 10.0) + (F('safe_earnings') / 100.0) + F('completed_contracts'),
+                    output_field=FloatField()
+                )
+            ).order_by('-recommendation_score', '-average_rating')[:5]
+            
+        except Exception as e:
+            logger.error(f"Error calculating recommended freelancers: {str(e)}")
+            return FreelancerProfile.objects.none()
+
+    def list(self, request, *args, **kwargs):
+        try:
+            queryset = self.get_queryset()
+            
+            if not queryset.exists():
+                return Response(
+                    {"detail": "No highly rated freelancers found at this time."},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+            
+            serializer = self.get_serializer(queryset, many=True)
+            return Response(serializer.data)
+
+        except DatabaseError as e:
+            logger.error(f"Database error in recommendations: {str(e)}")
+            return Response(
+                {"error": "Database service temporarily unavailable."},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE
+            )
+        except Exception as e:
+            logger.error(f"Unexpected error in recommendations: {str(e)}")
+            return Response(
+                {"error": "An unexpected error occurred."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+        
+class FreelancerToDoViewSet(viewsets.ModelViewSet):
+    serializer_class = FreelancerToDoSerializer
+    
+    def get_queryset(self):
+        return FreelancerToDo.objects.all().order_by('is_completed', '-id')
+
+    def perform_create(self, serializer):
+        if FreelancerToDo.objects.count() >= 10:
+            raise ValidationError(
+                {"detail": "To-do limit reached. Please delete existing tasks to add new ones."}
+            )
+        serializer.save()
+
+    @action(detail=True, methods=['post'], url_path='mark-complete')
+    def mark_complete(self, request, pk=None):
+        todo = self.get_object()
+        todo.is_completed = True
+        todo.save()
+        return Response(
+            {'status': 'task marked as completed', 'is_completed': todo.is_completed},
+            status=status.HTTP_200_OK
+        )

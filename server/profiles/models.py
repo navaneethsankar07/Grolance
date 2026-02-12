@@ -210,3 +210,8 @@ class Review(models.Model):
 
     def __str__(self):
         return f"{self.rating}* for {self.reviewee.email} as {self.review_type}"
+    
+
+class FreelancerToDo(models.Model):
+    todo = models.CharField(max_length=100)
+    is_completed = models.BooleanField(default=False)

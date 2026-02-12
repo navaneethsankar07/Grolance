@@ -8,5 +8,7 @@ export const switchRole = async ({ role }) => {
   return data;
 };
 
-
-
+export const fetchRecommendedFreelancers = async ()=>{
+  const {data} = await axiosInstance.get('/profile/recommended-freelancers');
+  return data;
+}
