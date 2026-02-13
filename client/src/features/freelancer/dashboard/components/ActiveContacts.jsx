@@ -10,7 +10,6 @@ function ActiveContacts() {
   const activeContracts = contracts
     .filter(contract => contract.status === 'active' || contract.status === 'disputed')
     .slice(0, 4)
-  console.log(data);
   
   const getDueDate = (signedAt, days) => {
     if (!signedAt || !days) return 'N/A';
@@ -24,11 +23,11 @@ function ActiveContacts() {
 
   if (isLoading) {
     return (
-      <div className="mb-8 max-w-260">
-        <h2 className="text-[25px] font-semibold text-[#111827] leading-7 mb-4" style={{ fontFamily: 'Inter, sans-serif' }}>
+      <div className="mb-8 w-full max-w-6xl">
+        <h2 className="text-xl md:text-[25px] font-semibold text-[#111827] leading-7 mb-4 px-1">
           Active Contracts
         </h2>
-        <div className="grid grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
           {[...Array(2)].map((_, i) => (
             <div key={i} className="h-40 bg-gray-100 animate-pulse rounded-xl border border-[#F3F4F6]"></div>
           ))}
@@ -38,51 +37,62 @@ function ActiveContacts() {
   }
 
   return (
-    <div className="mb-8 max-w-260">
-      <h2 className="text-[25px] font-semibold text-[#111827] leading-7 mb-4" style={{ fontFamily: 'Inter, -apple-system, Roboto, Helvetica, sans-serif' }}>
+    <div className="mb-8 w-full max-w-6xl">
+      <h2 className="text-xl md:text-[25px] font-semibold text-[#111827] leading-7 mb-4 px-1">
         Active Contracts
       </h2>
       
       {activeContracts.length > 0 ? (
-        <div className="grid grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
           {activeContracts.map((contract, index) => (
-            <div key={contract.id || index} className="bg-white rounded-xl p-6 border border-[#F3F4F6] shadow-sm">
-              <div className="flex items-center gap-2 text-xs text-[#6B7280] mb-2">
-                <User className="w-4 h-4 text-[#9CA3AF]" />
-                <span style={{ fontFamily: 'Inter, -apple-system, Roboto, Helvetica, sans-serif' }}>{contract.client_name}</span>
+            <div 
+              key={contract.id || index} 
+              className="bg-white rounded-xl p-5 md:p-6 border border-[#F3F4F6] shadow-sm hover:shadow-md transition-shadow"
+            >
+              <div className="flex items-center gap-2 text-[11px] md:text-xs text-[#6B7280] mb-2">
+                <User className="w-3.5 h-3.5 md:w-4 md:h-4 text-[#9CA3AF]" />
+                <span className="truncate">{contract.client_name}</span>
               </div>
-              <h3 className="text-[15px] font-semibold text-[#111827] leading-[22px] mb-3" style={{ fontFamily: 'Inter, -apple-system, Roboto, Helvetica, sans-serif' }}>
+
+              <h3 className="text-sm md:text-[15px] font-bold text-[#111827] leading-tight md:leading-[22px] mb-3 line-clamp-2 min-h-[2.5rem] md:min-h-0">
                 {contract.project_title}
               </h3>
-              <div className="flex items-center gap-2 text-xs text-[#4B5563] mb-2">
-                <Calendar className="w-4 h-4" />
-                <span style={{ fontFamily: 'Inter, -apple-system, Roboto, Helvetica, sans-serif' }}>
+
+              <div className="flex items-center gap-2 text-[11px] md:text-xs text-[#4B5563] mb-4">
+                <Calendar className="w-3.5 h-3.5 md:w-4 md:h-4 text-primary" />
+                <span>
                   Due {getDueDate(contract.freelancer_signed_at, contract.delivery_days)}
                 </span>
               </div>
+
               <div className="flex items-center justify-between pt-3 border-t border-[#F3F4F6]">
-                <div className="flex items-center gap-2">
-                  <DollarSign className="w-4 h-4 text-[#4B5563]" />
-                  <span className="text-xs font-semibold text-[#111827]" style={{ fontFamily: 'Inter, -apple-system, Roboto, Helvetica, sans-serif' }}>
-                    {contract.total_amount}
+                <div className="flex items-center gap-1.5">
+                  <div className="p-1 bg-green-50 rounded">
+                    <DollarSign className="w-3.5 h-3.5 md:w-4 md:h-4 text-green-600" />
+                  </div>
+                  <span className="text-xs md:text-sm font-bold text-[#111827]">
+                    ${contract.total_amount}
                   </span>
                 </div>
-                <Link to={`contracts/${contract.id}`} className="text-xs font-medium text-[#3B82F6] hover:underline" style={{ fontFamily: 'Inter, -apple-system, Roboto, Helvetica, sans-serif' }}>
-                  View Details →
+                <Link 
+                  to={`contracts/${contract.id}`} 
+                  className="text-[11px] md:text-xs font-bold text-primary hover:text-blue-700 transition-colors bg-blue-50 px-3 py-1.5 rounded-lg"
+                >
+                  Details →
                 </Link>
               </div>
             </div>
           ))}
         </div>
       ) : (
-        <div className="bg-white rounded-xl p-10 border border-[#F3F4F6] shadow-sm flex flex-col items-center justify-center text-center">
-          <div className="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center mb-3">
-            <FileX className="w-6 h-6 text-gray-400" />
+        <div className="bg-white rounded-xl p-8 md:p-12 border border-[#F3F4F6] shadow-sm flex flex-col items-center justify-center text-center">
+          <div className="w-14 h-14 bg-gray-50 rounded-full flex items-center justify-center mb-4">
+            <FileX className="w-7 h-7 text-gray-300" />
           </div>
-          <p className="text-[#6B7280] font-medium" style={{ fontFamily: 'Inter, sans-serif' }}>
+          <p className="text-gray-600 font-bold text-sm md:text-base">
             No active contracts found.
           </p>
-          <p className="text-xs text-[#9CA3AF] mt-1" style={{ fontFamily: 'Inter, sans-serif' }}>
+          <p className="text-[11px] md:text-xs text-gray-400 mt-1">
             Accept an offer to start a project.
           </p>
         </div>

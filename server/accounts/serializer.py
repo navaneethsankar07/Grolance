@@ -6,7 +6,7 @@ from django.utils.http import urlsafe_base64_decode
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from .models import User
-
+from .utils import otp_service
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -141,11 +141,20 @@ class ChangePasswordSerializer(serializers.Serializer):
 
 class DeleteAccountSerializer(serializers.Serializer):
     password = serializers.CharField(write_only=True, required=False)
+    otp = serializers.CharField(write_only=True, required=False)
 
     def validate(self, data):
         user = self.context['request'].user
         
-        if not user.is_google_account:
+        if user.is_google_account:
+            otp = data.get("otp")
+            if not otp:
+                raise serializers.ValidationError({"otp": "Verification code is required."})
+            
+            verification = otp_service.verify(user.email, otp, purpose="account_deletion")
+            if "error" in verification:
+                raise serializers.ValidationError({"otp": verification["error"]})
+        else:
             password = data.get("password")
             if not password:
                 raise serializers.ValidationError({"password": "Password is required to delete your account."})

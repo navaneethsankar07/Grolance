@@ -2,28 +2,22 @@ import React from "react";
 import { ShieldCheck, Zap, Users, Landmark, Scale, CheckCircle2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import Footer from "../../features/client/landingPage/components/Footer";
+import { useSelector } from "react-redux";
+import ClientHeader from "../../features/client/homepage/components/ClientHeader";
+import { FreelancerHeader } from "../../features/freelancer/dashboard/components/Header";
+import Header from "../../features/client/landingPage/components/Header";
 
-const Header = () => (
-  <nav className="sticky top-0 z-50 bg-white border-b border-slate-100 px-6 py-4">
-    <div className="max-w-7xl mx-auto flex items-center justify-between">
-      <Link to="/" className="text-xl font-black text-slate-900 tracking-tighter flex items-center gap-2">
-        <h2 className="text-[37px] font-museo font-extrabold leading-7">
-              <span className="text-[#1A1A1A]">Gro</span>
-              <span className="text-[#3B82F6]">lance</span>
-            </h2>
-      </Link>
-    
-    
-    </div>
-  </nav>
-);
 
 export default function AboutPage() {
+  const user = useSelector(state=>state.auth.user)
   return (
     <div className="min-h-screen bg-[#f8fafc]">
-      <Header />
+      {user ? 
+        (user?.current_role === 'client' ? <ClientHeader /> : <div className='fixed w-full z-100'><FreelancerHeader/></div> ) 
+        : <Header />
+      }
 
-      <section className="py-20 px-6">
+      <section className="py-25 px-6">
         <div className="max-w-4xl mx-auto text-center">
           <span className="text-[10px] font-bold text-blue-600 uppercase tracking-[0.3em] mb-4 block">Our Purpose</span>
           <h1 className="text-4xl md:text-6xl font-extrabold text-slate-900 tracking-tight mb-8">

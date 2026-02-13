@@ -17,7 +17,7 @@ function FreelancerDashboard() {
             Your personalized freelance workspace is ready. You have 3 new opportunities waiting.
           </p>
           <div className="flex items-center gap-5 mt-4">
-            <Link to={'jobs'} className="bg-[#4F46E5] text-white px-6 py-2.5 rounded-lg font-semibold text-base shadow-sm hover:bg-[#4338CA] transition-all">
+            <Link to={'jobs'} className="bg-[#4F46E5] text-white px-6 py-2.5 rounded-lg font-semibold text-sm md:text-base shadow-sm hover:bg-[#4338CA] transition-all">
               Find Work
             </Link>
             <Link to={'profile'} className="bg-white text-[#334155] px-6 py-2.5 rounded-lg font-semibold text-base border border-[#E2E8F0] hover:bg-gray-50 transition-all">

@@ -8,13 +8,14 @@ export default function FreelancerOffers() {
   const [page, setPage] = useState(1);
   const { data: offers, isLoading, isError } = useMyOffers(page);
   const { openModal } = useModal();
+console.log(offers,'daa');
 
   if (isLoading) return <div className="p-10 text-center">Loading offers...</div>;
   if (isError) return <div className="p-10 text-center text-red-500">Error loading offers.</div>;
 
-  const offerList = offers?.results || [];
+  const offerList = offers || [];
   const totalCount = offers?.count || 0;
-
+console.log(offerList,'haai')
   const handlePageChange = (newPage) => {
     setPage(newPage);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -67,7 +68,7 @@ export default function FreelancerOffers() {
                   <div className="flex justify-end">
                     <button 
                       onClick={() => openModal('offer-modal', { offer })}
-                      className="flex items-center gap-2 bg-gray-900 text-white px-6 py-2.5 rounded-xl font-semibold hover:bg-gray-800 transition-colors group"
+                      className="flex items-center gap-2 bg-primary text-white px-6 py-2.5 rounded-xl font-semibold hover:bg-gray-800 transition-colors group"
                     >
                       <span>Review & Sign</span>
                       <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />

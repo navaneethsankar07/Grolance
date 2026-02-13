@@ -92,6 +92,7 @@ class VerifyEscrowPaymentView(APIView):
             proposal = Proposal.objects.filter(
                 project=project, freelancer=freelancer_profile).first()
             selected_package = None
+            print(proposal.package)
 
             if proposal:
                 selected_package = proposal.package

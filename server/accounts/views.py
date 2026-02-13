@@ -330,6 +330,7 @@ class GoogleAuthView(APIView):
     def post(self, request):
         serializer = GoogleAuthSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+        
 
         token = serializer.validated_data["token"]
 
@@ -341,6 +342,8 @@ class GoogleAuthView(APIView):
             )
 
         user = GoogleUserService.get_or_create_user(payload)
+        if not user or user.is_deleted:
+            return Response({"error": "Invalid credentials"}, status=401)
 
         refresh = RefreshToken.for_user(user)
 
@@ -386,6 +389,23 @@ class ChangePasswordAPIView(APIView):
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+class RequestDeleteOTPView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        user = request.user
+        if not user.is_google_account:
+            return Response(
+                {"error": "OTP request is only available for Google accounts. Please use your password."}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        result = otp_service.send(user.email, purpose="account_deletion")
+        if "error" in result:
+            return Response(result, status=status.HTTP_429_TOO_MANY_REQUESTS)
+            
+        return Response({"message": "Verification code sent to your email."}, status=status.HTTP_200_OK)
+
 
 class DeleteAccountView(APIView):
     permission_classes = [IsAuthenticated]
@@ -396,6 +416,7 @@ class DeleteAccountView(APIView):
         serializer.is_valid(raise_exception=True)
 
         user = request.user
+        user.email = f"deleted_{uuid.uuid4().hex[:8]}_{user.email}"
         user.is_active = False
         user.is_deleted = True
         user.save()

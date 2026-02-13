@@ -155,13 +155,13 @@ export default function ClientDisputeModal({ onClose, contractId }) {
             <button
               onClick={onClose}
               type="button"
-              className="flex-1 h-12 px-6 text-sm font-medium text-gray-900 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+              className="flex-1 h-12 px-6 shrink-0 min-h-10 text-sm font-medium text-gray-900 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className={`flex-1 h-12 px-6 text-sm font-medium text-white rounded-lg transition-colors ${
+              className={`flex-1 h-12 px-6 shrink-0 min-h-10 text-sm font-medium text-white rounded-lg transition-colors ${
                 isPending ? "bg-gray-400 cursor-not-allowed" : "bg-black hover:bg-gray-800"
               }`}
               disabled={!reason || !description || isPending}

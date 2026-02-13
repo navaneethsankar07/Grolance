@@ -214,4 +214,11 @@ class Review(models.Model):
 
 class FreelancerToDo(models.Model):
     todo = models.CharField(max_length=100)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, 
+        on_delete=models.CASCADE,
+        related_name="todos",
+        null=True,
+        blank=True
+    )
     is_completed = models.BooleanField(default=False)

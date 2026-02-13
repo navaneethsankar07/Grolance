@@ -494,16 +494,20 @@ class RecommendedFreelancersView(ListAPIView):
         
 class FreelancerToDoViewSet(viewsets.ModelViewSet):
     serializer_class = FreelancerToDoSerializer
+    permission_classes = [IsAuthenticated]
     
     def get_queryset(self):
-        return FreelancerToDo.objects.all().order_by('is_completed', '-id')
+        return FreelancerToDo.objects.filter(user=self.request.user).order_by('is_completed', '-id')
 
     def perform_create(self, serializer):
-        if FreelancerToDo.objects.count() >= 10:
+        user_todo_count = FreelancerToDo.objects.filter(user=self.request.user).count()
+        
+        if user_todo_count >= 10:
             raise ValidationError(
                 {"detail": "To-do limit reached. Please delete existing tasks to add new ones."}
             )
-        serializer.save()
+        
+        serializer.save(user=self.request.user)
 
     @action(detail=True, methods=['post'], url_path='mark-complete')
     def mark_complete(self, request, pk=None):

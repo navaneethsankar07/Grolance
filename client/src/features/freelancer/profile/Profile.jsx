@@ -46,20 +46,28 @@ export default function Profile() {
             <p className="text-gray-500 text-sm">View and manage your freelance professional profile.</p>
           </div>
 
-          <div className="flex gap-3">
-            <Link 
-              to={'/freelancer/settings/payment'} 
-              className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 font-medium text-sm transition-all shadow-sm"
-            >
-              <CreditCard size={16} /> Bank Details
-            </Link>
-            <Link to={'/freelancer/profile/earnings-overview'} className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 font-medium text-sm transition-all shadow-sm">
-              <Eye size={16} /> View Earnings
-            </Link>
-            <Link to={'edit/'} className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium text-sm transition-all shadow-sm">
-              <Edit3 size={16} /> Edit Profile
-            </Link>
-          </div>
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto">
+  <Link 
+    to={'/freelancer/settings/payment'} 
+    className="flex items-center justify-center gap-2 px-4 py-2.5 sm:py-2 bg-white border border-gray-200 text-gray-700 rounded-xl sm:rounded-lg hover:bg-gray-50 font-bold sm:font-medium text-xs sm:text-sm transition-all shadow-sm"
+  >
+    <CreditCard size={16} /> Bank Details
+  </Link>
+  
+  <Link 
+    to={'/freelancer/profile/earnings-overview'} 
+    className="flex items-center justify-center gap-2 px-4 py-2.5 sm:py-2 bg-white border border-gray-200 text-gray-700 rounded-xl sm:rounded-lg hover:bg-gray-50 font-bold sm:font-medium text-xs sm:text-sm transition-all shadow-sm"
+  >
+    <Eye size={16} /> View Earnings
+  </Link>
+  
+  <Link 
+    to={'edit/'} 
+    className="flex items-center justify-center gap-2 px-4 py-3 sm:py-2 bg-primary text-white rounded-xl sm:rounded-lg hover:bg-blue-700 font-bold sm:font-medium text-xs sm:text-sm transition-all shadow-sm order-first sm:order-last"
+  >
+    <Edit3 size={16} /> Edit Profile
+  </Link>
+</div>
         </div>
 
         <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">

@@ -84,11 +84,11 @@ console.log(modalProps);
       <div className="w-full max-w-[672px] bg-white rounded-xl shadow-2xl overflow-hidden my-auto animate-in fade-in zoom-in duration-200">
         <div className="flex items-start justify-between gap-4 px-6 py-6 border-b border-slate-100">
           <div className="flex-1 min-w-0">
-            <h1 className="text-[17px] font-semibold text-slate-900 leading-7 mb-1">
+            <h1 className="text-[17px] wrap-anywhere font-semibold text-slate-900 leading-7 mb-1">
               {projectName}
             </h1>
             <p className="text-xs text-slate-500 leading-5">
-              Contract with <span className="text-slate-700 font-medium">{freelancerName}</span>
+              Contract with <span className="text-slate-700  font-medium">{freelancerName}</span>
             </p>
           </div>
           <div className="flex items-center gap-4 flex-shrink-0">

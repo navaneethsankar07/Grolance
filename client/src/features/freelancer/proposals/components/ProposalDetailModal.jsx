@@ -56,7 +56,7 @@ export default function ProposalDetailModal({ isOpen, onClose, proposal }) {
         <div className="border-t px-6 py-4 bg-gray-50 flex justify-end">
           <button
             onClick={onClose}
-            className="px-6 py-2 bg-gray-900 text-white rounded-lg font-medium hover:bg-gray-800 transition-colors"
+            className="px-6 py-2 bg-primary text-white rounded-lg font-medium hover:bg-gray-800 transition-colors"
           >
             Close
           </button>

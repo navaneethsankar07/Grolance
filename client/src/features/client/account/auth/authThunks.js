@@ -43,11 +43,23 @@ export const logoutThunk = createAsyncThunk(
   }
 );
 
+export const requestDeleteOTP = createAsyncThunk(
+  "auth/requestDeleteOTP",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.post("/auth/request-delete-otp/");
+      return response.data;
+    } catch (err) {
+      return rejectWithValue(err.response.data);
+    }
+  }
+);
+
 export const deleteAccount = createAsyncThunk(
   "auth/deleteAccount",
-  async (password, { rejectWithValue }) => {
+  async (credentials, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.post("/auth/delete-account/", { password });
+      const response = await axiosInstance.post("/auth/delete-account/", credentials);
       return response.data;
     } catch (err) {
       return rejectWithValue(err.response.data);

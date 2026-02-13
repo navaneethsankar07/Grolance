@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import SendOtpView, VerifyOtpView, ResendOtpView, RefreshTokenView, LoginView, CurrentUserView, LogoutView, ForgotPasswordView, ValidateResetTokenView, ResetPasswordView, GoogleAuthView, ChangePasswordAPIView, DeleteAccountView
+from .views import SendOtpView, VerifyOtpView, ResendOtpView, RefreshTokenView, LoginView, CurrentUserView, LogoutView, ForgotPasswordView, ValidateResetTokenView, ResetPasswordView, GoogleAuthView, ChangePasswordAPIView, DeleteAccountView, RequestDeleteOTPView
 
 
 
@@ -16,5 +16,6 @@ urlpatterns = [
     path("reset-password/", ResetPasswordView.as_view(), name="reset-password"),
     path("google/", GoogleAuthView.as_view(), name="google-auth"),
     path("change-password/", ChangePasswordAPIView.as_view(), name="change-password"),
-    path("delete-account/", DeleteAccountView.as_view(),name='delete-account')
+    path("delete-account/", DeleteAccountView.as_view(),name='delete-account'),
+    path('request-delete-otp/', RequestDeleteOTPView.as_view(), name='request-delete-otp'),
 ]

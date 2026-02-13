@@ -28,6 +28,7 @@ export default function Contracts() {
     role: 'freelancer',
     search: searchTerm 
   });
+console.log(data);
 
   const tabs = ['All', 'In Progress', 'Submitted', 'Completed', 'Disputed'];
 

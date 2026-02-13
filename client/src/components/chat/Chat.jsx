@@ -65,6 +65,25 @@ export default function Chat({ onClose, data }) {
     return [...flattened].sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
   }, [messagePages]);
 
+  useEffect(() => {
+    if (!hasNextPage || isFetchingNextPage) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          fetchNextPage();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (topItemRef.current) {
+      observer.observe(topItemRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
   const messageValue = watch("message");
   useEffect(() => {
     if (!isConnected || isChatDisabled || !messageValue) return;
@@ -262,6 +281,7 @@ export default function Chat({ onClose, data }) {
     </>
   );
 }
+
 function ConversationItem({ name, profile_photo, message, time, unread, active, onClick, isOnline }) {
   return (
     <button

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import JobCard from "./components/JobCard";
 import { useFreelancerProjects } from "./findJobsQueries";
-import { useCategories, useSkills } from '../../client/projectManagement/projectQueries';
+import { useAllCategories, useAllSkillls, useCategories, useSkills } from '../../client/projectManagement/projectQueries';
 import { toast } from 'react-toastify';
 import { Link } from 'react-router-dom';
 import { ChevronLeft, ChevronRight } from "lucide-react";
@@ -20,11 +20,9 @@ export default function FindJobs() {
 
   const [page, setPage] = useState(1);
 
-  const { data: skillsData, isLoading: skillsLoading } = useSkills();
-  const skills = skillsData?.results ?? [];
-
-  const { data: categoriesData, isLoading: categoriesLoading } = useCategories();
-  const categories = categoriesData?.results ?? [];
+  const { data: skillsData, isLoading: skillsLoading } = useAllSkillls();
+  
+  const { data: categories, isLoading: categoriesLoading } = useAllCategories();
 
   const { data, isLoading } = useFreelancerProjects({
     search: appliedSearch || undefined,
@@ -126,7 +124,7 @@ export default function FindJobs() {
               {isSkillsOpen && (
                 <div className="absolute mt-2 w-56 bg-white border border-[#E5E7EB] rounded-xl shadow-xl py-2 z-50 max-h-60 overflow-y-auto">
                   <button onClick={() => { setSelectedSkill(""); setIsSkillsOpen(false); setPage(1); }} className="w-full text-left px-4 py-2 text-sm text-primary font-medium hover:bg-blue-50 border-b border-gray-100">All Skills</button>
-                  {skills.map((skill) => (
+                  {skillsData.map((skill) => (
                     <button key={skill.id} onClick={() => { setSelectedSkill(skill.name); setIsSkillsOpen(false); setPage(1); }} className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">{skill.name}</button>
                   ))}
                 </div>

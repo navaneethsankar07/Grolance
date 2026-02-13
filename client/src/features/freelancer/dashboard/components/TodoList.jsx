@@ -68,7 +68,7 @@ function TodoList() {
             className="bg-[#3B82F6] text-white px-4 h-[42px] rounded-lg flex items-center gap-2 hover:bg-[#2563EB] transition-colors shadow-sm disabled:bg-gray-300 disabled:cursor-not-allowed"
           >
             {isCreating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
-            <span className="text-sm font-semibold">Add</span>
+            <span className="text-sm font-semibold hidden sm:inline">Add</span>
           </button>
         </div>
         {errors.todo && <p className="text-red-500 text-[10px] mt-1 ml-1">{errors.todo.message}</p>}
@@ -79,15 +79,15 @@ function TodoList() {
           tasks.map((task) => (
             <div 
               key={task.id} 
-              className="group flex items-center gap-3 p-3 rounded-lg hover:bg-[#F9FAFB] border border-transparent hover:border-[#F3F4F6] transition-all"
+              className="group flex items-center gap-3 p-3 rounded-lg bg-transparent md:hover:bg-[#F9FAFB] border border-transparent md:hover:border-[#F3F4F6] transition-all"
             >
               <input
                 type="checkbox"
                 checked={task.is_completed}
                 onChange={() => completeTodo(task.id)}
-                className="w-5 h-5 rounded accent-[#3B82F6] cursor-pointer"
+                className="w-5 h-5 rounded accent-[#3B82F6] cursor-pointer flex-shrink-0"
               />
-              <span className={`flex-1 text-sm transition-all ${
+              <span className={`flex-1 text-sm transition-all break-words min-w-0 ${
                 task.is_completed ? 'text-[#9CA3AF] line-through' : 'text-[#374151] font-medium'
               }`}>
                 {task.todo}
@@ -95,10 +95,10 @@ function TodoList() {
               <button
                 type="button"
                 onClick={() => deleteTodo(task.id)}
-                className="p-1.5 opacity-0 group-hover:opacity-100 hover:bg-red-50 hover:text-red-500 rounded-md transition-all text-[#9CA3AF]"
+                className="p-2 md:p-1.5 opacity-100 md:opacity-0 md:group-hover:opacity-100 hover:bg-red-50 hover:text-red-500 rounded-md transition-all text-[#9CA3AF] flex-shrink-0"
                 title="Delete task"
               >
-                <Trash2 className="w-4 h-4" />
+                <Trash2 className="w-4 h-4 md:w-4 md:h-4" />
               </button>
             </div>
           ))

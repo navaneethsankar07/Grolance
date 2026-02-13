@@ -133,7 +133,7 @@ const onSubmit = (data) => {
               {...register("phone")}
               type="tel"
               placeholder="+1 (555) 000-0000"
-              className={`h-[54px] px-5 rounded-xl border transition-all text-base flex-1 focus:outline-none focus:ring-2 focus:ring-primary/20 ${
+              className={`h-[54px] min-h-11 px-5 rounded-xl border transition-all text-base flex-1 focus:outline-none focus:ring-2 focus:ring-primary/20 ${
                 errors.phone
                   ? "border-red-500"
                   : "border-[#D1D5DB] focus:border-primary"

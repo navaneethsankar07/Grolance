@@ -258,43 +258,58 @@ export default function ProfileEdit() {
             </div>
           </section>
 
-          <section className="p-6 bg-white rounded-2xl border border-gray-200 shadow-sm">
-            <h2 className="text-lg font-bold mb-4 text-gray-900">Skills & Expertise</h2>
-            <div className="flex flex-wrap gap-2 mb-4">
-              {profile.skills.map((skill) => (
-                <SkillTag
-                  key={skill}
-                  skill={skill}
-                  onRemove={() => setProfile({ ...profile, skills: profile.skills.filter((s) => s !== skill) })}
-                />
-              ))}
-            </div>
-            <div className="flex gap-2">
-              <input
-                placeholder="Add skill..."
-                className="flex-1 h-12 px-4 rounded-xl border border-gray-200 outline-none"
-                value={newSkill}
-                onChange={(e) => setNewSkill(e.target.value)}
-                onKeyPress={(e) => {
-                  if (e.key === "Enter" && newSkill.trim()) {
-                    setProfile({ ...profile, skills: [...profile.skills, newSkill.trim()] });
-                    setNewSkill("");
-                  }
-                }}
-              />
-              <button
-                onClick={() => {
-                  if (newSkill.trim()) {
-                    setProfile({ ...profile, skills: [...profile.skills, newSkill.trim()] });
-                    setNewSkill("");
-                  }
-                }}
-                className="px-6 bg-gray-900 text-white rounded-xl font-bold text-sm"
-              >
-                Add
-              </button>
-            </div>
-          </section>
+          <section className="p-4 md:p-6 bg-white rounded-2xl border border-gray-200 shadow-sm">
+  <h2 className="text-lg font-bold mb-4 text-gray-900">Skills & Expertise</h2>
+  
+  {/* Skills Container */}
+  <div className="flex flex-wrap gap-2 mb-6">
+    {profile.skills.length > 0 ? (
+      profile.skills.map((skill) => (
+        <SkillTag
+          key={skill}
+          skill={skill}
+          onRemove={() => 
+            setProfile({ 
+              ...profile, 
+              skills: profile.skills.filter((s) => s !== skill) 
+            })
+          }
+        />
+      ))
+    ) : (
+      <p className="text-sm text-gray-400 italic">No skills added yet.</p>
+    )}
+  </div>
+
+  {/* Input Group */}
+  <div className="flex flex-col sm:flex-row gap-3">
+    <div className="flex-1 relative">
+      <input
+        placeholder="Add skill (e.g. React)..."
+        className="w-full h-12 px-4 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:ring-4 focus:ring-gray-900/5 focus:border-gray-900 outline-none transition-all text-sm md:text-base"
+        value={newSkill}
+        onChange={(e) => setNewSkill(e.target.value)}
+        onKeyPress={(e) => {
+          if (e.key === "Enter" && newSkill.trim()) {
+            setProfile({ ...profile, skills: [...profile.skills, newSkill.trim()] });
+            setNewSkill("");
+          }
+        }}
+      />
+    </div>
+    <button
+      onClick={() => {
+        if (newSkill.trim()) {
+          setProfile({ ...profile, skills: [...profile.skills, newSkill.trim()] });
+          setNewSkill("");
+        }
+      }}
+      className="w-full sm:w-auto px-8 h-12 bg-gray-900 text-white rounded-xl font-black uppercase tracking-widest text-xs hover:bg-gray-800 active:scale-95 transition-all shadow-lg shadow-gray-200"
+    >
+      Add
+    </button>
+  </div>
+</section>
 
           <section className="p-6 bg-white rounded-2xl border border-gray-200 shadow-sm">
             <h2 className="text-lg font-bold mb-6 text-gray-900">Service Packages</h2>

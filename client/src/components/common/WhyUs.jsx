@@ -7,10 +7,12 @@ import { useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 import ClientHeader from '../../features/client/homepage/components/ClientHeader';
 import { FreelancerHeader } from '../../features/freelancer/dashboard/components/Header';
+import { useModal } from '../../hooks/modal/useModalStore';
 
 const WhyUsPage = () => {
   const user = useSelector(state => state.auth.user);
   const navigate = useNavigate();
+  const {openModal} = useModal()
 
   const stats = [
     { label: "Successful Projects", value: "12K+" },
@@ -24,7 +26,9 @@ const WhyUsPage = () => {
       user.current_role === 'client' ? navigate('/create-project') : navigate('/freelancer/jobs');
     } else {
       toast.warn('Please Login or Signup to continue');
-      navigate('/login');
+      openModal('signin')
+      console.log('hello');
+      
     }
   };
 
@@ -53,7 +57,7 @@ const WhyUsPage = () => {
         : <Header />
       }
 
-      <main className="flex-grow">
+      <main className="flex-grow ">
         <section className="pt-32 pb-20 lg:pt-48 lg:pb-32 px-6">
           <div className="max-w-7xl mx-auto text-center">
             <h1 className="text-4xl lg:text-7xl font-black text-slate-900 tracking-tight mb-8 leading-[1.05]">
