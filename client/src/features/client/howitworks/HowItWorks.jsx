@@ -5,7 +5,7 @@ export default function HowItWorks() {
   return (
     <div className="min-h-screen bg-white">
       <section className="relative w-full px-4 sm:px-8 md:px-16 lg:px-20 xl:px-24 pt-4 pb-12 md:pb-16">
-        <div className="relative w-full h-[500px] md:h-[635px] rounded-[80px] md:rounded-[100px] overflow-hidden">
+        <div className="relative w-full h-[500px] md:h-[635px] rounded-4xl lg:rounded-[80px] md:rounded-[100px] overflow-hidden">
           <img
             src="how-it-works.jpg"
             alt="Team collaboration"

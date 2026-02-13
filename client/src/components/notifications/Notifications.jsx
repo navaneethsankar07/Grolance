@@ -9,8 +9,8 @@ export default function Notifications({ onClose }) {
   const [fetchAll, setFetchAll] = useState(false);
   const { user } = useSelector(state => state.auth);
   const { data: notifications, isLoading } = useNotifications(fetchAll, {
-  enabled: !!user 
-});
+    enabled: !!user 
+  });
   const markReadMutation = useMarkAsRead();
     
   const getStyleMap = (type) => {
@@ -30,16 +30,16 @@ export default function Notifications({ onClose }) {
 
   if (isLoading) {
     return (
-      <div className="w-[384px] bg-white rounded-xl border p-10 flex justify-center shadow-2xl">
+      <div className="fixed inset-x-4 top-[74px] sm:inset-auto sm:right-4 sm:w-[384px] bg-white rounded-xl border p-10 flex justify-center shadow-2xl z-[100]">
         <Loader2 className="w-6 h-6 animate-spin text-primary" />
       </div>
     );
   }
 
   return (
-    <div className="w-[384px] min-w-[384px] animate-in fade-in zoom-in-95 duration-200">
+    <div className="fixed inset-x-4 top-[74px] sm:inset-auto sm:right-4 sm:w-[384px] z-[100] animate-in fade-in zoom-in-95 duration-200">
       <div className="bg-white rounded-xl border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.12)] overflow-hidden">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 bg-gray-50/50">
+        <div className="flex items-center justify-between px-4 sm:px-5 py-4 border-b border-gray-100 bg-gray-50/50">
           <div className="flex items-center gap-2">
             <h1 className="text-xs font-semibold text-gray-900">Notifications</h1>
             <button 
@@ -54,7 +54,7 @@ export default function Notifications({ onClose }) {
           </button>
         </div>
 
-        <div className="px-5 py-6 space-y-6 h-[400px] overflow-y-auto bg-white">
+        <div className="px-4 sm:px-5 py-6 space-y-6 h-[60vh] sm:h-[400px] overflow-y-auto bg-white">
           {notifications?.results?.length > 0 ? (
             notifications?.results.map((n) => {
               const style = getStyleMap(n.notification_type);
@@ -96,7 +96,6 @@ export default function Notifications({ onClose }) {
             </div>
           )}
         </div>
-        
       </div>
     </div>
   );

@@ -10,6 +10,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 export default function ProposalsIndex() {
   const { id } = useParams();
   const [page, setPage] = useState(1);
+  
   const [status, setStatus] = useState("");
 
   const { data: project, isLoading: isProjectLoading } = useProjectDetails(id);

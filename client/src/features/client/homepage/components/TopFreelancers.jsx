@@ -3,10 +3,8 @@ import { useRecommendedFreelancers } from "../homePageQueries";
 import HomeFreelancerCard from "./HomeFreelancerCard";
 
 export default function TopFreelancers() {
-  const {data, isLoading} = useRecommendedFreelancers()
-  console.log(data);
+  const {data, isLoading} = useRecommendedFreelancers();
   
-  console.log(data);
   if (isLoading) {
     return (
       <div className="py-20 flex flex-col items-center justify-center">
@@ -18,9 +16,9 @@ export default function TopFreelancers() {
   
   return (
     <section className="py-12 sm:py-16 lg:py-20 bg-white">
-      <div className="max-w-[1700px] mx-40 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-[1546px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-20">
         
-        <h2 className="text-[#111318] font-inter text-2xl sm:text-3xl lg:text-[40px] font-bold leading-tight mb-12 lg:mb-23">
+        <h2 className="text-[#111318] font-inter text-2xl sm:text-3xl lg:text-[40px] font-bold leading-tight mb-8 lg:mb-12">
           Recommended Freelancers
         </h2>
 
@@ -35,7 +33,6 @@ export default function TopFreelancers() {
             </div>
           )}
         </div>
-
       </div>
     </section>
   );

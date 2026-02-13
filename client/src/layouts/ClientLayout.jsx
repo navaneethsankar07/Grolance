@@ -4,11 +4,13 @@ import ClientFooter from "../features/client/homepage/components/ClientFooter";
 
 export default function ClientLayout() {
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col w-full overflow-x-hidden">
       <ClientHeader />
 
-      <main className="flex-1 bg-gray-50 px-4 ">
-        <Outlet />
+      <main className="flex-1 bg-gray-50 w-full">
+        <div className="w-full max-w-[1920px] mx-auto">
+          <Outlet />
+        </div>
       </main>
 
       <ClientFooter />
