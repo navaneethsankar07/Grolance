@@ -11,7 +11,8 @@ from rest_framework_simplejwt.tokens import RefreshToken, TokenError
 from django.conf import settings
 from .services.google_auth import GoogleAuthService
 from .services.google_user_service import GoogleUserService
-
+from django.db import IntegrityError
+import uuid
 
 class SendOtpView(APIView):
     permission_classes = [AllowAny]

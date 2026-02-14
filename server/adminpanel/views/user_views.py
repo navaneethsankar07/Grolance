@@ -33,10 +33,8 @@ class AdminUserListAPIView(ListAPIView):
         elif status == 'active':
             queryset = queryset.filter(is_active=True, is_deleted=False)
         elif status == 'both':
-            # Active users who have a freelancer profile
             queryset = queryset.filter(is_active=True, is_deleted=False, is_freelancer=True)
         elif status == 'client':
-            # Active users who are NOT freelancers (Clients only)
             queryset = queryset.filter(is_active=True, is_deleted=False, is_freelancer=False)
 
         return queryset

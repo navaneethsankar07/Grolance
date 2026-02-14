@@ -64,8 +64,7 @@ def _send_sms(phone: str, otp: str):
 def send_phone_otp(phone: str) -> None:
     otp = _generate_otp()
     _store_otp(phone, otp)
-    print(otp)
-    # _send_sms(phone, otp)
+    _send_sms(phone, otp)
 
 
 

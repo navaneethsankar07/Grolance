@@ -13,6 +13,7 @@ from rest_framework import status
 from django.db import transaction, DatabaseError
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models.functions import Coalesce
+from accounts.utils import otp_service
 from .models import (
     ClientProfile, FreelancerProfile, FreelancerPaymentSettings,
     FreelancerPackage, FreelancerPortfolio, FreelancerSkill, Review,FreelancerToDo
@@ -185,7 +186,7 @@ class SendPhoneOTPAPIView(APIView):
                 freelancer_profile.is_phone_verified = False
                 freelancer_profile.save()
 
-            send_phone_otp(phone)
+            otp_service.send(request.user.email, purpose="phone_verification")
             return Response({"message": "OTP sent successfully"}, status=status.HTTP_200_OK)
         except Exception as e:
             logger.error(f"OTP send error: {str(e)}")
@@ -201,10 +202,16 @@ class VerifyPhoneOTPAPIView(APIView):
             serializer.is_valid(raise_exception=True)
             phone = serializer.validated_data["phone"]
             otp = serializer.validated_data["otp"]
+            
+            verification = otp_service.verify(
+                request.user.email, 
+                otp, 
+            purpose="phone_verification"
+        )
+            if "error" in verification:
+                return Response(verification, status=status.HTTP_400_BAD_REQUEST)
 
-            if not verify_phone_otp(phone, otp):
-                return Response({"message": "Invalid or expired OTP"}, status=status.HTTP_400_BAD_REQUEST)
-
+            
             freelancer_profile, _ = FreelancerProfile.objects.get_or_create(
                 user=request.user)
             freelancer_profile.phone = phone
