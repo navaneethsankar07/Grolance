@@ -1,32 +1,24 @@
-import React from 'react';
-import { Mail, MapPin, Phone, Clock, Globe, ArrowRight, ShieldCheck, Sparkles } from 'lucide-react';
+import { Mail, MapPin, Phone, Clock, ShieldCheck } from 'lucide-react';
 import Footer from '../../features/client/landingPage/components/Footer';
-import { Link } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import ClientHeader from '../../features/client/homepage/components/ClientHeader';
+import { FreelancerHeader } from '../../features/freelancer/dashboard/components/Header';
+import Header from '../../features/client/landingPage/components/Header';
+import ClientFooter from '../../features/client/homepage/components/ClientFooter';
+import FreelancerFooter from '../../features/freelancer/dashboard/components/FreelancerFooter';
 
-const Header = () => (
-  <nav className="sticky top-0 z-50 bg-white border-b border-slate-100 px-6 py-4">
-    <div className="max-w-7xl mx-auto flex items-center justify-between">
-      <Link to="/" className="text-xl font-black text-slate-900 tracking-tighter flex items-center gap-2">
-        <h2 className="text-[37px] font-museo font-extrabold leading-7">
-              <span className="text-[#1A1A1A]">Gro</span>
-              <span className="text-[#3B82F6]">lance</span>
-            </h2>
-      </Link>
-    
-    
-    </div>
-  </nav>
-);
 
 const ContactPage = () => {
   const emailAddress = "support@yourdomain.com";
   const officeAddress = "123 Business Avenue, Suite 500, New York, NY 10001";
   const phoneNumber = "+1 (555) 000-0000";
+  const user = useSelector(state=>state.auth.user)
 
   return (
     <div className="min-h-screen bg-[#FDFDFD] flex flex-col font-sans selection:bg-slate-200">
       
-      <Header/>
+      {user?
+      user.current_role === 'client' ? <ClientHeader/> : <FreelancerHeader/> : <Header/>}
       <main className="flex-grow">
         <div className="bg-white border-b border-slate-100">
           <div className="max-w-7xl mx-auto pt-32 pb-20 lg:pt-52 lg:pb-32 px-6 text-center">
@@ -126,7 +118,8 @@ const ContactPage = () => {
         </div>
       </main>
 
-      <Footer />
+      {user?
+      user.current_role === 'client' ? <ClientFooter/> : <FreelancerFooter/> : <Footer/>}
     </div>
   );
 };

@@ -6,7 +6,6 @@ import { useDashboardStats } from "../dashboardQueries";
 
 export default function AdminOverview() {
   const {data:dashboardStats} = useDashboardStats()
-  console.log(dashboardStats);
   
   return (
     <div className="space-y-8 px-10 py-10">

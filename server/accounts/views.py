@@ -116,6 +116,7 @@ class VerifyOtpView(APIView):
                         "id": user.id,
                         "email": user.email,
                         "full_name": user.full_name,
+                        "current_role":user.current_role
                     },
                     "access_token": str(refresh.access_token),
                 },
@@ -199,6 +200,7 @@ class LoginView(APIView):
                     "email": user.email,
                     "full_name": user.full_name,
                     "is_admin": user.is_admin,
+                    'current_role':user.current_role
                 },
             }
         )

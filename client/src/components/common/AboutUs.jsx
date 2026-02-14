@@ -6,10 +6,14 @@ import { useSelector } from "react-redux";
 import ClientHeader from "../../features/client/homepage/components/ClientHeader";
 import { FreelancerHeader } from "../../features/freelancer/dashboard/components/Header";
 import Header from "../../features/client/landingPage/components/Header";
+import ClientFooter from "../../features/client/homepage/components/ClientFooter";
+import FreelancerFooter from "../../features/freelancer/dashboard/components/FreelancerFooter";
 
 
 export default function AboutPage() {
   const user = useSelector(state=>state.auth.user)
+  console.log(user?.current_role);
+  
   return (
     <div className="min-h-screen bg-[#f8fafc]">
       {user ? 
@@ -90,7 +94,10 @@ export default function AboutPage() {
       </section>
 
      
-    <Footer/>
+     {user ? 
+        (user?.current_role === 'client' ? <ClientFooter/> : <div><FreelancerFooter/></div> ) 
+        : <Footer />
+      }
     </div>
   );
 }

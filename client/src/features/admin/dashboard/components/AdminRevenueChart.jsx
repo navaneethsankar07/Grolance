@@ -5,7 +5,6 @@ import { useRevenueChart } from "../dashboardQueries";
 export default function AdminRevenueChart() {
   const [range, setRange] = useState("this_year");
   const { data: chartData, isLoading } = useRevenueChart(range);
-console.log(chartData);
 
   return (
     <div className="bg-white rounded-xl border border-gray-100 p-6 shadow-sm transition-all">

@@ -6,21 +6,26 @@ import {setCredentials} from '../../client/account/auth/authslice'
 export const useUpdateProfile = () => {
   const dispatch = useDispatch();
   const queryClient = useQueryClient();
-  const {user:currentUser} = useSelector(state=>state.auth)
+  const { user: currentUser } = useSelector(state => state.auth);
 
   return useMutation({
     mutationFn: updateProfile,
-
     onSuccess: (updatedData) => {
-
       const updatedUser = {
         ...currentUser,
-        full_name:updatedData.full_name,
-        profile_photo:updatedData.profile_photo,
-      }
+        ...updatedData, 
+      };
       dispatch(setCredentials({ user: updatedUser }));
-      queryClient.setQueriesData(['profile'],updatedData)
-      queryClient.invalidateQueries({ queryKey: ["profile"],refetchType:'none' });
+
+      queryClient.setQueryData(['profile'], (oldData) => {
+        return {
+          ...oldData,
+          ...updatedData
+        };
+      });
+
+      queryClient.invalidateQueries({ queryKey: ["profile"] });
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
     },
   });
 };

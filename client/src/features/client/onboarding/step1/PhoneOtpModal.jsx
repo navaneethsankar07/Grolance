@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { useVerifyPhoneOtp } from "../onBoardingMutations";
 import { useModal } from "../../../../hooks/modal/useModalStore";
+import { useSelector } from "react-redux";
 
 export default function PhoneOtpModal({ phone }) {
   const [otp, setOtp] = useState("");
   const { closeModal } = useModal();
   const { mutateAsync: verifyOtp, isPending } = useVerifyPhoneOtp();
+  const user = useSelector(state=>state.auth.user)
 
   const handleVerify = async () => {
     if (otp.length !== 6) return;
@@ -21,7 +23,7 @@ export default function PhoneOtpModal({ phone }) {
           Verify Phone Number
         </h2>
         <p className="text-sm text-gray-500 mb-6">
-          Enter the 6-digit OTP sent to <span className="font-semibold">{phone}</span>
+          Enter the 6-digit OTP sent to <span className="font-semibold">{user?.email}</span>
         </p>
 
         <input

@@ -7,12 +7,16 @@ import { useState } from 'react';
 export default function PaymentRelease() {
   const [page, setPage] = useState(1);
   const { data: payoutData, isLoading } = usePendingPayouts(page);
+  console.log(payoutData,'hello');
   
-  const payments = payoutData?.results || [];
-  const totalCount = payoutData?.count || 0;
+  
+  const payments = payoutData || [];
+  const totalCount = payoutData?.length || 0;
   
   const { openModal } = useModal();
   const refundMutation = useRefundPayment();
+  console.log(payoutData?.results);
+  
 
   const handlePageChange = (newPage) => {
     setPage(newPage);

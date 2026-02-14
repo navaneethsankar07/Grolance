@@ -41,7 +41,6 @@ const handleSendInvite = () => {
       message: message
     }, {
       onSuccess: () => {
-        toast.success("Invitation sent successfully!");
         onClose();
         setSelectedProjectId('');
         setSelectedPackageId(null);
@@ -52,7 +51,6 @@ const handleSendInvite = () => {
                             error.response?.data?.detail || 
                             "Failed to send invitation. Please try again.";
         
-        toast.error(serverError);
       }
     });
   };

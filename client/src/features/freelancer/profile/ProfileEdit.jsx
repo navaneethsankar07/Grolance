@@ -261,7 +261,6 @@ export default function ProfileEdit() {
           <section className="p-4 md:p-6 bg-white rounded-2xl border border-gray-200 shadow-sm">
   <h2 className="text-lg font-bold mb-4 text-gray-900">Skills & Expertise</h2>
   
-  {/* Skills Container */}
   <div className="flex flex-wrap gap-2 mb-6">
     {profile.skills.length > 0 ? (
       profile.skills.map((skill) => (
@@ -281,7 +280,6 @@ export default function ProfileEdit() {
     )}
   </div>
 
-  {/* Input Group */}
   <div className="flex flex-col sm:flex-row gap-3">
     <div className="flex-1 relative">
       <input

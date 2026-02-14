@@ -134,7 +134,7 @@ export default function FindTalent() {
                   <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Category</label>
                   <select ref={categoryRef} className="w-full h-11 px-3 rounded-xl border border-gray-200 bg-gray-50 text-sm outline-none">
                     <option>All Categories</option>
-                    {categories?.map(cat => <option key={cat.id} value={cat.name}>{cat.name}</option>)}
+                    {(Array.isArray(categories) ? categories : categories?.results || [])?.map(cat => <option key={cat.id} value={cat.name}>{cat.name}</option>)}
                   </select>
                 </div>
                 <div className="space-y-2">

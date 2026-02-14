@@ -8,6 +8,14 @@ import {
 
 let isRefreshing = false;
 let failedQueue = [];
+const publicRoutes = [
+      "/auth/send-otp/", 
+      "/auth/verify-otp/", 
+      "/auth/login/", 
+      "/auth/refresh/",
+      "/auth/forgot-password/",
+      "/auth/reset-password/"
+    ];
 
 const processQueue = (error, token = null) => {
   failedQueue.forEach((prom) => {
@@ -19,8 +27,9 @@ const processQueue = (error, token = null) => {
 
 axiosInstance.interceptors.request.use(
   (config) => {
+    const isPublicRoute = publicRoutes.some(route => config.url.includes(route));
     const token = store.getState().auth.accessToken;
-    if (token) {
+    if (token && !isPublicRoute) {
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;

@@ -10,6 +10,7 @@ export const loginThunk = createAsyncThunk(
     try {
       const res = await authApi.loginUser({ email, password });
       return res; 
+
     } catch (err) {
       return thunkAPI.rejectWithValue(err.response?.data);
     }
@@ -21,6 +22,8 @@ export const fetchUser = createAsyncThunk(
   async (_, thunkAPI) => {
     try {
       const res = await authApi.getCurrentUser();
+      console.log(res);
+      
       return res.user;
     } catch (error) {
       return thunkAPI.rejectWithValue(error.message ||
