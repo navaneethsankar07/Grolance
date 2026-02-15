@@ -97,35 +97,6 @@ class AdminRevenueChartView(APIView):
         period = request.query_params.get('range', 'this_year')
         now = timezone.now()
 
-        MOCK_DATA = {
-            'this_year': [
-                {"month": "Jan", "revenue": 1200}, {"month": "Feb", "revenue": 2100},
-                {"month": "Mar", "revenue": 0}, {"month": "Apr", "revenue": 0},
-                {"month": "May", "revenue": 0}, {"month": "Jun", "revenue": 0},
-                {"month": "Jul", "revenue": 0}, {"month": "Aug", "revenue": 0},
-                {"month": "Sep", "revenue": 0}, {"month": "Oct", "revenue": 0},
-                {"month": "Nov", "revenue": 0}, {"month": "Dec", "revenue": 0},
-            ],
-            'last_year': [
-                {"month": "Jan", "revenue": 4500}, {"month": "Feb", "revenue": 5200},
-                {"month": "Mar", "revenue": 4800}, {"month": "Apr", "revenue": 6100},
-                {"month": "May", "revenue": 5900}, {"month": "Jun", "revenue": 7200},
-                {"month": "Jul", "revenue": 6800}, {"month": "Aug", "revenue": 8100},
-                {"month": "Sep", "revenue": 7500}, {"month": "Oct", "revenue": 9200},
-                {"month": "Nov", "revenue": 8800}, {"month": "Dec", "revenue": 10500},
-            ],
-            'all_time': [
-                {"month": "2023", "revenue": 45000},
-                {"month": "2024", "revenue": 82000},
-                {"month": "2025", "revenue": 115000},
-                {"month": "2026", "revenue": 3300},
-            ]
-        }
-
-        use_mock = True  
-        if use_mock:
-            return Response(MOCK_DATA.get(period, MOCK_DATA['this_year']))
-
         if period == 'all_time':
             db_data = (
                 Payment.objects.filter(status__in=['completed', 'released'])
@@ -135,11 +106,12 @@ class AdminRevenueChartView(APIView):
                 .order_by('label')
             )
             return Response([
-                {"month": str(entry['label'].year), "revenue": float(entry['revenue'])}
+                {"month": str(entry['label'].year), "revenue": float(entry['revenue'] or 0)}
                 for entry in db_data
             ])
 
         target_year = now.year if period == 'this_year' else now.year - 1
+        
         monthly_data = {i: 0.0 for i in range(1, 13)}
         
         db_data = (
@@ -153,7 +125,7 @@ class AdminRevenueChartView(APIView):
         )
 
         for entry in db_data:
-            monthly_data[entry['month_num'].month] = float(entry['revenue'])
+            monthly_data[entry['month_num'].month] = float(entry['revenue'] or 0)
 
         return Response([
             {"month": calendar.month_name[m][:3], "revenue": revenue}
