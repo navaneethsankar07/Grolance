@@ -1,4 +1,3 @@
-import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './fonts.css'
 import './index.css'
@@ -20,7 +19,6 @@ const initialOptions = {
 const queryClient = new QueryClient();
 
 createRoot(document.getElementById('root')).render(
-  // <StrictMode>
     <Provider store={store}>
 <PersistGate
   persistor={persistor}
@@ -36,6 +34,5 @@ createRoot(document.getElementById('root')).render(
   </ModalProvider>
     </PersistGate>
     </Provider>
- // </StrictMode>,
 
 )
