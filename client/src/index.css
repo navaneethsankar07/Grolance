@@ -1,0 +1,11 @@
+@import "tailwindcss";
+
+@layer utilities {
+  .font-museo {
+    font-family: 'MuseoModerno', sans-serif;
+  }
+}
+
+@theme {
+  --color-primary:#3B82F6;
+}

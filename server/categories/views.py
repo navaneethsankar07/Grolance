@@ -1,0 +1,90 @@
+from rest_framework.generics import ListAPIView, CreateAPIView, RetrieveUpdateDestroyAPIView
+from rest_framework.permissions import IsAuthenticated
+from .models import Category,Skill
+from .serializers import CategorySerializer, SkillSerializer, CategoryWriteSerializer, SkillWriteSerializer
+from adminpanel.permissions import IsAdminUser
+from  rest_framework.exceptions import ValidationError
+from common.pagination import AdminUserPagination
+from rest_framework.filters import SearchFilter, OrderingFilter
+from rest_framework.response import Response
+from django.db.models.deletion import ProtectedError
+
+class CategoryListView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = CategorySerializer
+    pagination_class = AdminUserPagination
+    filter_backends = [SearchFilter, OrderingFilter]
+    search_fields = ["name"]
+    ordering = ["-id"]
+    def get_queryset(self):
+        return Category.objects.all().order_by('id')
+    
+    def list(self, request, *args, **kwargs):
+        if request.query_params.get('no_pagination') == 'true':
+            self.pagination_class = None
+            queryset = self.get_queryset()
+            serializer = self.get_serializer(queryset, many=True)
+            return Response(serializer.data)
+            
+        return super().list(request, *args, **kwargs)
+
+class CategoryCreateView(CreateAPIView):
+    permission_classes = [IsAdminUser]
+    serializer_class = CategoryWriteSerializer
+    queryset = Category.objects.all()
+
+
+
+class CategoryDetailView(RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsAdminUser]
+    serializer_class = CategoryWriteSerializer
+    queryset = Category.objects.all()
+
+    def perform_destroy(self, instance):
+        if instance.skills.exists():
+            raise ValidationError(
+            "This category is in use and cannot be deleted."
+        )
+
+        instance.delete()
+
+class SkillListView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = SkillSerializer
+    pagination_class = AdminUserPagination
+    filter_backends = [SearchFilter, OrderingFilter]
+    SearchFilter = ["name", "category_name"]
+    ordering = ["-id"]
+    
+
+    def get_queryset(self):
+        return Skill.objects.select_related("category").all()
+    
+
+    def list(self, request, *args, **kwargs):
+        if request.query_params.get('no_pagination') == 'true':
+            self.pagination_class = None
+            queryset = self.get_queryset()
+            serializer = self.get_serializer(queryset, many=True)
+            return Response(serializer.data)
+            
+        return super().list(request, *args, **kwargs)
+
+class SkillCreateView(CreateAPIView):
+    permission_classes = [IsAdminUser]
+    serializer_class = SkillWriteSerializer
+    queryset = Skill.objects.all()
+
+
+class SkillDetailView(RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsAdminUser]
+    serializer_class = SkillWriteSerializer
+    queryset = Skill.objects.all()
+
+    def perform_destroy(self, instance):
+        try:
+            instance.delete()
+        except ProtectedError:
+            raise ValidationError(
+                "This skill is currently being used in projects and cannot be deleted."
+            )

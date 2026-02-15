@@ -1,0 +1,21 @@
+import axiosInstance from '../../../api/axiosInstance'
+
+export const requestContractRevision = async ({ contractId, reason }) => {
+  const response = await axiosInstance.post(`/contracts/${contractId}/request-revision/`, { reason });
+  return response.data;
+};
+
+export const updateContractStatus = async ({ contractId, status }) => {
+  const response = await axiosInstance.patch(`/contracts/${contractId}/status_update/`, { status });
+  return response.data;
+};
+
+export const verifyPayment = async (verificationData) => {
+  const response = await axiosInstance.post('/payments/verify-payment/', verificationData);
+  return response.data;
+};
+
+export const createReview = async (reviewData) => {
+  const { data } = await axiosInstance.post("/profile/reviews/create/", reviewData);
+  return data;
+}

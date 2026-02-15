@@ -17,9 +17,6 @@ media/
 # Environment variables
 .env
 
-# Database (ONLY if sqlite was ever used)
-db.sqlite3
-
 # Editor / OS
 .vscode/
 .idea/
