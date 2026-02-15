@@ -17,7 +17,6 @@ export default function JobDetail() {
   const { id } = useParams();
   const { data, isLoading, isError, error } = useProjectDetails(id);
   const { openModal } = useModal();
-console.log(data);
 
   if (isLoading) return (
     <div className="flex flex-col justify-center items-center h-screen bg-slate-50">

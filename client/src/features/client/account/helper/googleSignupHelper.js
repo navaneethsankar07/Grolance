@@ -1,7 +1,6 @@
 // googleSignupHelper.js
 export const initGoogleButton = (elementId, callback) => {
   if (!window.google) {
-    console.error("Google SDK not loaded");
     return;
   }
 

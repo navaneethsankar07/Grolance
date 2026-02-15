@@ -9,25 +9,22 @@ class GlobalErrorBoundary extends React.Component {
   }
 
   static getDerivedStateFromError(error) {
-    // Update state so the next render shows the fallback UI.
     return { hasError: true, error };
   }
 
   componentDidCatch(error, errorInfo) {
-    // You can log the error to an error reporting service here
     console.error("Uncaught error:", error, errorInfo);
   }
 
   handleReset = () => {
     this.setState({ hasError: false });
-    window.location.href = "/"; // Force a clean reload to the home page
+    window.location.href = "/"; 
   };
 
   render() {
     if (this.state.hasError) {
       return (
         <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6 text-center">
-          {/* Animated Background Pulse */}
           <motion.div 
             animate={{ scale: [1, 1.1, 1], opacity: [0.1, 0.2, 0.1] }}
             transition={{ duration: 4, repeat: Infinity }}
@@ -39,7 +36,6 @@ class GlobalErrorBoundary extends React.Component {
             animate={{ opacity: 1, y: 0 }}
             className="max-w-md w-full bg-white rounded-[2.5rem] shadow-2xl p-10 border border-white relative"
           >
-            {/* Top Icon */}
             <div className="absolute -top-10 left-1/2 -translate-x-1/2">
               <div className="w-20 h-20 bg-primary rounded-3xl shadow-xl shadow-primary/30 flex items-center justify-center text-white">
                 <AlertTriangle size={40} />

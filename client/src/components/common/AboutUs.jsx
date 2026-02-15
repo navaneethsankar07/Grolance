@@ -12,7 +12,6 @@ import FreelancerFooter from "../../features/freelancer/dashboard/components/Fre
 
 export default function AboutPage() {
   const user = useSelector(state=>state.auth.user)
-  console.log(user?.current_role);
   
   return (
     <div className="min-h-screen bg-[#f8fafc]">

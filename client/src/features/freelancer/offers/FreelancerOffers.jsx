@@ -8,14 +8,12 @@ export default function FreelancerOffers() {
   const [page, setPage] = useState(1);
   const { data: offers, isLoading, isError } = useMyOffers(page);
   const { openModal } = useModal();
-console.log(offers,'daa');
 
   if (isLoading) return <div className="p-10 text-center">Loading offers...</div>;
   if (isError) return <div className="p-10 text-center text-red-500">Error loading offers.</div>;
 
   const offerList = offers || [];
   const totalCount = offers?.count || 0;
-console.log(offerList,'haai')
   const handlePageChange = (newPage) => {
     setPage(newPage);
     window.scrollTo({ top: 0, behavior: 'smooth' });

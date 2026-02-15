@@ -40,12 +40,8 @@ const [_key, { page, status, search }] = queryKey;
   return res.data;
 };
 
-export const fetchProjectById = async (id) => {
-  console.log(id);
-  
-  const res = await axiosInstance.get(`/projects/${id}/`);
-  console.log(res.data,'babu');
-  
+export const fetchProjectById = async (id) => {  
+  const res = await axiosInstance.get(`/projects/${id}/`);  
   return res.data;
 };
 

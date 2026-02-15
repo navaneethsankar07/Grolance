@@ -7,7 +7,6 @@ import { useSelector } from 'react-redux'
 
 function ClientHomepage() {
   const user = useSelector(state=>state.auth.user)
-  console.log(user.current_role);
   
   return (
     <>

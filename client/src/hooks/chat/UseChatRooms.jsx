@@ -10,8 +10,6 @@ export const useChatSocket = (roomId) => {
   const token = useSelector(state => state.auth.accessToken);
 
   useEffect(() => {
-    console.log(`%c [useChatSocket] connecting to room: ${roomId}`, 'color: #3b82f6; font-weight: bold;');
-    console.trace("Socket Connection Trace");
     if (!roomId || !token) return;
 
     const wsUrl = `ws://localhost:8000/ws/chat/${roomId}/?token=${token}`;

@@ -15,7 +15,6 @@ class OTPService:
 
     @staticmethod
     def generate_otp():
-        print('otp generated')
         return str(random.randint(100000, 999999))
 
     @staticmethod
@@ -74,7 +73,6 @@ class OTPService:
       </body>
         </html>
     """
-        print('otp sended')
         send_otp_email_task.delay(
         email=email,
         subject=subject,
@@ -134,7 +132,6 @@ class PasswordResetService:
         reset_url = (
             f"{settings.FRONTEND_URL}/reset-password?uid={uid}&token={token}"
         )
-        print(reset_url)
 
         subject = "Reset  Grolance password"
 

@@ -22,7 +22,6 @@ export const fetchUser = createAsyncThunk(
   async (_, thunkAPI) => {
     try {
       const res = await authApi.getCurrentUser();
-      console.log(res);
       
       return res.user;
     } catch (error) {

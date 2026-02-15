@@ -36,7 +36,6 @@ export default function ClientContracts() {
     role: 'client',
     search: search 
   });
-console.log(data);
 
   const tabs = ['All', 'In Progress', 'Submitted', 'Completed', 'Disputed'];
 

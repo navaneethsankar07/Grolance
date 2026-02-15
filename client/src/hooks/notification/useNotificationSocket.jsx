@@ -22,7 +22,6 @@ export const useNotificationSocket = (userId) => {
       if (isCorrectRole) {
         notificationSound.currentTime = 0; 
         notificationSound.play().catch(err => {
-          console.warn("Audio blocked: User interaction required.", err);
         });
       }
 
@@ -39,7 +38,6 @@ export const useNotificationSocket = (userId) => {
       queryClient.invalidateQueries(["notifications"]);
     };
 
-    socket.onclose = () => console.log("Notification Socket closed");
     
     return () => socket.close();
   }, [userId, accessToken, queryClient, currentRole]);

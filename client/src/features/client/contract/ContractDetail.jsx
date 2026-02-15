@@ -23,7 +23,6 @@ export default function ClientContractDetail() {
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, percentage: 0 });
   const [isRevisionModalOpen, setIsRevisionModalOpen] = useState(false);
   const [revisionReason, setRevisionReason] = useState("");
-  console.log(contract);
   
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState("");
@@ -118,7 +117,6 @@ export default function ClientContractDetail() {
   const existingReview = contract.reviews?.client_review;
   const freelancerReview = contract.reviews?.freelancer_review
   const isFreelancerDisputed = dispute && dispute?.raised_by_id === contract.freelancer_id;
-console.log(freelancerReview);
 
   return (
     <div className="min-h-screen bg-[#f8fafc] pb-20">

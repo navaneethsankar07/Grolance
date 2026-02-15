@@ -7,7 +7,6 @@ import { useState } from 'react';
 export default function PaymentRelease() {
   const [page, setPage] = useState(1);
   const { data: payoutData, isLoading } = usePendingPayouts(page);
-  console.log(payoutData,'hello');
   
   
   const payments = payoutData || [];
@@ -15,7 +14,6 @@ export default function PaymentRelease() {
   
   const { openModal } = useModal();
   const refundMutation = useRefundPayment();
-  console.log(payoutData?.results);
   
 
   const handlePageChange = (newPage) => {

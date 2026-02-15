@@ -26,9 +26,7 @@ const WhyUsPage = () => {
       user.current_role === 'client' ? navigate('/create-project') : navigate('/freelancer/jobs');
     } else {
       toast.warn('Please Login or Signup to continue');
-      openModal('signin')
-      console.log('hello');
-      
+      openModal('signin')      
     }
   };
 

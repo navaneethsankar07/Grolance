@@ -34,7 +34,6 @@ export default function ContractDetail() {
   const [formData, setFormData] = useState({ title: '', file: null, link_url: '', notes: '' });
   const [activeRevisionId, setActiveRevisionId] = useState(null);
   const [rejectionNote, setRejectionNote] = useState("");
-  console.log(contract);
   
   useEffect(() => {
     if (!contract) return;

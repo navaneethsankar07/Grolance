@@ -22,8 +22,6 @@ export const useClientSpendingSummary = () => {
 
 
 export const useClientReviews = (userId) => {
-  console.log(userId);
-  
   return useQuery({
     queryKey: ["clientReviews", userId],
     queryFn: () => fetchClientReviews(userId),

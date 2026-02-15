@@ -2,7 +2,6 @@ import axiosInstance from '../../../api/axiosInstance'
 
 export const fetchMyOffers = async () => {
   const response = await axiosInstance.get("/contracts/my_offers/");
-  console.log(response.data)
   return response.data;
 };
 

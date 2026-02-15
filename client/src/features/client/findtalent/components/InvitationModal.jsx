@@ -54,7 +54,6 @@ const handleSendInvite = () => {
       }
     });
   };
-  console.log(packages);
   
 
   if (!isOpen) return null;

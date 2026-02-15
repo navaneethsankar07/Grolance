@@ -9,9 +9,7 @@ export const useResolveDispute = () => {
     onSuccess: (data, variables) => {
       queryClient.invalidateQueries(["admin", "disputes", variables.id]);
       queryClient.invalidateQueries(["admin", "disputes"]);
-      
-      console.log("Audit log updated:", data.message);
-    },
+          },
     onError: (error) => {
       const message = error.response?.data?.error || "Failed to update case.";
       alert(`Decision Error: ${message}`);

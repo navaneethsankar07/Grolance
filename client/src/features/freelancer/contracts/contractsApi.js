@@ -45,7 +45,6 @@ export const createDispute = async ({ contract, reason, description, files }) =>
     description,
     evidence_urls,
   });
-  console.log(data);
   
   return data;
 };

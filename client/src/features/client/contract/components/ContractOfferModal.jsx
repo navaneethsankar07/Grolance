@@ -14,7 +14,6 @@ export default function ContractOfferModal() {
   const sigCanvas = useRef(null);
 
   const { mutate: verifyPayment, isLoading: isVerifying } = useVerifyPayment();
-console.log(modalProps);
 
   const projectName = modalProps?.projectName || "E-commerce Website Redesign";
   const freelancerName = modalProps?.freelancerName || "Sarah Chen";
