@@ -8,8 +8,6 @@ import NotFound from "../components/NotFound";
 export default function ProtectedRoute({ children }) {
   const { user, initialized } = useSelector((state) => state.auth);
   const location = useLocation();
-  console.log(user);
-  console.log(initialized);
   
   if (!initialized) return null;
 

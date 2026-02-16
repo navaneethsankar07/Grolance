@@ -1,14 +1,14 @@
 import React, { useState } from "react";
 import { Calendar, Building2, MapPin, Star, MessageSquare, ChevronLeft, ChevronRight } from "lucide-react";
 import { useClientReviews, useProfile } from "./profileQueries"; 
+import {useSelector} from 'react-redux'
 import { Link } from "react-router-dom";
 
 export default function ProfileOverview() {
   const [page, setPage] = useState(1);
   const { data: profile, isLoading: profileLoading, isError: profileError } = useProfile();
-  
-  const { data: reviewsData, isLoading: reviewsLoading, isFetching } = useClientReviews(profile?.id, page);
-  console.log(reviewsData,'hello');
+  const user = useSelector(state=>state.auth.user)
+  const { data: reviewsData, isLoading: reviewsLoading, isFetching } = useClientReviews(user?.id, page);
   
   const reviews = reviewsData?.results || [];
   const hasNext = !!reviewsData?.next;

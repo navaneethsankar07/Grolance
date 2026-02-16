@@ -432,12 +432,11 @@ class ClientReviewListView(ListAPIView):
     permission_classes = []
 
     def get_queryset(self):
-        user_id = self.request.user
+        user_id = self.kwargs.get('user_id')
         if not user_id:
             return Review.objects.none()
-            
         return Review.objects.filter(
-            reviewee_id=user_id, 
+            reviewer_id=user_id, 
             review_type='client'
         ).order_by('-created_at')
     
