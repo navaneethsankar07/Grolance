@@ -7,6 +7,7 @@ import { useFreelancerProfile } from "../onBoardingQueries";
 import { useSendPhoneOtp } from "../onBoardingMutations";
 import { useModal } from "../../../../hooks/modal/useModalStore";
 import { toast } from "react-toastify";
+import { Link } from "react-router-dom";
 
 export default function StepOne() {
   const { formData, updateFormData, nextStep } = useOnBoarding();
@@ -178,19 +179,19 @@ const onSubmit = (data) => {
               className="text-sm text-gray-600 leading-relaxed cursor-pointer"
             >
               I have read and agree to the{" "}
-              <a
-                href="/terms"
+              <Link
+                to="/terms-and-conditions"
                 className="text-primary font-bold hover:underline"
               >
                 Terms & Conditions
-              </a>{" "}
+              </Link>{" "}
               and{" "}
-              <a
-                href="/privacy"
+              <Link
+                to="/privacy-policies"
                 className="text-primary font-bold hover:underline"
               >
                 Privacy Policy
-              </a>
+              </Link>
               .
             </label>
           </div>

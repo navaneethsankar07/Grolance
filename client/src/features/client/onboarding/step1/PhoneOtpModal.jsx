@@ -2,18 +2,27 @@ import { useState } from "react";
 import { useVerifyPhoneOtp } from "../onBoardingMutations";
 import { useModal } from "../../../../hooks/modal/useModalStore";
 import { useSelector } from "react-redux";
+import { toast } from "react-toastify";
 
 export default function PhoneOtpModal({ phone }) {
   const [otp, setOtp] = useState("");
   const { closeModal } = useModal();
   const { mutateAsync: verifyOtp, isPending } = useVerifyPhoneOtp();
-  const user = useSelector(state=>state.auth.user)
+  const user = useSelector(state => state.auth.user);
 
   const handleVerify = async () => {
-    if (otp.length !== 6) return;
+    if (otp.length !== 6) {
+      toast.error("Please enter a valid 6-digit OTP");
+      return;
+    }
 
-    await verifyOtp({ phone, otp });
-    closeModal();
+    try {
+      await verifyOtp({ phone, otp });
+      toast.success("Phone verified successfully!");
+      closeModal();
+    } catch (error) {
+      toast.error(error?.response?.data?.message || "Invalid OTP. Please try again.");
+    }
   };
 
   return (
@@ -40,7 +49,7 @@ export default function PhoneOtpModal({ phone }) {
           disabled={isPending}
           className="mt-6 w-full h-[54px] rounded-xl bg-primary text-white font-bold hover:opacity-90 disabled:opacity-50"
         >
-          Verify OTP
+          {isPending ? "Verifying..." : "Verify OTP"}
         </button>
 
         <button
