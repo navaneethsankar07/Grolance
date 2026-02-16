@@ -5,6 +5,8 @@ import { toast } from "react-toastify";
 export default function EditSkillModal({ open, onOpenChange, skill, categories }) {
   const [name, setName] = useState("");
   const [categoryId, setCategoryId] = useState("");
+  console.log(categories.data);
+  
 
   const updateSkillMutation = useUpdateSkill();
 
@@ -85,7 +87,7 @@ export default function EditSkillModal({ open, onOpenChange, skill, categories }
                 className="w-full h-12 px-4 border rounded-lg focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">Select category</option>
-                {categories.map((cat) => (
+                {categories?.data.map((cat) => (
                   <option key={cat.id} value={cat.id}>
                     {cat.name}
                   </option>

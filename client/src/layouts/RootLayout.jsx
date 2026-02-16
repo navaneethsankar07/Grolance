@@ -69,7 +69,7 @@ useNotificationSocket(userId);
       {modal === "forgot-password" && <ForgotPasswordModal isOpen />}
       {modal === "confirm-project" && <ConfirmProjectModal isPending={false} onConfirm={modalProps.onConfirm} />}
       {modal === 'edit-category' && <EditCategoryModal open onOpenChange={closeModal} category={modalProps} />}
-      {modal === 'edit-skill' && <EditSkillModal open onOpenChange={closeModal} skill={modalProps.item} categories={modalProps.categories} />}
+      {modal === 'edit-skill' && <EditSkillModal open onOpenChange={closeModal} skill={modalProps.item} categories={modalProps.allCategories} />}
       {modal === 'add-category' && <AddCategoryModal open onOpenChange={closeModal} />}
       {modal === 'add-skill' && <AddSkillModal categories={modalProps.allCategories?.data} onClose={closeModal} />}
       {modal === 'delete-category' && <DeleteCategoryModal open onOpenChange={closeModal} category={modalProps} />}

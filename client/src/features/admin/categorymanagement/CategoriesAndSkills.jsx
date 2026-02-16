@@ -80,7 +80,7 @@ export default function CategoriesAndSkills() {
           hasNext={!!skillData?.next}
           hasPrev={!!skillData?.previous}
           onAdd={() => openModal("add-skill", { allCategories })}
-          onEdit={(item) => openModal("edit-skill", { item, categories })}
+          onEdit={(item) => openModal("edit-skill", { item, allCategories })}
           onDelete={(item) => openModal("delete-skill", item)}
         />
       </div>
