@@ -24,7 +24,7 @@ export default function StepSix() {
     resolver: zodResolver(stepSixSchema),
     defaultValues: {
       paymentDetails: {
-        paypalEmail: formData.paymentDetails?.paypalEmail || '',
+        paypalEmail: 'freelancer@paypal.com',
         isConfirmed: formData.paymentDetails?.isConfirmed || false,
       }
     },
@@ -62,22 +62,22 @@ export default function StepSix() {
   return (
     <OnboardingLayout 
       title="Payout Method" 
-      subtitle="Enter your PayPal email to receive payments for completed projects."
+      subtitle="The system uses a pre-configured PayPal account for test transactions."
     >
       <div className="w-full max-w-[720px] mx-auto">
         <form id="onboarding-form" className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
           
           <div className="flex flex-col gap-2">
-            <label className="text-xs font-bold text-gray-700 uppercase tracking-wider">PayPal Email Address</label>
+            <label className="text-xs font-bold text-gray-700 uppercase tracking-wider">Test PayPal Email Address</label>
             <input
               type="email"
               {...register("paymentDetails.paypalEmail")}
-              placeholder="e.g., yourname@example.com"
-              className={`h-[54px] px-5 rounded-xl border outline-none transition-all ${
-                errors.paymentDetails?.paypalEmail ? 'border-red-500 focus:ring-4 focus:ring-red-50' : 'border-gray-200 focus:border-primary focus:ring-4 focus:ring-primary/10'
-              }`}
+              readOnly
+              className="h-[54px] px-5 rounded-xl border border-gray-200 bg-gray-50 text-gray-500 cursor-not-allowed outline-none"
             />
-            {errors.paymentDetails?.paypalEmail && <p className="text-red-500 text-xs font-bold">{errors.paymentDetails.paypalEmail.message}</p>}
+            <p className="text-[11px] text-amber-600 font-medium italic">
+              * This field is locked to our sandbox account for testing purposes.
+            </p>
           </div>
 
           <div className="p-4 rounded-2xl border border-blue-100 bg-blue-50 flex items-start gap-4">
