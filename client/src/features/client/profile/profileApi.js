@@ -25,5 +25,7 @@ export const fetchClientSpendingSummary = async () => {
 
 export const fetchClientReviews = async (userId) => {
   const { data } = await axiosInstance.get(`/profile/reviews/client/${userId}/`);
+  console.log(data,'haii');
+  
   return data;
 };

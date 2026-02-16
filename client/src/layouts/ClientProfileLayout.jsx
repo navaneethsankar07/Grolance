@@ -32,7 +32,7 @@ export default function ClientProfileLayout() {
         <ProfileSidebar onNavigate={() => setIsSidebarOpen(false)} />
       </aside>
 
-      <main className="flex-1 p-4 sm:p-6 bg-gray-50 overflow-x-hidden w-full">
+      <main className="flex-1  p-4 sm:p-6 bg-gray-50 overflow-x-hidden w-full">
         <Outlet />
       </main>
     </div>

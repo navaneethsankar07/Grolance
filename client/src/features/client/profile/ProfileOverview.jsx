@@ -8,6 +8,7 @@ export default function ProfileOverview() {
   const { data: profile, isLoading: profileLoading, isError: profileError } = useProfile();
   
   const { data: reviewsData, isLoading: reviewsLoading, isFetching } = useClientReviews(profile?.id, page);
+  console.log(reviewsData,'hello');
   
   const reviews = reviewsData?.results || [];
   const hasNext = !!reviewsData?.next;
@@ -21,14 +22,14 @@ export default function ProfileOverview() {
 
   return (
     <div className="max-w-6xl mx-auto space-y-6">
-      <h1 className="text-2xl md:text-[26px] font-black text-gray-900 mb-2">Profile Overview</h1>
+      <h1 className="text-2xl md:text-[26px] lg:mt-10 font-black text-gray-900 mb-2">Profile Overview</h1>
 
       <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
         <div className="p-6 md:p-8">
           <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
             <div className="relative">
               <img
-                src={profile_photo || `https://ui-avatars.com/api/?name=${encodeURIComponent(full_name)}&background=2563eb&color=fff`}
+                src={profile_photo || `https://ui-avatars.com/api/?name=${encodeURIComponent(full_name)}&background=3B82F6&color=fff`}
                 alt="Profile"
                 className="w-24 h-24 md:w-32 md:h-32 rounded-3xl object-cover shadow-lg border-4 border-white"
               />
@@ -116,7 +117,7 @@ export default function ProfileOverview() {
                   <div key={review.id} className="p-5 bg-gray-50/50 rounded-2xl border border-gray-100 transition-all hover:bg-white hover:shadow-md">
                     <div className="flex items-center gap-4 mb-4">
                       <img 
-                        src={review.reviewer_photo || `https://ui-avatars.com/api/?name=${review.reviewer_name}&background=random`} 
+                        src={review.reviewer_photo || `https://ui-avatars.com/api/?name=${review.reviewer_name}&background=3B82F6&color=fff`} 
                         className="w-10 h-10 rounded-xl object-cover border-2 border-white shadow-sm" 
                         alt="" 
                       />

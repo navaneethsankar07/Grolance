@@ -10,7 +10,8 @@ let isRefreshing = false;
 let failedQueue = [];
 const publicRoutes = [
       "/auth/send-otp/", 
-      "/auth/verify-otp/", 
+      "/auth/verify-otp/",
+      "/auth/resend-otp/",
       "/auth/login/", 
       "/auth/refresh/",
       "/auth/forgot-password/",
