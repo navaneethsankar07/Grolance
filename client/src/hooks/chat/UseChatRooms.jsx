@@ -12,7 +12,7 @@ export const useChatSocket = (roomId) => {
   useEffect(() => {
     if (!roomId || !token) return;
 
-    const wsUrl = `ws://localhost:8000/ws/chat/${roomId}/?token=${token}`;
+    const wsUrl =`${import.meta.env.VITE_WS_URL}/chat/${roomId}/?token=${token}`;
     socketRef.current = new WebSocket(wsUrl);
 
     socketRef.current.onopen = () => {
