@@ -446,6 +446,7 @@ class ProposalsSerializer(serializers.ModelSerializer):
 
 class ProposalsListSerializer(serializers.ModelSerializer):
     freelancer_name = serializers.CharField(source='freelancer.user.full_name')
+    freelancer_ratings = serializers.CharField(source='freelancer.average_rating',read_only=True)
     freelancer_photo = serializers.CharField(
         source='freelancer.user.profile_photo', read_only=True)
     freelancer_tagline = serializers.CharField(
@@ -455,7 +456,7 @@ class ProposalsListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Proposal
         fields = [
-            'id', 'freelancer_id', 'freelancer_name', 'freelancer_photo', 'freelancer_tagline',
+            'id', 'freelancer_id', 'freelancer_name', 'freelancer_photo', 'freelancer_tagline','freelancer_ratings',
             'cover_letter', 'bid_amount', 'delivery_days', 'status', 'created_at', 'contract_info'
         ]
 

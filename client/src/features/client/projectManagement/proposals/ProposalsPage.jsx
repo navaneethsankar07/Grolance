@@ -30,6 +30,7 @@ export default function ProposalsIndex() {
     if (b.contract_info?.is_this_freelancer) return 1;
     return 0;
   });
+console.log(sortedProposals);
 
   const anyOfferMade = actualProposals.some(p => p.contract_info !== null);
 
@@ -122,7 +123,7 @@ export default function ProposalsIndex() {
                   name: prop.freelancer_name,
                   title: prop.freelancer_tagline || "Freelancer",
                   image: prop.freelancer_photo ,
-                  rating: 4.8, 
+                  rating: prop.freelancer_ratings, 
                 }}
                 proposal={{
                   title: project?.title,

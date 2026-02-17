@@ -1,13 +1,9 @@
 import React, { useState } from 'react';
-import { X, CheckCircle2, Trash2, AlertTriangle } from 'lucide-react'; 
+import { X, CheckCircle2, Trash2, AlertTriangle, Star } from 'lucide-react'; 
 import { useModal } from '../../../../../hooks/modal/useModalStore';
 import { Link, useNavigate } from 'react-router-dom';
 
-const StarIcon = () => (
-  <svg width="16" height="20" viewBox="0 0 16 20" fill="none">
-    <path d="M5.89967 13.2167L7.99967 11.95L10.0997 13.2333L9.54967 10.8333L11.3997 9.23333L8.96634 9.01667L7.99967 6.75L7.03301 9L4.59967 9.21667L6.44967 10.8333L5.89967 13.2167ZM3.88301 16L4.96634 11.3167L1.33301 8.16667L6.13301 7.75L7.99967 3.33333L9.86634 7.75L14.6663 8.16667L11.033 11.3167L12.1163 16L7.99967 13.5167L3.88301 16Z" fill="#EAB308"/>
-  </svg>
-);
+
 
 export default function ProposalCard({ freelancer, proposal, isInvitation = false, invitationStatus = 'pending', anyOfferMade, onReject, isRejecting }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -25,7 +21,6 @@ export default function ProposalCard({ freelancer, proposal, isInvitation = fals
     ? `${proposal.description.substring(0, MAX_LENGTH)}...` 
     : proposal.description;
 
-  // Reusable Avatar Component
   const FreelancerAvatar = ({ size = "h-12 w-12", textSize = "text-xl" }) => (
     <>
       {freelancer?.image ? (
@@ -208,7 +203,7 @@ export default function ProposalCard({ freelancer, proposal, isInvitation = fals
             <p className="text-sm text-gray-500 hover:text-primary">{freelancer.title}</p>
             </Link>
             <div className="flex items-center gap-1 pt-1">
-              {[...Array(5)].map((_, i) => <StarIcon key={i} />)}
+              <Star className="w-4 h-4 fill-yellow-400 text-yellow-400"/>
               <span className="ml-1 text-sm font-medium text-gray-700">{freelancer.rating}</span>
             </div>
           </div>

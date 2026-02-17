@@ -9,7 +9,6 @@ export default function ProfileOverview() {
   const { data: profile, isLoading: profileLoading, isError: profileError } = useProfile();
   const user = useSelector(state=>state.auth.user)
   const { data: reviewsData, isLoading: reviewsLoading, isFetching } = useClientReviews(user?.id, page);
-  
   const reviews = reviewsData?.results || [];
   const hasNext = !!reviewsData?.next;
   const hasPrev = !!reviewsData?.previous;
@@ -19,7 +18,6 @@ export default function ProfileOverview() {
   if (profileError) return <div className="p-8 text-red-500 font-medium">Failed to load profile</div>;
 
   const { full_name, email, profile_photo, company_name, location, categories, joined_at, average_rating, review_count } = profile;
-
   return (
     <div className="max-w-6xl mx-auto space-y-6">
       <h1 className="text-2xl md:text-[26px] lg:mt-10 font-black text-gray-900 mb-2">Profile Overview</h1>
