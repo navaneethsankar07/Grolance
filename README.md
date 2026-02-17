@@ -1,18 +1,6 @@
-# **Grolance – Freelancing Platform**
+# **Grolance – Full-Stack Freelancing Platform**
 
-Grolance is a full-stack freelancing platform inspired by modern gig marketplaces.
-It connects clients with freelancers through a secure, role-based system for project posting, bidding, collaboration, and payments.
-
-The platform is designed with **scalability, security, and real-world production patterns** in mind, using a modern React + Django architecture.
-
----
-
-## 🚧 Project Status
-
-**Under Active Development**
-
-Grolance is being developed incrementally following a milestone-driven roadmap.
-Core authentication, role handling, and admin foundations are stable. Marketplace, communication, and payment workflows are actively in progress.
+Grolance is a professional-grade, full-stack freelancing platform designed to connect clients with independent professionals. Built with a robust Django + React architecture, it implements real-world production patterns including secure escrow payments, real-time communication, and an advanced administrative arbitration system.
 
 ---
 
@@ -23,7 +11,8 @@ Core authentication, role handling, and admin foundations are stable. Marketplac
 * Modular backend with Django REST Framework
 * Modern React frontend with scalable state management
 * Admin-controlled platform governance
-* Background task processing for email & async operations
+* Async Operations: Celery and Redis integration for background tasks and automated email notifications.
+* Real-time Communication: WebSocket-based chat system (Daphne/Channels) that unlocks upon hiring.
 
 ---
 
@@ -36,7 +25,7 @@ Core authentication, role handling, and admin foundations are stable. Marketplac
 * JWT authentication (access + refresh token strategy)
 * All users start as **Clients**
 * Switch to **Freelancer** role
-* Phone OTP verification during freelancer onboarding
+* Phone number verification during freelancer onboarding
 
 ---
 
@@ -56,6 +45,7 @@ Core authentication, role handling, and admin foundations are stable. Marketplac
 * View contracts
 * Raise disputes
 * Notifications
+* Real-Time chat
 * Contact support
 
 #### Client Profile & Settings
@@ -76,7 +66,7 @@ Core authentication, role handling, and admin foundations are stable. Marketplac
 3. Starter & Pro packages
 4. Portfolio upload
 5. Review & profile completion
-6. Bank details for payments
+6. paypal details for payments
 
 #### Freelancer Dashboard
 
@@ -115,7 +105,7 @@ Core authentication, role handling, and admin foundations are stable. Marketplac
 
 ### 5. Payment Module
 
-* Razorpay integration (test mode)
+* Paypal integration (test mode)
 * Client pre-payment before work starts
 * Contract-level payment tracking
 * Automatic commission calculation
@@ -129,6 +119,9 @@ Core authentication, role handling, and admin foundations are stable. Marketplac
 * Order lifecycle:
 
   * Pending → In Progress → Submitted → Under Review → Completed
+  
+* Legal Agreement Generation: Automatic creation of a binding legal contract upon hiring.
+* Digital Signature: Required agreement confirmation using digital signatures to ensure enforceability before work commences.
 * Timeline tracking
 * Delivery submission system
 * Automatic and manual state transitions
@@ -148,7 +141,7 @@ Core authentication, role handling, and admin foundations are stable. Marketplac
 ### 8. Notification System
 
 * Notification modal
-* Mark-all-as-read functionality
+* Mark--as-read functionality
 
 ---
 
@@ -212,58 +205,33 @@ Core authentication, role handling, and admin foundations are stable. Marketplac
 * **TanStack Query** (server-state management)
 * Redux Toolkit (auth & global state)
 * Redux Persist
+* PayPal JavaScript SDK (for secure payments)
+* React Hook Form
+* Zod (schema validation)
 * Axios with interceptors
 * Tailwind CSS
+* Lucide React
+* React Icons
 
 ### Backend
 
 * Django
 * Django REST Framework
+* Daphne (for handling WebSockets nad HTTP)
 * SimpleJWT
 * PostgreSQL
 * Redis (OTP, caching)
 * **Celery** (background tasks & email)
-* Django Channels (planned)
+* Django Channels
+
+### Media & Document Handling
+
+* Cloudinary
+* xhtml2pdf(pisa) (generating legal document for contracts)
 
 ---
 
-## 📁 Project Structure
 
-```
-GROLANCE/
-│
-├── client/
-│   ├── public/
-│   ├── src/
-│   │   ├── api/
-│   │   ├── app/
-│   │   ├── assets/
-│   │   ├── components/
-│   │   ├── features/
-│   │   ├── hooks/
-│   │   ├── layouts/
-│   │   ├── pages/
-│   │   ├── routes/
-│   │   └── utils/
-│   ├── main.jsx
-│   ├── App.jsx
-│   └── vite.config.js
-│
-└── server/
-    ├── accounts/
-    ├── adminpanel/
-    ├── categories/
-    ├── communication/
-    ├── contracts/
-    ├── payments/
-    ├── profiles/
-    ├── projects/
-    ├── grolance_backend/
-    ├── manage.py
-    └── requirements.txt
-```
-
----
 
 ## ▶️ Running Locally
 
@@ -297,8 +265,9 @@ Full-Stack Developer (Django + React)
 
 ## 📄 License
 
-This project is built for educational and learning purposes.
-Commercial usage will require further review and licensing decisions.
+This project is licensed under the MIT License.
+
+Note: This platform was developed as a comprehensive demonstration of full-stack engineering, security best practices, and marketplace logic.
 
 ---
 
