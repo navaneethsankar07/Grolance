@@ -265,9 +265,11 @@ Full-Stack Developer (Django + React)
 
 ## 📄 License
 
-This project is licensed under the MIT License.
+Copyright © 2026 Navaneeth Sankar. **All Rights Reserved.**
 
-Note: This platform was developed as a comprehensive demonstration of full-stack engineering, security best practices, and marketplace logic.
+This project is proprietary. Unauthorized copying, modification, or distribution 
+of this code via any medium is strictly prohibited. For permission requests, 
+please contact support@grolance.com.
 
 ---
 
