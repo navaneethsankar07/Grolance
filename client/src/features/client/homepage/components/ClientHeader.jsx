@@ -64,7 +64,7 @@ export default function ClientHeader() {
   const isActive = (path) => location.pathname === path;
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-gray-200/80 bg-white/95 backdrop-blur-sm">
+    <header className="fixed top-0 z-50 w-full border-b border-gray-200/80 bg-white/95 backdrop-blur-sm">
       <div className="w-full xl:px-8 px-4 flex h-[73px] items-center justify-between">
         <div className="flex items-center gap-2">
           <button 

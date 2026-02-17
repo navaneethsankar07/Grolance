@@ -26,7 +26,7 @@ export default function ClientProfileLayout() {
       )}
 
       <aside className={`
-        fixed inset-y-0 lg:mt-0 mt-18 left-0 z-50 w-72 bg-white border-r border-gray-200 transform transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0 lg:z-auto lg:w-80 lg:h-[calc(100vh-4rem)] lg:sticky lg:top-0
+        fixed inset-y-0 lg:mt-5 mt-18 left-0 z-50 w-72 bg-white border-r border-gray-200 transform transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0 lg:z-auto lg:w-80  lg:sticky lg:top-0
         ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}
       `}>
         <ProfileSidebar onNavigate={() => setIsSidebarOpen(false)} />

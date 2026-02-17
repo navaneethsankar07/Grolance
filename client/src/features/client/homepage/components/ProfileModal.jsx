@@ -55,7 +55,7 @@ export default function ProfileModal({ isOpen, onClose }) {
   return (
     <div
       ref={menuRef}
-      className="absolute right-4 top-[74px] z-[100] w-[calc(100%-32px)] sm:w-80 rounded-2xl border border-gray-100 bg-white p-4 shadow-2xl animate-in fade-in zoom-in-95 duration-200"
+      className="fixed right-4 top-[74px] z-[100] w-[calc(100%-32px)] sm:w-80 rounded-2xl border border-gray-100 bg-white p-4 shadow-2xl animate-in fade-in zoom-in-95 duration-200"
     >
       <div className="flex flex-col gap-2.5">
         <Link
